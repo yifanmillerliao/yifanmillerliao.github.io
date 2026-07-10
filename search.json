@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "cv.html",
+    "href": "cv.html",
+    "title": "CV",
+    "section": "",
+    "text": "My CV will be available here soon.\nFor now, this page is under construction."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Miller Liao",
+    "section": "",
+    "text": "I am a Statistics and Physics student at the University of Chicago.\nThis website will host my projects in applied statistics, data analysis, visualization, and computational research."
+  },
+  {
+    "objectID": "index.html#selected-projects",
+    "href": "index.html#selected-projects",
+    "title": "Miller Liao",
+    "section": "Selected Projects",
+    "text": "Selected Projects\nProjects are currently in development."
+  },
+  {
+    "objectID": "index.html#current-interests",
+    "href": "index.html#current-interests",
+    "title": "Miller Liao",
+    "section": "Current Interests",
+    "text": "Current Interests\n\nApplied statistics\nData science and visualization\nMeasurement and uncertainty\nComputational social science"
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "Projects",
+    "section": "",
+    "text": "My projects are currently in development."
+  },
+  {
+    "objectID": "projects.html#project-1",
+    "href": "projects.html#project-1",
+    "title": "Projects",
+    "section": "Project 1",
+    "text": "Project 1\nApplied Data Analysis\nA narrow, end-to-end analysis using real-world public data.\nStatus: Topic selection"
+  },
+  {
+    "objectID": "projects.html#project-2",
+    "href": "projects.html#project-2",
+    "title": "Projects",
+    "section": "Project 2",
+    "text": "Project 2\nStatistical Visualization or Interactive Explainer\nA visual explanation of an important statistical concept.\nStatus: Planned"
+  },
+  {
+    "objectID": "projects.html#research-project",
+    "href": "projects.html#research-project",
+    "title": "Projects",
+    "section": "Research Project",
+    "text": "Research Project\nLonger-term Research Project\nA deeper project involving measurement, uncertainty, or computational social science.\nStatus: Scoping"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I am an undergraduate student at the University of Chicago, double majoring in Statistics and Physics.\nI am interested in using statistical reasoning, computation, and visualization to understand real-world problems.\nThis page is currently under construction."
+  }
+]
