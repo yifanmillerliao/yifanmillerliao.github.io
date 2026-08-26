@@ -1,19 +1,19 @@
 ---
-title: "Whose Games Get Looked At by the Machine"
-subtitle: "A case study in data that exists because someone chose to create it"
+title: "Which Chess Games Get Engine Analysis?"
+subtitle: "A selection-bias audit of 14.3 million Lichess games"
 author: "Miller Liao"
 date: 2026-08
-description: "In 14.3 million Lichess games, the 7.5% carrying free engine evaluations were chosen by people, not sampled. Measuring what that choosing selects — and how much of it can be repaired."
+description: "Only 7.5% of Lichess games carry engine evaluations, and they are not a random 7.5%. By comparing them with the full population, I examine how the analyzed subset differs, what simple summary statistics miss, and how much of those differences statistical adjustment can repair."
 image: images/card_thumbnail.png
 image-alt: "A curve falling then rising: the share of chess games that get engine-analyzed, by player rating"
 categories:
   - Selection Bias
-  - Statistics
-  - Python
-  - Data Story
+  - Inverse Probability Weighting
+  - Clustered Data
+  - Online Chess
 order: 1
 abstract: |
-  Every month Lichess publishes every rated game it hosts. A subset carries free engine evaluations, and researchers use that subset because engine time is expensive. In November 2017 the subset is 7.54% of the data (1,078,379 of 14,306,375 games), and it exists because individual users clicked "request analysis" on particular games. This article measures what that clicking selects, using the rare luxury that the unselected games are still in the file. The evaluated subset overstates Classical chess 3.3-fold, sits 41 rating points below the month's average, and thins both tails of the length distribution. A selection model on game features repairs what it was shown; on prespecified checks over variables it was never shown, weighting closes 29–47% of each fixable discrepancy, and two termination categories — one with no analyzed games at all this month, one with almost none — cannot be meaningfully reweighted. The sharper finding is organization: analysis incidence clusters on players. Adding one participant-level variable, how often a player's other games carry evaluations, raises within-month discrimination (AUC) from 0.664 to 0.827 and absorbs the entire time-control hierarchy at the reference profile. Whether that reflects stable player types, format-induced reviewing, or both, this design cannot say; either way, studies that inherit the annotations inherit the clustering.
+  Lichess, a major online chess platform, publishes a monthly database of its rated games. Some games carry engine evaluations: computer assessments of the position after each move. Studies of move quality often rely on this evaluated subset because generating equivalent evaluations for millions of games requires substantial computation. In November 2017, only 7.54% of 14,306,375 standard rated games contained them. Because users choose which games to analyze, **this is not a random subset**; unusually, the unevaluated games remain observable, allowing direct comparison between evaluated games and all games. I found that the evaluated subset overrepresents Classical chess (the slowest live time control) 3.3-fold and averages 41 rating points **below** all games, but such simple summaries conceal sharper patterns: the rating pattern reverses between fast and slow chess, and a small mean difference in game length masks a 16-fold range in analysis rates. Reweighting by game features removes only 29–47% of the discrepancies on prespecified variables the model never saw. The strongest structure lies at the player level: adding how often each player's other games are evaluated raises in-sample discrimination (AUC, the chance the model ranks an evaluated game above an unevaluated one) from 0.664 to 0.827. Although this design cannot measure bias in unavailable move-quality outcomes, it shows that pre-existing evaluations form a user-selected, player-clustered sample that game-level adjustment can only partly repair.
 format:
   html:
     toc: true
@@ -22,299 +22,433 @@ format:
     fig-cap-location: bottom
     smooth-scroll: true
     link-external-newwindow: true
-    other-links:
-      - text: "Download PDF"
-        href: report.pdf
 bibliography: references.bib
 ---
 
-*Data: Lichess open database, November 2017. Full reproduction materials accompany the article.*
+*Data: Lichess open database, November 2017. Methods, data provenance, and code availability: [Appendix D](#appendix-d).*
 
-## 1. An assumption almost nobody checks
+## 1. A useful subset — but not a random one
 
-If you have ever studied online chess, you have probably used the Lichess open database. Every month the site publishes every rated game played on it, in PGN format. Some of those games come with engine evaluations: a number after each move saying how good the position is.
+Lichess is a major online chess platform, and every month it publishes every rated game played on the site. Some games also include engine evaluations: a number after each move estimating which side has the advantage, and by how much.
 
-Evaluated games are enormously convenient. Blunder rates, conversion of winning positions, how far people drift from the engine line under time pressure: every one of these quantities needs an engine's verdict on every move, and here the verdicts come free. So a lot of research, quite reasonably, reaches for those games.
+These evaluations let researchers study blunders, the conversion of winning positions, and play under time pressure without running an engine over millions of positions themselves. That makes the evaluated games a valuable shortcut.
 
-The problem is that they are **7.54% of the data.**
+In the November 2017 data, however, **only 7.54% of standard rated games carried evaluations (1,078,379 of 14,306,375[^0]), and they were not a random 7.54%.** An evaluation appears because someone clicked “request analysis.”[^3] Which games receive evaluations reflects a chain of human choices, so the evaluated 7.54% may not represent the full population of games.
 
-In November 2017, the month this study uses, Lichess recorded 14,306,375 standard rated games. Exactly 1,078,379 of them carry evaluations. Those 1,078,379 were not sampled at random. A game has an evaluation because somebody clicked "request analysis", typically though not verifiably one of the two players: the file does not record who asked, and spectators or later visitors can ask too. Someone, at any rate, decided this game was worth a closer look. Who clicks, when, and on which games is a chain of human decisions. In methodological terms, this data exists because someone chose to create it.
+![Of 14,306,375 standard rated games played on Lichess in November 2017, 1,078,379 (7.54%) carry engine evaluations. Studies relying on these pre-existing annotations therefore begin with a small, user-selected subset of the month's games.](images/fig_hero_headline.png){#fig-hero}
 
-Data with that property is common, and it usually comes with a curse. Product reviews exist because someone cared enough to write one; the famous bullet-hole diagrams of returning WWII bombers described only the planes that made it home. In such settings the unselected part leaves no record. You cannot compare the people who answered to the people who didn't, so the size of the bias is anyone's guess.
+Self-selected data usually hides what was not selected. Product reviews come from people motivated to speak; the silent majority leaves no comparable record. But here Lichess offers a rare exception: all 13.2 million unevaluated games remain in the same database, together with their time controls, ratings, lengths, terminations, and results. I can therefore compare the evaluated subset with the full month on these observed features and ask how much statistical adjustment narrows the differences.
 
-Chess is unusual here: the unselected games are still there. The dump contains every game, analyzed or not. The 13.2 million games nobody asked the engine about sit in the same file with the same fields: time control, both ratings, length, result. For every field the dump records for all games — time control, ratings, length, termination, result — the selection distortion is therefore not something to speculate about: it can be measured directly, by comparing the evaluated subset against the whole, and most of this article is that comparison. What no such comparison can reach are the engine-derived, move-level quantities that exist only inside the analyzed games; their bias cannot be identified from the pre-existing annotations alone, and the article will keep the two categories apart throughout. The question it builds toward: how different is the selected part on what we can see, and can the difference be corrected?
-
-![The headline split: of 14,306,375 standard rated games played on Lichess in November 2017, 1,078,379 (7.54%) carry engine evaluations.](images/fig_hero_headline.png){#fig-hero}
-
-
-## 2. Which studies inherit the selection problem
-
-One distinction decides whether any of this applies to you. Researchers who use engine evaluations on Lichess data come in two kinds.
-
-- **Those who run the engine themselves.** They choose their games first, then evaluate every one with their own Stockfish. Recent examples include Cüvitoğlu (2026), who evaluated a downloaded sample with Stockfish 14.1, and Elbert et al. (2026), who selected from roughly 273 million games and ran Stockfish 17.1 uniformly. Because the evaluations are generated uniformly after the sample is chosen, nothing about who clicked "analyze" can reach their results. The catch is cost: engine analysis takes real compute per game, studies need millions of games, and that bill is exactly why the second kind exists.
-- **Those who use the `%eval` annotations already in the dump.** This saves the entire compute bill and inherits the "who clicked analyze" selection process. *This article is about them.* The practice appears in published and influential work: McIlroy-Young et al. (2020), in a widely cited paper, note that a subset of Lichess games carries high-quality Stockfish evaluations that any player can request, and write that they *"restricted our attention to these games"*, roughly 10% of games in their period.[^1]
-
-
-## 3. Which games get analyzed
-
-It is worth forming a guess before looking. Out of 14.3 million games, which ones do people actually analyze? Long, serious games? Games between strong players? Close fights that could have gone either way? Keep your guesses in mind; the next three sections check them against the data.
-
-The most direct check is to group the games by their features and ask what share of each group carries an evaluation. Time control is the loudest dimension.
-
-![Evaluation rate by time control — the share of each control's own games that carry evaluations — alongside each control's share of the month. Intervals: 95% player-resampling stability intervals (B = 200). Exact counts in @tbl-c1.](images/fig1_rates_by_control.png){#fig-controls}
-
-A Classical game is 5.9 times more likely to be analyzed than an UltraBullet game. This is the intuitive part, and the "long, serious games" guess earns its point: a game you sat with for half an hour feels worth a second look; a thirty-second one, what would you even look at?[^2]
-
-The consequences for a downstream researcher are direct. If your dataset is the evaluated games, you believe 5.6% of chess on Lichess is Classical. The true share is 1.7%, overstated 3.3-fold. By the same mechanism you would undercount tournament games (11.3% in the evaluated set against 16.5% in reality) and undercount the games of heavy players (taking, for each game, the mean of its two players' monthly game totals and then averaging over games: 368 for the average evaluated game, 508 for the average game overall: a game-weighted quantity that counts busy players once per appearance, not an average over players, which is far lower).
-
-Time control, then, is loud, and its consequences are mechanical. The next dimension is rating, and rating behaves so strangely that it needs a section of its own.
-
-
-## 4. The rating gap points the wrong way
-
-Before computing anything, I wrote down what I expected to find, so that hindsight could not quietly rewrite it. One entry read:
-
-> *Stronger players take the game more seriously, so evaluated games should have higher ratings.*
-
-The first look seemed to settle the matter — against me, and not in the way a simple "no" would. The share of games analyzed falls with rating (a game's rating, here and throughout, is the average of its two players' pre-game ratings, in that control's own rating pool) through the entire amateur range: from 10.9% below 1000 to a low of 6.2% around 1800–2000, turning upward only above 2400 to end at 11.3%. Across games below 2400, higher rating goes with a *lower* analyzed share, and games between 1800-and-2000-rated players, people well into chess as a serious hobby, are analyzed least often of all.
-
-![The pooled rating curve: evaluation rate by game rating (the average of the two players' pre-game ratings, in each control's own pool), all controls pooled. Denominator: all games in the rating bin. Thin bins carry Wilson bounds; the bins shown survive them.](images/fig2_marginal_rating.png){#fig-rating-curve}
+That comparison has a firm boundary. Engine-derived, move-level quantities such as blunder rates do not exist for unevaluated games, so their bias cannot be identified from the existing annotations alone. My question here is narrower: how does the evaluated subset differ on what we can observe, and how much of that difference can be corrected?
 
 ::: {.callout-note collapse="true"}
-## Why can't some of these bins be trusted?
+## Does this apply to your study?
 
-An early version of this curve nearly fooled me. Binned at 100 points, the 700-rating bin showed a 25% analysis rate, three times the overall rate and apparently a striking find. Printing the bin's games told the whole story: four games, one of which had an evaluation. A bar built on n=4 and a bar built on n=70,000 are drawn with the same width and the same confidence, and the eye cannot tell them apart. With a Wilson interval attached, the n=4 bar spans 4% to 71%, which is to say it says nothing.
+Whether a study inherits this problem depends on where its engine evaluations come from.
 
-I use Wilson intervals rather than the textbook normal approximation for two concrete reasons this dataset supplies itself. The normal interval can dip below zero, an impossible probability, precisely in the thin bins where honesty matters most; Wilson stays inside [0, 1] by construction. And the edge case is real here: 7,592 games ended as `Unterminated`, and zero of them carry evaluations. At k=0 the normal approximation returns an interval of width zero, absolute certainty at the point of least information. The Wilson upper bound is 0.05%. The curve above is built on bins that survive their bounds.
+Researchers who run the engine themselves choose their games first and then evaluate every selected game uniformly. @cuvitoglu2026 and @elbert2026, for example, followed this approach. Because evaluation occurs after the games are chosen, user analysis requests cannot create this particular selection problem. The tradeoff is computational cost.
+
+Researchers who use evaluations already stored in the Lichess data avoid that cost, but inherit the sample that users chose to analyze. @mcilroyyoung2020, for example, restricted their study to the roughly 10% of games that already carried Stockfish evaluations.[^1] This article examines the selection problem created by this second approach.
 :::
 
-The same wrong sign shows up in the averages. Evaluated games average 1580; the full population, 1621. The evaluated set sits 41 rating points lower (44 against unevaluated games, a **standardized difference**[^t-smd] of −0.16).
+## 2. Slower games are analyzed far more often
 
-When a mechanism this plausible meets a sign this wrong, two explanations came to mind. Perhaps the assumption was simply false, and strong players do not review their games. Or perhaps the quantity I computed is not the quantity I imagined. The second is the cheaper one to check, and Section 3 already supplied a reason for suspicion: which kinds of games get analyzed differs enormously by time control.
+Before looking at the data, take a guess: which of 14.3 million games do people choose to analyze — the ones that took a long time to play, the ones between stronger players, or the ones that ran many moves? The next three sections test those three guesses in turn.
+
+Let us begin with time control. At each speed, what share of games carries an evaluation?
+
+![Slow games are analyzed far more often than fast games, even though they make up a much smaller share of all games. The evaluated subset is shaped by what players choose to review, not by how the month's chess is actually distributed. Panel (a): each control's share of the month. Panel (b): the share of each control's own games that carry evaluations, with 95% player-resampling stability intervals. Exact counts in @tbl-c1.](images/fig1_rates_by_control.png){#fig-controls}
+
+A Classical game is 5.9 times as likely to be analyzed as an UltraBullet game. The first guess is right: a game you spent half an hour playing feels worth revisiting; a thirty-second game often does not.[^2]
+
+If the evaluated subset were treated as representative, Classical chess would appear to make up 5.6% of Lichess games. Its actual share of the full month is only 1.7% (a 3.3x overrepresentation). The subset also underrepresents tournament games (11.3% versus 16.5%) and games involving highly active players: the two players’ average monthly game count is 368 in evaluated games, compared with 508 overall.
+
+Time control gives a clear first answer: slower games are overrepresented. Rating is more complicated, because its pattern changes with time control.
+
+## 3. Why are evaluated games lower-rated?
+
+A natural guess is that stronger players review their games more often. It was also one of my prespecified expectations: evaluated games should have higher ratings.
+
+They do not. Evaluated games average 1580, compared with 1621 across the full month — a 41-point gap in the opposite direction.[^4] A game's rating here is the average of its two players' pre-game ratings.
+
+The pooled curve in @fig-rating-curve points in the same direction. Except above 2400, games become less likely to carry an evaluation as rating rises. Why would stronger players appear less likely to analyze their games?
+
+![Pooled across time controls, the analysis rate falls from 10.9% below 1000 to 6.2% at 1800–2000, then rises to 11.3% above 2400. Taken alone, the curve suggests that higher-rated games are analyzed less often across most of the amateur range. Game rating is the mean of the two players' pre-game ratings; Wilson intervals show bin-level uncertainty, and sparse bins are omitted.](images/fig2_marginal_rating.png){#fig-rating-curve}
 
 ::: {.callout-note collapse="true"}
-## Why is an "overall average" not what it seems?
+## Why does each percentage need an interval?
 
-Any overall average is a weighted average of subgroups, and the weights can shift along exactly the axis you care about:
+Each point on the curve is a percentage, but those percentages are based on very different numbers of games. In an early version, the 700-rating bin showed a striking 25% analysis rate. It represented only four games, one of which had an evaluation.
 
-$$\text{marginal}(x)=\sum_j w_j(x)\,\text{group}_j(x)$$
-
-If the $w_j$ move with $x$, the marginal curve mixes real within-group trends with changing composition, and it is a faithful picture of neither. Simpson's paradox is this formula at its most extreme; milder versions operate constantly and invisibly.
-The worry is not abstract here. The groups are the six time controls, and their weights shift violently along the rating axis: below 1000, more than a quarter of games are Rapid or Classical; above 2400, 96% are Bullet or Blitz. An "average over all games" at a given rating averages over a different mix of chess at every point of the axis.
+Without an interval, that point looked just as convincing as one based on 70,000 games. Its 95% Wilson interval, from 4% to 71%, revealed how little it actually told us. Wilson intervals remain within the possible range of 0% to 100% and behave better for small or extreme counts, so I use them here to expose — and omit — bins too sparse to interpret.
 :::
-So I split the 41 points with two thought experiments. Suppose first that, inside every time control, evaluated games were completely typical in rating, and the only difference was which controls get analyzed: whatever gap survives is the composition part. Now suppose instead that the evaluated games matched the site's mix of controls exactly, leaving only the rating differences inside each control: what survives is the within part. The two parts add up exactly to the observed gap, and the accounting is called a **Kitagawa decomposition**[^t-kita]. (The exact formula, and the fact that this is one convention among several — a symmetric one, with other conventions allocating the split somewhat differently — are in the appendix; 24.2% is an accounting allocation, not a law.)
 
-```
-Composition (slow controls over-selected)   −9.9 points    24%
-Within-control differences                 −31.0 points    76%
-─────────────────────────────────────────
-Total                                      −40.9 points
-```
+The initial expectation might simply have been wrong. Before drawing that conclusion, however, the pooled result needed to be taken apart. Section 2 showed that analysis rates differ sharply by time control. The mix of time controls also changes with rating: below 1000, more than a quarter of games are Rapid or Classical; above 2400, 96% are Bullet or Blitz.
 
-Only a quarter of the reversal (24.2%, **stability interval**[^t-stab] 22.6–25.8%) comes from the obvious mechanism. That quarter works as follows. Lichess maintains a separate rating pool for each time control, and the pools are not aligned: the median game sits at 1733 in UltraBullet but 1455 in Classical, a 278-point offset that cannot be read as a 278-point difference in strength, because the pools are rated separately and populated by different players. "Average rating" therefore shifts whenever the mix of pools shifts. Classical is simultaneously the most-analyzed control and the lowest-numbered pool, so over-selecting it drags the average down. The mechanism is real but modest.
+At any rating, the pooled analysis rate is an average of the rates in the six time controls, weighted by how many games each control contributes. Because those weights change across rating bands, the pooled curve combines two sources of variation: analysis behavior may change within a time control, or the mixture of time controls may change. It cannot tell us how much comes from each.
 
-Three quarters of the reversal happens inside the controls, and there the pattern stops being a nuisance and becomes the finding:
+The same mixture can affect the 41-point difference in average rating. I separated the gap with a Kitagawa decomposition[^t-kita]. The decomposition is a piece of statistical bookkeeping: it assigns one part of the gap to the evaluated subset containing a different mix of time controls, and the other part to rating differences that remain within the same time controls.
 
-![The interaction. Left: evaluation rate by rating band within each control, shown as log-scale lift against that control's own overall rate. Right: the six within-control ratios — the rate at 2000–2200 divided by the rate at 1200–1400, the same window in every control. Whiskers: 95% player-resampling stability intervals (B = 200). All six exclude 1; the direction reverses between Blitz and Rapid. Exact ratios in @tbl-c2.](images/fig3_interaction.png){#fig-interaction .column-page-inset}
+| Source of the rating gap | Contribution | Share |
+|---|---:|---:|
+| Different mix of time controls | −9.9 points | 24.2% |
+| Rating differences within time controls | −31.0 points | 75.8% |
+| **Total** | **−40.9 points** | **100%** |
 
-Within fast controls, the stronger the players, the *less* the game is analyzed; in UltraBullet, a 2000–2200 game is analyzed a quarter as often as a 1200–1400 one. Within slow controls the gradient runs the other way. The direction reverses between Blitz and Rapid. All six ratios compare the same rating window, so they are on the same scale; intervals are 95% player-resampling stability intervals (B = 200; one seat at a time, wider seat reported; crossed check in appendix). All six exclude 1.
+: Splitting the 41-point rating gap. The composition part reflects the evaluated subset containing a different mix of time controls; the within part reflects rating differences that survive inside each control {#tbl-kitagawa}
 
-At lower ratings the six controls stay relatively close together. At higher ratings they split sharply: the share falls to a few percent in fast chess and rises toward routine in slow chess. A natural reading is that fast and slow chess support different review cultures. That is an interpretation, not a result: the data shows the split, not its reason.
+Only 24.2% of it (stability interval 22.6–25.8%[^t-stab]) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.
 
-Because Bullet and Blitz make up 76% of all games, the falling gradients dominate any pooled average. That is what manufactured most of the wrong-way 41 points, and it also dissolves the strange U that opened this section: two opposing gradients, averaged with sliding weights. @fig-gradients shows the dissolution directly.
+The remaining 31 points arise within time controls. In other words, the lower average rating is not mainly an artifact of combining differently centered rating pools. The relationship between rating and analysis itself changes direction across time controls, as @fig-interaction shows.
 
-![The pooled curve of @fig-rating-curve, taken apart: evaluation rate by rating band within each control, on a log axis (equal slopes = equal multiplicative gradients). Warm lines rise with rating; cool lines fall through the amateur range before the top-end turn. The falling family carries 76% of all games and dominates any pooled average. Thin cells (n < 200) omitted; cell-level rates and intervals in @fig-interaction.](images/fig3_why_gradients.png){#fig-gradients}
+![Rating and time control are associated with analysis in opposite directions. (a) Across the common rating range, analysis rates fall with rating in UltraBullet, Bullet, and Blitz, but rise in Rapid, Classical, and Correspondence. (b) The analysis-rate ratio for games rated 2000–2200 versus 1200–1400 is below 1 for fast controls and above 1 for slow controls, reversing between Blitz and Rapid. Whiskers are 95% player-resampling stability intervals (B = 200); exact ratios appear in @tbl-c2.](images/fig3_interaction.png){#fig-interaction .column-page-inset}
+
+Within UltraBullet, Bullet, and Blitz, higher-rated games are analyzed less often. An UltraBullet game rated 2000–2200, for example, is analyzed only 0.26 times as often as one rated 1200–1400. Within Rapid, Classical, and Correspondence, the direction reverses. Analysis rates are relatively similar across time controls at lower ratings, but split sharply as rating rises: they fall in fast chess and rise in slow chess.
+
+One possible interpretation is that fast and slow chess encourage different reviewing habits. The data establishes the divergence, but not why it occurs.
+
+Because Bullet and Blitz make up 76% of all games, their downward rating gradients dominate the pooled results. Once the time controls are separated, both the lower average rating and the U-shaped pooled curve become understandable: they combine relationships pointing in opposite directions, with weights that change across rating bands. The pooled curve is numerically correct, but it does not describe a single rating pattern shared by all games.
 
 ::: {.callout-note collapse="true"}
-## Why can't we just report "the effect of rating"?
+## Why can't we report one "effect of rating"?
 
-When the direction of X's gradient depends on Z, "the gradient of X" has no referent; only "the gradient of X at a given Z" does. Three consequences follow for the rest of this study. A selection model must include the rating × time-control interaction, because fitting one curve to six curves with opposite signs is misspecification rather than approximation. Any reweighting must balance the joint cells, not rating and speed separately. And no sentence in this article states a marginal rating gradient. Throughout, I say *selection-rate gradient*, not "effect": nothing here identifies a causal quantity.
+Because the relationship depends on time control. In fast chess, higher rating goes with less analysis; in slow chess, it goes with more. A single rating coefficient would average relationships with opposite signs and describe neither one well.
+
+The selection model must therefore include a rating × time-control interaction, and the reweighting must balance their joint categories rather than treating rating and time control separately. I also refer to a selection-rate gradient or association, not a causal “effect”: these data do not identify one.
 :::
 
-## 5. A 16-fold structure under a 3.5-ply difference
+## 4. A 3.5-ply mean gap hides a 16-fold pattern
 
-Game length looked like the least interesting variable in the dataset. Length is measured in plies: one ply is one move by one player, so two plies make one full move. Evaluated games average 64.2 plies; the rest, 67.7. A 3.5-ply gap is the kind of number you file under "nothing there," and on the first pass that is exactly where I filed it.
+Game length initially looked like the least interesting variable in the dataset. A **ply** is one move by one player, so two plies, back and forth, make one full move. Evaluated games averaged 64.2 plies; unevaluated games averaged 67.7. That 3.5-ply difference[^t-length-comparison] looked modest enough that during my first pass of the dataset, I recorded it as “no significant effect.”
 
-Then I binned it, and the binning showed what the mean was hiding.
+Then I stopped comparing only the averages. I divided games into seven length groups and calculated the evaluation rate within each one.
 
-![Evaluation rate within each length bin (denominator: all games in the bin), overall and inside each of the six controls; the 41–60-ply band is shaded in every panel. Bin shares and exact rates in @tbl-c3.](images/fig4_length.png){#fig-length .column-page-inset}
+![Evaluation is concentrated among games of intermediate length. Across the full month, the rate rises from 0.65% for games lasting ten plies or fewer to 10.4% at 41–60 plies, then declines among longer games. The same interior peak appears within all six time controls, so the hump cannot be explained simply by their different mixtures. Rates are calculated among all games in each length group; the 41–60-ply group is shaded throughout. Exact counts and rates appear in @tbl-c3.](images/fig4_length.png){#fig-length .column-page-inset}
 
-From 0.65% to 10.4% is a 16-fold range, and the shape is a hump. That very short games go unanalyzed surprises nobody; most are not really games, an early resignation or a disconnection. But very long games also go unanalyzed, which I had not predicted. The peak sits at 41–60 plies, a game of normal, complete length. The hump is not an artifact of time control either: it appears, with the peak in the same bin, inside every one of the six controls.
+The pattern is a hump, not a steady increase or decrease. Across the full month, the evaluation rate spans a factor of 16 between the shortest group and the peak. A low rate among very short games was unsurprising. The decline among very long games was not. Evaluations are most common for games lasting 41–60 plies—roughly 20–30 full moves—and become less common toward either tail.
 
-![Cumulative length distributions, evaluated (orange) versus unevaluated (navy) games; the shaded area between the two curves equals the Wasserstein distance, 6.8 plies.](images/fig4_why_distributions.png){#fig-ecdf .column-page-inset}
+Repeating the calculation within each time control leaves the basic shape intact: all six peak in the same 41–60-ply group. Different time controls contain games of different typical lengths, but that compositional difference does not account for the hump.
 
-How does a 16-fold structure coexist with a 3.5-ply mean difference? Because the unevaluated group is fatter in both tails. It has 12.5 times the share of games lasting ten plies or fewer (1.55% against 0.12%) and more of the very long games (6.2% against 3.9% beyond 120 plies). The two tails pull the mean in opposite directions and nearly cancel.
+The evaluation-rate figure and the mean comparison look at the data from opposite directions. The figure groups games by length and asks what share received an evaluation. To understand the small mean gap, we instead group games by evaluation status and compare their length distributions.
 
-Alongside the mean gap, then, this article reports a distributional distance: the **Wasserstein distance**[^t-w1], here 6.8 plies (evaluated versus unevaluated, matching the −3.5 mean gap; the versus-all-games figure is in the published table), twice the mean gap. In one dimension it equals the area between the two cumulative distribution curves, so the shaded region in @fig-ecdf is not an illustration of the number — it is the number.
+Unevaluated games are more common in both tails. Games lasting 10 plies or fewer make up 1.55% of the unevaluated group but only 0.124% of the evaluated group — a 12.5-fold difference. At the other end, games longer than 120 plies account for 6.2% of unevaluated games and 3.9% of evaluated games. The excess of very short games pulls the unevaluated mean downward; the excess of very long games pulls it upward. Those movements partially cancel, leaving only a 3.5-ply difference between the means.
 
 ::: {.callout-note collapse="true"}
-## Why is a small mean difference not a small difference?
+## Why can a small mean gap hide a large pattern?
 
-The mean responds only to the first moment of a distribution; deviations that offset across the two tails are invisible to it, which is exactly what happened here. House rule in this project: core comparisons report a distributional distance alongside the mean gap. The Wasserstein distance is the one reported because of the picture above — the area between the cumulative curves *is* the statistic. The more familiar KS statistic reads off a single point of maximal separation and, at n = 14.3 million, invites misuse as a significance test.
+A mean records the balance point of a distribution. It does not show how observations are arranged around that point. Differences below the mean and differences above it can pull in opposite directions and disappear from the final average—which is what happens here.
+
+The cumulative distributions make that cancellation visible.
+
+![Unevaluated games are more common in both length tails. The cumulative curves therefore cross: the direction of the difference at short lengths reverses at longer lengths. Integrating the absolute vertical gap between the curves over the full length range gives a one-dimensional Wasserstein distance of 6.8 plies.](images/fig4_why_distributions.png){#fig-ecdf}
+
+Alongside the mean gap, I therefore report the **Wasserstein distance**[^t-w1]. In one dimension, it is obtained by integrating the absolute difference between the two cumulative distribution curves. Because the horizontal axis is measured in plies and the vertical axis is a proportion, the resulting distance is also measured in plies.
+
+Here, the Wasserstein distance is 6.8 plies, which is almost twice the absolute mean gap. The difference arises because the mean allows discrepancies in opposite tails to cancel, whereas the Wasserstein distance counts separation in both directions.
 :::
 
-This is the second time in the article that a summary statistic reported "nothing here" while the structure underneath said otherwise. With rating, a pooled curve concealed opposing gradients; with length, a mean concealed a hump. In both cases the summary was accurate but incomplete, and the structure it averaged over was the real result.
+This is the second time a reasonable summary has concealed the more consequential pattern underneath it. With rating, pooling across time controls hid opposing gradients. With length, averaging across the two tails hid a hump. Neither summary was numerically wrong, but each answered a narrower question than the one I needed to ask, and each discarded information in the act of averaging.
 
+So far, selection has been described through properties of games: their time control, rating, length. The next question is whether those observed patterns can be turned into a useful correction: whether reweighting the evaluated games by what is recorded can reconstruct the full month. Section 5 builds a potential correction and puts that correction to the test.
 
-*Everything so far treats selection as a property of games: their speed, their rating, their length. Two questions remain. Can these patterns be combined into a correction that rebuilds the full month from the evaluated subset alone? And when the correction falls short, what is the shortfall made of? The repair comes first.*
+## 5. Can weighting repair the evaluated subset?
 
+As the previous sections showed, the evaluated subset contains too much slow chess, too few tournament games, lower-rated games, and a different length distribution. Weighting offers a possible repair: give underrepresented games more influence and overrepresented games less, until the evaluated subset more closely resembles the full month.
 
-## 6. Can the difference be repaired?
+The ultimate goal is not to recover time control, rating, or the other fields already recorded for all 14.3 million games. We already know their full-month values. The goal is to estimate quantities **available only for evaluated games**, such as blunder rates or changes in engine advantage, and to extrapolate from the evaluated subset as if evaluations had been available for the entire month.
 
-Sections 3 through 5 measured, one dimension at a time, how the evaluated subset differs from the month it came from: too much Classical, too few tournament games, ratings forty points low, a length distribution thinned at both ends. A diagnosis this specific raises an obvious hope: if we know exactly how the subset is tilted, maybe we can tilt it back. Concretely: using fields recorded for every game, estimate each game's probability of entering the evaluated subset, then weight each analyzed game by the inverse of that probability. The practical point of such weights is not the free fields themselves (the dump already has those for every game) but that the same weights can then be applied to quantities observed only inside the subset.
+### How weighting reconstructs the population
 
-### Building the weights
+Imagine two groups of 1,000 games each — say Classical games rated 2000–2200 and UltraBullet games rated 2000–2200. Suppose 20% of the Classical games are analyzed, so 200 appear in the evaluated subset, while only 1% of the UltraBullet games are, so just ten appear. The percentages are round numbers chosen to keep the arithmetic legible; the real rates are in @tbl-c1.
 
-The repair idea is old and concrete. Suppose games of a certain kind get analyzed a quarter of the time. Then for every analyzed game of that kind, roughly three more just like it sit in the dump unanalyzed. The analyzed one can be made to speak for all four, itself and the three nobody clicked on: count it four times, and the analyzed games of that kind add up to that kind's true total. A kind analyzed half a percent of the time needs a louder megaphone: each survivor counts two hundred times. Do this for every kind at once, weighting each analyzed game by one over its probability of being analyzed, and, if the probabilities are adequately estimated and every kind retains some analyzed games, the weighted subset reproduces the month's composition in expectation. Survey statisticians call this **inverse-probability weighting**[^t-ipw] and use it to repair samples that did not come out even. In symbols, the weight on analyzed game $i$ is
+The two groups are equally common in this imagined month, but the evaluated subset contains them in a ratio of 200 to 10. Left uncorrected, the first group would have twenty times as much influence simply because its games were analyzed more often.
 
-$$w_i=\frac{1}{\hat\pi_i},\qquad \hat\pi_i=\widehat{P}\bigl(\text{evaluated}\mid\text{control, rating band, length band, tournament}\bigr).$$
+Weighting reverses that distortion. The 200 analyzed Classical games came from a population of 1,000, so each represents $1{,}000/200 = 5$ games: itself and, on average, four similar games without evaluations. Giving each a weight of five restores the group’s total representation because $200 \times 5 = 1{,}000$.
 
-Everything hangs on those probabilities, so the first job is to estimate them. I fit a **logistic regression**[^t-logit] to all 14,306,375 games. Its role is modest and worth stating precisely: it combines the characteristics we have been studying (time control, rating band, length band, tournament status, and a control-by-rating interaction, since Section 4 showed the rating gradient reverses across controls) into one estimated probability that a game with those characteristics carries an evaluation. It does not decide which feature is "responsible" for selection; with correlated features and an interaction, no coefficient can carry that weight. It simply learns how often each kind of game got analyzed. Predictors enter as bins, the same bins used throughout, which lets the U-shapes and reversals of earlier sections show up without being smoothed away; the price is that games inside one bin are treated as identical, and that price will be visible shortly. (Coefficients below are read against a reference game, a non-tournament Blitz game rated 1400–1600 of middling length, chosen as the most ordinary profile in the data; the choice relabels coefficients but changes no prediction. Full specification in the appendix.)
+The ten analyzed UltraBullet games must represent their entire population of 1,000, so each receives a weight of $1{,}000/10 = 100$. Its weighted total is likewise $10 \times 100 = 1{,}000$. The original 200-to-10 imbalance has become 1,000 to 1,000, matching the full population.
 
-The fitted model largely preserves the patterns documented earlier. At the reference rating band, a Classical game has 4.7 times the **odds**[^t-or] of analysis of an otherwise similar Blitz game (95% CI 4.5–4.9), and very short games and tournament games remain less likely to be analyzed after conditioning on the other modeled characteristics. The notable change is UltraBullet. Its raw analysis rate is the lowest of any control, yet for the reference profile its estimated odds are close to Blitz's (0.94, CI 0.86–1.03). This does not show that shortness causes the marginal deficit, and the control-by-rating interaction means the comparison is anchored at one rating band, not all of them; but it does suggest the raw UltraBullet gap is not a story about the format alone. The remaining fifty-odd coefficients are in the appendix table, and none of them is the point here. The model's job is to hand every game a probability; with those in hand, we can build the weights and ask whether the adjustment actually works.
+This is the logic of **inverse-probability weighting**[^t-ipw]. For an analyzed game $i$,
 
-How good is the model overall? Its in-sample **AUC**[^t-auc] is 0.664 (CI 0.662–0.665). AUC answers one narrow question. Hand the model two games at random, one analyzed and one not, and ask it to point to the analyzed one; AUC is how often it points right. A model with nothing to say gets it right half the time, no better than tossing a coin, and scores 0.5; a model that could always tell the two apart scores 1.0. Two-thirds is real signal, well short of certainty. And that is all AUC says. It is not the share of the decision explained, and it does not tell us whether weights built from these probabilities will actually rebuild the month. A model can rank mediocrely and still weight well, or the reverse. Whether the repair works has to be tested directly, and the test has to be designed so that it is allowed to fail.
+$$
+w_i=\frac{1}{\hat{\pi}_i},
+\qquad
+\hat{\pi}_i=
+\widehat{P}
+\bigl(
+\text{evaluated}
+\mid
+\text{time control, rating, length, tournament}
+\bigr).
+$$
 
-::: {.callout-note collapse="true"}
-## Why AUC and not accuracy?
+A game estimated to have a 20% probability of being analyzed receives weight $1/0.20 = 5$; one with a 1% probability receives weight $1/0.01 = 100$. If the probabilities are estimated adequately and every relevant kind of game retains some analyzed examples, these weighted games reproduce the population’s composition in expectation.
 
-Accuracy sounds like the natural score for a yes/no prediction, but it needs a threshold (call everything above some probability "analyzed"), and with rare outcomes it flatters models that do nothing. Only 7.54% of games are analyzed, so a model that answers "not analyzed" every single time is 92.46% accurate and perfectly useless: it never finds one analyzed game. Any accuracy number here would mostly be restating the base rate. AUC has no threshold to pick and only asks whether analyzed games are ranked above unanalyzed ones, so the do-nothing model scores 0.5 no matter how rare the outcome, and everything above 0.5 is actual information. That is why this article reports 0.664, and later 0.827, on a scale where useless sits at 0.5 rather than at 92%.
-:::
+The reconstruction is virtual: weighting does not create engine evaluations for games that lack them. It instead lets an evaluated game contribute on behalf of similar unevaluated games. That requires an additional assumption. Among games alike on the modeled features, the evaluated games must also represent the unevaluated games on the engine-derived quantity being studied. If two otherwise similar games differ in their likelihood of analysis because one contained a dramatic blunder, weighting on the recorded features will not remove the resulting difference in blunder rates. This requirement is the **missing-at-random assumption**[^t-mar].
+
+### Estimating the analysis probabilities
+
+I estimate each game’s analysis probability with a **logistic regression**[^t-logit] fitted to all 14,306,375 games. The model uses time control, a rating band rather than the exact average rating (2000–2200, for example), a game-length band, tournament status, and a time-control × rating interaction — the interaction required by the reversal in Section 3.
+
+These predictors enter as categories. That allows the rating reversals and length hump found earlier to remain visible, although it treats games within the same bin as equivalent.
+
+The model is used to estimate selection probabilities, not to determine why individual games were analyzed or which characteristic was responsible.[^t-model-spec] Once every game has an estimated probability, the inverse weights can be constructed. The relevant test is not how accurately the model classifies games, but whether the weighted subset recovers quantities it was not explicitly trained to match.
+
+### What can the reconstruction test?
+
+The quantities that weighting is ultimately meant to recover are engine-derived measures such as blunder rates and changes in engine advantage in the whole population (including games with no evaluation). Yet these quantities create a validation problem: they exist only for evaluated games. I can calculate a weighted estimate from that subset, but I cannot compare it with the true full-month value because the corresponding outcomes are missing for every unevaluated game. I therefore cannot observe directly how much of their selection bias the weighting removes, or test the missing-at-random assumption for the outcomes that matter most.
+
+To obtain an indirect test, I used variables whose full-month values are known as observable test cases. Among these recorded variables, I assigned two different roles. Time control, rating, game length, and tournament status were used to construct the weights. Because the weighted subset is explicitly designed to resemble the full month on these dimensions, matching them is a necessary diagnostic but weak evidence: it mainly shows that the machinery is doing what it was built to do.
+
+I then deliberately withheld several other recorded variables from the selection model. Lichess records game result, termination, and the participants’ monthly game counts as well. After constructing the weights without this information, I can ask whether these excluded variables also move toward their known full-month values.
+
+The logic runs in one direction only. If the weights improve nothing except the variables that built them, there is little reason to trust them on engine-derived quantities that cannot be checked. If they do improve several excluded variables, the modeled game characteristics are capturing selection structure beyond the dimensions they were designed to balance — which makes it more plausible, though not certain, that they help with blunder rates and evaluation swings too.
+
 
 ### Testing the adjustment
 
-Here is the trap a careless test falls into. If I check the weights by asking whether the weighted subset now matches the month on time control or rating, I am letting the model grade its own homework: those are exactly the dimensions the weights were built to balance, so success there is the machinery turning, not evidence about the world. The checks I ran instead were set before fitting: a battery of excluded variables, properties recorded for every game but never shown to the model. (I will call these excluded-variable checks; "held-out" would suggest held-out observations, which is not what happens here.) How the game ended (resignation or checkmate, a flag fall, an abandonment), what the result was, and how many games its players played that month. Each is recorded for every game in the dump, so the weighted answer can be compared with the full-month benchmark; none was available to the model, so matching them is not self-grading. One honesty note before the numbers: this is a stress test on proxies. The quantities downstream researchers actually want, blunder rates and evaluation swings, exist only inside analyzed games, so no test of this kind can be run on them. Held-out balance is evidence that the weights transfer beyond their training dimensions; it is not a guarantee for every unmeasured thing.
+![What weighting repairs, quantity by quantity. Each row runs from the unweighted evaluated subset (navy dot, 100% of its own discrepancy) toward the full-month value (dark line, discrepancy closed), with the weighted estimate in orange and the actual values printed. Upper block: variables used to build the weights; lower block: variables deliberately withheld from the model. Two categories with no usable evaluated games do not move. Underlying values and 95% player-resampling stability intervals are in `t7_4_threepoint.csv`.](images/F5_correction.png){#fig-weighting .column-page-inset}
 
-| Quantity | Full month (benchmark) | Evaluated subset | After weighting | Gap closed |
-|---|---:|---:|---:|---:|
-| *Shown to the model* | | | | |
-| Share Classical | 1.68% | 5.57% | 1.71% | 99% |
-| Share tournament | 16.5% | 11.3% | 16.0% | 89% |
-| Mean rating | 1621.0 | 1580.1 | 1620.5 | 99% |
-| Mean length (plies) | 67.5 | 64.2 | 66.6 | 72% |
-| *Never shown to the model* | | | | |
-| Players' monthly games (game-weighted) | 508 | 368 | 425 | 41% |
-| Ended by time forfeit | 32.8% | 26.5% | 29.4% | 47% |
-| Ended normally | 66.8% | 73.5% | 70.6% | 44% |
-| Drawn games | 3.78% | 2.53% | 3.07% | 43% |
+The upper part of @fig-weighting checks whether the weighting operates as intended. Classical games fall from 5.57% of the evaluated subset to 1.71% after weighting, almost exactly their 1.68% share of the full month. The 41-point rating gap shrinks to half a point, and 89% of the tournament gap closes.
 
-: What weighting repairs. Quantities the model was shown versus prespecified excluded-variable checks; the gap-closed column is the share of each original discrepancy removed {#tbl-weighting}
+These are useful implementation checks, but not independent validation: all three variables helped determine the weights. The model was designed to restore their representation.
 
-![What weighting repairs. Each row runs from the unweighted evaluated subset (navy; 100% of its own gap) toward the all-games value (dark line; gap closed), with the weighted estimate (orange) and the actual values labeled directly. Rows the model was shown land on the line; excluded-variable rows stop partway; two zero-support rows do not move. Underlying values and 95% stability intervals in the §6 table and `t7_4_threepoint.csv`.](images/F5_correction.png){#fig-weighting .column-page-inset}
+Length is the instructive exception. Although length appears in the model, weighting closes only 72% of its gap. Length enters the model through seven broad bins — 81–120 plies, say, rather than an exact count of 96 — so the model can restore how many games fall in each bin without correcting the differences among games inside the same bin. Bin width is not the whole story, though: a truncation check in the appendix shows that capping the largest 1% of weights raises this figure to 89%, so a few extreme weights carry part of the residual gap too.
 
-The top block confirms the machinery turns. These are the dimensions the weights target, so the 3.3-fold Classical overstatement collapsing to nothing and the forty-point rating gap shrinking to half a point are expected, not impressive; the one instructive residual is length, which closes only 72% because seven bins is a coarse ruler and the model is flat inside each bin. The bottom block is the actual result, and the mechanism behind it is worth spelling out. The model never saw termination, results, or the participants' monthly game counts, so the weights cannot target them directly; an excluded variable's gap can close only insofar as that variable travels with things the model does see. Time forfeits are commoner in fast games; the model knows about fast games; so correcting the control mix drags the termination mix partway along. That partway is the finding. Across the nine prespecified excluded-variable checks, weighting closed 29–47% of each discrepancy that was there to close: 41% of the players'-games gap, 44–47% of the termination gaps, 43% of the missing draws, 29% of the small loss-share gap. Two termination categories had essentially no analyzed games to reweight and closed nothing, and one result category had no real discrepancy to begin with; all nine are in the appendix table. The rest is what this particular adjustment failed to recover. I am deliberately not calling it a measurement of "selection on everything else": some of it may be my model's coarseness (bins too wide, interactions not included), some of it selection on things the file does not record; this test cannot apportion blame between the two. What it can say is that after an honest correction on everything observable here, half or more of every fixable excluded-variable discrepancy was still standing.
+The excluded variables provide the more meaningful test. Weighting closes 41% of the gap in participants’ monthly game counts, 44–47% of the major termination gaps, and 43% of the missing-draw gap. Across the nine prespecified checks, it removes 29–47% of each discrepancy that both existed initially and had enough evaluated games to be reweighted. The low end of that range is the black-win share, which started out only 2.7% off; when the initial gap is that small, the percentage closed is itself an unstable number.
+
+Why do variables omitted from the model move at all? Because they are related to variables the model does contain. Time forfeits, for example, are more common in fast chess. Correcting the over- and underrepresentation of different time controls therefore moves the termination distribution toward its benchmark, even though termination was never used to construct the weights.
+
+But it moves only partway. More than half of every fixable excluded-variable discrepancy remains. That is the central result of the test: the adjustment transfers beyond its inputs, but only partially.
+
+The residual discrepancies do not have a single explanation. Some may reflect a model that is too coarse: bins that are too wide or interactions that were omitted. Others may reflect selection related to information absent from the game-level model. The test measures how far this particular adjustment transferred; it cannot separate model misspecification from unmeasured selection.
 
 ### Where weighting fails
 
-Two boundary cases sharpen what weighting is and is not. First, the method has a hard floor, and its name is worth learning: weighting can only amplify games that exist in the subset. The two worst categories fail differently. The 7,592 Unterminated games from Section 3 have not a single analyzed member — an empirical zero for this month, not a law of the site, but with literally nothing to reweight their gap closes by 0.0%. The roughly 59,000 Abandoned games have about forty analyzed members: not zero, but overlap too thin to use, and their gap closes by 0.2%. For weighting to work, every kind of game you care about must retain enough analyzed members to stand on (statisticians call this the **positivity, or overlap, condition**[^t-pos]; one category fails it outright this month, the other practically). No cleverness with weights recovers a group the selection process left empty. Second, a repair can injure. Games ended by a rules infraction are about 7 in 100,000 this month, and the raw subset already estimated them essentially correctly; after weighting, the estimate lands at nearly double the benchmark (CI excluding it). The magnitude is trivial, the mechanism is not: weights are estimates, and where the underlying model errs, weighting can push error into a quantity that had none. I listed this failure mode before running the experiment, during the pilot; here it is on the full month. (The weights themselves are well-behaved: no handful of monster weights drives any of this; diagnostics in the appendix.)
+The average improvement hides two harder limits.
 
-So the repair verdict has three clauses. Weighting on observables fixes what observables explain, here 29–47% of the fixable discrepancies on variables it was never trained on; it cannot touch categories that selection excluded outright; and it can quietly damage what was never broken. The residual gaps carry one more message: something that matters for selection is missing from the game-level picture entirely. The next section goes looking for it.
+First, weighting can only amplify games that exist in the evaluated subset. Among the 7,592 games recorded as Unterminated, not one carries an evaluation. There is therefore no observed game that can represent this category, and its discrepancy closes by exactly 0.0%. Roughly 59,000 games are recorded as Abandoned, but only about forty are evaluated; their gap closes by just 0.2%.
 
+For weighting to work, every group relevant to the intended analysis must contain enough evaluated games to represent its unevaluated counterparts. This is the positivity, or overlap, condition[^t-pos]. Unterminated fails it outright in this month, while Abandoned fails it in practice. No weight can recover a category for which the evaluated subset supplies no usable examples.
 
-## 7. Selection clusters around players
-
-Section 6 ended with a puzzle. After an honest reweighting on everything visible about the games, half of every fixable excluded-variable discrepancy was still standing, and the least repaired of all was the participants' monthly game count. That row was trying to tell us something. Every result so far has treated selection as a property of games: their control, their rating, their length. But Section 1 already said, in passing, how this data comes to exist: someone clicks "request analysis". Games do not ask to be analyzed; people ask. The file never records who asked (the request can come from a player, a spectator, or anyone opening the game later), but whoever asks, the games a request lands on are always somebody's games. So there is a measurable player-level variable hiding here.
-
-The measurement is simple once one rule is respected. For each game, look up its two players and ask: how often do their *other* games this month carry an evaluation? Average the two answers and call it the game's participants' other-game analysis history (history, for short). The load-bearing words are "other games". If the current game were included in its own players' rates, the feature would contain a piece of the very answer it is supposed to predict, and any test of it would be quietly rigged. I ran the rigged version deliberately, as a check: including the current game inflates the AUC from 0.827 to 0.853. Excluding it, the **leave-one-out**[^t-loo] rule, is what keeps the feature honest.
-
-Before any model, the raw gradient is worth staring at.
-
-![Evaluation rate within each participants'-analysis-history bin (denominator: all games in the bin). History = the share of the two players' other games this month that carry evaluations, leave-one-out, averaged over the seats. Two near-empty bins omitted (appendix). Exact counts in @tbl-c4.](images/F6b_habit_gradient.png){#fig-history}
-
-From 1.7% to 79.5% is a 47-fold range. Time control gave 5.9-fold; game length, at its most dramatic, 16-fold. Nothing about the game itself comes close to what this one fact about its players carries. (Two small bins are omitted: games whose players have essentially no other games, and a curious exactly-zero-history bin that mixes true never-analyzers with players who simply have too few other games to measure; both in the appendix.)
-
-Put the same feature into Section 6's model, binned like everything else, and the in-sample AUC rises from 0.664 to 0.827 (CI 0.826-0.828). In the two-random-games test, the game-features model points to the analyzed game two times in three; add one number about the players and it points right five times in six. Two fences around that number: it is retrospective, within-month discrimination, not a forecast; and it is an incremental comparison — it says this one participant-history variable adds a great deal on top of the game features, not that it would beat them on its own, a model I did not run.
-
-Now the question this section exists to ask: with analysis history held fixed, what remains of the time-control effects? Section 6's headline coefficient was Classical at 4.7 times the odds of Blitz. After adding history, that odds ratio is 0.99 (CI 0.96-1.02). Read it slowly: among games whose participants have the same analysis history, a Classical game is no more likely to be analyzed than a Blitz game, at the reference profile. The 3.3-fold overrepresentation of Classical chess, the most intuitive finding in this article, the one every reader nods along to ("of course people analyze their serious games"), does not survive one player-level variable. The reading that comes most naturally — a deliberate sort of player both chooses slow chess and tends to have games analyzed, so the Classical excess was really about who plays Classical — is one interpretation consistent with this result, not the result itself; its rival appears in the box just below. What the data establish is the reorganization: a pattern that presented as a property of the format is absorbed, entirely, by a quantity measured on the people at the board.
-
-The rest of the hierarchy goes the same way, and then some. Bullet (1.06 before, 1.00 after) and Rapid (1.59 before, 0.96 after) flatten to nothing. The two extremes do something stranger than flattening: UltraBullet, indistinguishable from Blitz in the game-only model, comes out *above* it once history is fixed (1.50, CI 1.41-1.60), and Correspondence drops below (0.59, CI 0.55-0.63). I report both without a mechanism story; at fixed history, the residual differences are real but modest, they flip sign at the two ends of the speed spectrum, and they are anchored, like every coefficient here, at the reference rating band. The honest summary is that conditioning on one participant-level variable does not just shrink the time-control effects; it erases the middle of the hierarchy and reverses its ends.
+Second, weighting can make an estimate worse. Games ending through a rules infraction are extremely rare (about seven in every 100,000) and the unweighted evaluated subset already approximates their full-month share closely. After weighting, the estimate rises to nearly twice the benchmark, with an interval excluding the true value. The category is too rare to matter substantively here, but the failure mode matters.
 
 ::: {.callout-note collapse="true"}
-## Does the collapse prove the time control does nothing?
 
-No, and the reason is worth owning, because at least two different worlds produce exactly the collapse above. In world A, an unseen player type (a deliberate sort who treats chess as something to learn from) both chooses slow chess and clicks "request analysis"; the format itself does nothing. Analysis history, measured from a player's other games, stands in for that type (a proxy for the common cause, which is what statisticians call a confounder), and conditioning on it removes a format effect that was never real. That is the composition reading used above. But consider world B. Suppose Classical genuinely makes anyone more likely to request analysis, and players specialize: Alice plays almost only Classical, Bob almost only Blitz. Alice's other games are then mostly Classical too, so her history is high partly *because the format works on her*. In that world the history variable already contains the format's accumulated effect, and conditioning on it subtracts the very thing being tested (overadjustment). Both worlds generate the same joint pattern in this file: Classical, high history, and analysis travel together. They are observationally equivalent, and no amount of staring at this month's data separates them. Two things survive the ambiguity. For predicting who clicks, which is all the weighting of Section 6 ever needs, the two worlds agree; they disagree only about why. And the design that could separate them is known, comparing the same player's slow and fast games against each other, but it needs many players who play both in volume, and it is left as future work (Limitations).
+## Why can a correction make an estimate worse?
+
+Weighting does not move every variable automatically toward its population value. It changes the representation of the modeled game types, and other variables associated with those types move with them.
+
+If the selection model is incomplete, if an excluded variable is only weakly related to the modeled features, or if its original agreement with the population arose from offsetting discrepancies, reweighting can move it away from the benchmark. Rare categories are especially unstable because their weighted estimates depend on very few games.
+
+The diagnostics do not suggest that a handful of extreme weights drives the overall results; weight distributions, effective sample size, and truncation checks appear in the appendix. The broader lesson remains: weighting must be checked separately for the quantities a study intends to estimate.
 :::
-Three cautions keep this finding inside its evidence. First, analysis history is measured, not known: a leave-one-out rate is a noisy summary, least stable for light players. On synthetic data built so that a control effect was pure player composition, this pipeline removed about half of the fake effect when handed the noisy proxy and nearly all of it when handed the true history (appendix). That validates the machinery under that scenario; it does not establish the direction of any bias in the real data, where the box's second world is also in play. Second, nothing causal is claimed; the box above develops why this dataset cannot even in principle decide between "players choose formats" and "formats shape players". Third, the AUC is in-sample and the odds ratios are reference-anchored, as before.
 
+The verdict is therefore partial rather than binary. Weighting on recorded game characteristics almost reconstructs the dimensions it was built to match, but those checks are largely mechanical. On variables deliberately withheld from the model, it removes 29–47% of each fixable discrepancy. It cannot recover categories absent from the evaluated subset.
 
-This finding speaks to Section 6, but carefully. It identifies a major selector missing from the game-feature model, which offers a plausible account of why the weighting transferred incompletely; no more than plausible, because the deciding experiment (adding analysis history to the weights and rerunning the excluded-variable checks) was not run. It was not run for a reason: the variable is built from the same month's selection outcomes, it is unstable for light players, and its job in this article is diagnosis, not a weighting recipe for others to transport. The diagnosis is enough. Analysis incidence is strongly clustered on players, and any account of who ends up in the evaluated subset that never mentions the people at the board is missing its largest variable. The article opened by asking which games get looked at by the machine. The honest answer, two sections of machinery later, is that the question was aimed one level too low.
+The weighted subset is therefore closer to the full month, but it is not equivalent to it. The remaining discrepancies also suggest that the game-level fields omit an important part of the selection process. Requests land on games, but they are made by people. The next section asks whether a summary built on the participants supplies the missing information.
 
-![Adding the participants to the model. Left: in-sample AUC, where 0.5 is a model with no information. Right: time-control odds ratios against Blitz at the reference profile, before (navy) and after (orange) adding analysis history; whiskers are 95% player-resampling stability intervals (B = 200). The middle of the hierarchy collapses onto 1; the two ends flip across it.](images/F6_player.png){#fig-players .column-page-inset}
+## 6. Analysis clusters around players
 
+Section 5 left one particularly suggestive mismatch. Even after weighting on recorded game characteristics, much of the discrepancy in the participants’ monthly activity remained. That was a clue that the selection model might be operating at the wrong level.
 
-## 8. How biased is it? Wrong question, better one available
+Every predictor in that model described the game: its time control, rating, length, or tournament status. But an evaluation enters the file only after someone requests it.[^3] That human choice may be associated not only with what kind of game it is, but also with whose game it is. The next question was therefore whether evaluations repeatedly land on games involving the same participants.
 
-After seven sections, the honest summary of "how biased is the evaluated subset?" is that the question has no single answer. The distortions measured in this article span everything from none at all to complete absence, and which one applies depends entirely on what a researcher wants to compute. So the useful deliverable is not a verdict but a table.
+The most direct participant-level signal available in the data is the evaluation history of the participants’ other games. For each game, I calculated the share of each player’s *other* games that month that carried an evaluation, then averaged the two players’ rates. I call the result the game’s **participant-history score**[^t-history]. It is an evaluation percentage, not a measure of how many games the players played.
 
-| If your quantity is... | Evaluated subset | Full month | Distortion | After game-level weighting |
+The current game is excluded from both players’ rates. This **leave-one-out**[^t-loo] rule prevents the game’s own evaluation status from entering the variable used to predict it. “History” is also only shorthand: the score summarizes the full month, so some of the other games may have occurred later than the focal game. It is a retrospective measure of clustering, not a forecasting variable.
+
+![Games involving participants whose other games are frequently evaluated are themselves far more likely to carry an evaluation. The rate rises from 1.7% to 79.5% across participant-history bins, a 47-fold range. Participant history is the mean of the two players’ leave-one-out analysis rates among their other games that month; the denominator is all games in each bin. Two sparse or structurally ambiguous bins are omitted, with exact counts reported in @tbl-c4.](images/F6b_habit_gradient.png){#fig-history}
+
+The raw gradient is striking. Analysis rates varied 5.9-fold across time controls and 16-fold across game-length groups, but across participant-history groups, they vary from 1.7% to 79.5%, a 47-fold range. These ranges are not a causal comparison or a formal ranking of variable importance. They show that evaluations are far more concentrated around participants than the earlier game-level summaries revealed.
+
+::: {.callout-note collapse="true"}
+
+## Why must the current game be left out?
+
+Suppose the current game were included when calculating its players’ analysis rates. If the game carries an evaluation, it would automatically push its own predictor upward; if it does not, it would push the predictor downward. Part of the answer would therefore be built into the feature used to predict it. This is **target leakage**[^t-leakage], not genuine predictive information.
+
+The leave-one-out rule does not turn the score into a forecast: it still uses the evaluation status of other games from the same month. It simply ensures that each game does not help predict itself.
+:::
+
+The raw gradient alone cannot tell us whether participant history contains genuinely new information. Players with high history scores might simply play more Classical games, occupy different rating bands, or produce games of different lengths. To separate participant history from those recorded game characteristics, I added the score, in bins, to the selection model from Section 5.
+
+I compared the two models using the AUC[^t-auc], which measures how well a model distinguishes evaluated from unevaluated games. If we draw one game from each group, the AUC is the probability that the model assigns the higher estimated analysis probability to the evaluated game. A model that ranks the two at random scores 0.5; a model that ranks every evaluated game above every unevaluated one scores 1.0. Note that this is a statement about ordering, not about labelling any individual game correctly.
+
+Using only time control, rating, length, and tournament status, the model has an in-sample AUC of 0.664 (95% CI 0.662–0.665): it identifies the evaluated game about two times in three. Adding the participant-history score raises the AUC to 0.827 (95% CI 0.826–0.828), or roughly five times in six. Participant history therefore carries substantial information about where evaluations appear, beyond everything contained in the modeled game characteristics.
+
+This is an incremental comparison. It measures what participant history adds to the game-feature model, not how well participant history would perform by itself—a model I did not run. It is also retrospective within-month discrimination, not evidence that the model could forecast which future games will be analyzed.
+
+::: {.callout-note collapse="true"}
+## Why compare the models with AUC rather than accuracy?
+
+Only 7.54% of games are analyzed. A model that labels every game “not analyzed” would therefore be 92.46% accurate while identifying no analyzed games at all. Ordinary accuracy would mostly repeat the base rate and would also require choosing an arbitrary probability threshold.
+
+AUC instead compares the models’ rankings across all possible thresholds. This makes it useful here because the question is comparative: how much better can the model separate evaluated from unevaluated games once participant history is added?
+
+AUC still does not measure how much of the selection process has been “explained,” establish causality, or show that the estimated probabilities are well calibrated. Nor does a higher AUC by itself imply better inverse-probability weights. Here it is used only to compare the discriminatory information contained in two sets of predictors.
+:::
+
+### The time-control hierarchy collapses
+
+The larger AUC shows that participant history adds information. The more consequential result is what happens to the apparent time-control patterns after that information enters the model.
+
+In the game feature model, a Classical game had 4.7 times the odds of analysis of a Blitz game at the reference profile. After conditioning on participant history, the odds ratio[^t-or] falls to 0.99 (95% CI 0.96–1.02), which means that among games in the same history bin and at the reference profile, Classical is no more likely to be analyzed than Blitz.
+
+That is striking! The evaluated subset contains 3.3 times the population share of Classical chess, a pattern that initially looked like a property of the format: serious games receive more serious review. Yet the Classical–Blitz difference is almost entirely absorbed by one variable measured on the participants.
+
+The middle of the time-control hierarchy follows the same pattern. Bullet falls from 1.06 to 1.00, and Rapid from 1.59 to 0.96. At the two ends, the estimates cross to the other side of Blitz: UltraBullet rises to 1.50 (95% CI 1.41–1.60), while Correspondence falls to 0.59 (0.55–0.63). 
+
+Participant history is also an imperfect measurement: a leave-one-out rate built on a few other games is far noisier than one built on hundreds, so the coefficients above should not be read as perfectly purged of player composition.[^5]
+
+![Adding participant history changes both discrimination and the apparent time-control hierarchy. Left: in-sample AUC rises from 0.664 for the game-feature model to 0.827 once participant history is added. Right: time-control odds ratios against Blitz at the reference profile, before (navy) and after (orange) adding history. Classical, Rapid, and Bullet collapse toward 1, while UltraBullet and Correspondence cross to opposite sides. Whiskers are 95% player-resampling stability intervals (B = 200).](images/F6_player.png){#fig-players .column-page-inset}
+
+::: {.callout-note collapse="true"}
+## Does the collapse prove that time control does nothing?
+
+No. At least two different worlds can produce the same pattern.
+
+In world A, an unobserved kind of player (for example, someone who is very serious about chess and treats chess as something to study) both chooses slower formats and tends to have games analyzed. Participant history acts as a proxy variable[^t-proxy] for that underlying disposition. Conditioning on it removes a Classical–Blitz difference that came from which players chose the two formats rather than from the formats themselves.
+
+In world B, playing Classical genuinely makes a game more likely to receive an analysis request. But players tend to specialize: a Classical player’s other games are mostly Classical too. Their high participant-history score would then partly reflect the accumulated influence of the format itself. Conditioning on that score would remove part of the relationship we were trying to measure—an instance of overadjustment[^t-over].
+
+![Two causal structures that produce the same joint pattern in one month of data. Arrows read as "influences"; the dashed box is unobserved. In world A the format has no arrow to evaluation at all, and participant history stands in for the unobserved kind of player. In world B the format does affect evaluation, and participant history partly carries that same influence, because a player's other games share the format. Conditioning on history is a repair in the first world and an overadjustment in the second.](images/fig_two_worlds.png){#fig-two-worlds}
+
+Both worlds make Classical games, high participant history, and evaluation travel together. This one month of observational data cannot distinguish them. A comparison of slow and fast games played by the same people would reduce differences due to stable player characteristics and is a natural next step. It would not, by itself, prove a causal effect: the games may still differ in other ways, and the requester’s identity remains unknown.
+
+For within-month discrimination, the two worlds make similar predictions. For explaining why the time-control hierarchy collapses, they imply very different answers.
+:::
+
+The finding therefore has a strong descriptive meaning but a limited causal one. Evaluations are heavily clustered among games involving the same participants, and a participant-level summary absorbs associations that previously appeared to belong to time control. The data do not tell us whether that summary represents a stable player disposition, the accumulated influence of the formats those players choose, or some combination of the two.
+
+Nor does this result establish that participant history would solve the weighting problem in Section 5.[^6] The score is constructed from the same month’s evaluation outcomes, is unstable for players with few games, and may not be available in the population to which another researcher wants to transport results. It is more useful here as a diagnostic than as a ready-made weighting recipe.
+
+The diagnosis is still important: a model based only on game characteristics omits a major participant-level structure in where analysis lands.
+
+## 7. Bias depends on what you measure
+
+There is no single answer to “How biased is the evaluated subset?” Selection bias matters relative to a particular quantity. For some quantities, the evaluated games closely match the full month. For others, the discrepancy is large but partly repairable. Some categories are almost entirely missing, and the engine-derived quantities researchers care about most cannot be checked from the existing annotations at all.
+
+The more useful question is therefore:
+
+> For the quantity I want to estimate, what does the evaluated subset get wrong—and can anything in the observed data repair it?
+
+| Target quantity | Evaluated subset | Full month | Observed distortion | What game-level weighting does |
 |---|---:|---:|---|---|
-| Share of Classical games | 5.57% | 1.68% | 3.3× overstated | repaired (99% closed) |
-| Mean rating | 1580 | 1621 | −41 rating points vs the month | repaired (99%) |
-| Share of tournament games | 11.3% | 16.5% | 0.69× understated | mostly repaired (89%) |
-| Mean game length | 64.2 plies | 67.5 plies | −3.2 plies, hiding a 16-fold hump | mostly repaired (72%) |
-| Players' monthly games (game-weighted) | 368 | 508 | 0.72× understated | partially repaired (41%) |
-| Ended by time forfeit | 26.5% | 32.8% | −6.3 percentage points | partially repaired (47%) |
-| Drawn games | 2.53% | 3.78% | 0.67× understated | partially repaired (43%) |
-| White-win share | 49.8% | 49.7% | essentially none | none needed; weighting can even inject error |
-| Unterminated games | none analyzed | 0.05% | absent from subset | unrepairable this month (empirical zero support) |
-| Abandoned games | ~40 analyzed | 0.41% | nearly absent | unusable overlap (near-zero support) |
-| Anything move-level (blunder rates, eval swings) | exists only inside the subset | unobservable | untestable here | untestable in principle |
+| Share of Classical games | 5.57% | 1.68% | 3.3× too high | Nearly repaired (99% closed) |
+| Mean rating | 1580 | 1621 | 41 points lower | Nearly repaired (99%) |
+| Share of tournament games | 11.3% | 16.5% | 31% too low | Mostly repaired (89%) |
+| Mean game length | 64.2 plies | 67.5 plies | 3.2 plies shorter | Mostly repaired (72%) |
+| Participants’ monthly games, game-weighted mean | 368 | 508 | 28% too low | Partly repaired (41%) |
+| Share ending by time forfeit | 26.5% | 32.8% | 6.3 percentage points lower | Partly repaired (47%) |
+| Share ending in a draw | 2.53% | 3.78% | 33% too low | Partly repaired (43%) |
+| White-win share | 49.8% | 49.7% | Essentially none | No correction needed; weighting slightly worsens it |
+| Unterminated games | 0 evaluated games | 7,592 games (0.05%) | Completely absent | Cannot be repaired: zero support |
+| Abandoned games | About 40 evaluated games | About 59,000 games (0.41%) | Almost absent | Too little overlap for a dependable estimate |
+| Engine-derived move quantities, such as blunder rates | Observed only for evaluated games | Not recorded for the rest | Cannot be measured from the dump | Cannot be validated from the existing annotations |
 
-: Bias by quantity. What the evaluated subset gets wrong, by how much, and how much of it game-level weighting repairs {#tbl-bias-by-quantity}
+: Selection distortion and the success of weighting depend on the target quantity. Percentages in the final column report the share of the original evaluated-versus-population discrepancy removed by the game-feature weights. Every row compares the evaluated subset with the full month; §4's 3.5-ply figure instead compares it with the unevaluated remainder, which is why the length row reads 3.2. {#tbl-bias-by-quantity}
 
-The last row is the one that matters most and the one this article cannot measure, which is itself the finding: the quantities researchers most want engine evaluations *for* are precisely the ones whose selection bias cannot be checked against the dump, because the unanalyzed games carry no evaluations to compare. Every check in this article runs on the free fields. For move-level work the choice in Section 2 is not a nuance but the whole game: run the engine yourself, or accept that any move-level selection bias remains unknown and cannot be bounded from the existing annotations alone.
+The table separates three situations. Quantities included in the weighting model are reconstructed almost completely. Recorded quantities deliberately excluded from the model move in the right direction, but only partially: weighting removes 29–47% of their fixable discrepancies. Categories with no usable evaluated examples cannot be reconstructed at all.
 
-For a researcher who still reaches for the `%eval` subset, the table compresses to habits:
+The final row is different. Blunder rates, evaluation swings, and similar move-level quantities are the reason researchers want the evaluated subset in the first place. But those quantities are missing for every unevaluated game, so the full-month benchmark needed to measure their selection bias does not exist in the dump.
 
-1. Say so, and report the share. "We use the 7.5% of games with evaluations" is one sentence, and it was absent from the studies I inspected (a purposive nine, not a sample of the literature; see the note to Section 2).
-2. Check your quantity against the free fields. Composition, ratings, lengths, terminations are all computable from the dump for your month; the contingency tables published with this article make it a spreadsheet exercise for November 2017.
-3. If your quantity is composition-sensitive, reweight on game features and expect partial repair: near-complete on what the model sees; on the prespecified excluded-variable checks here, 29–47% of each fixable discrepancy.
-4. Check support before trusting any weighted number: categories with no analyzed games cannot be conjured back.
-5. Read game-level gradients with Section 7 in mind: a "games like this get analyzed" pattern may really be a "people like this click" pattern wearing the game's clothing.
+::: {.callout-note collapse="true"}
+## Why can’t the existing evaluations reveal their own selection bias?
+
+Suppose the target is the average blunder rate. To measure the selection distortion directly, we would need to compare the blunder rate among evaluated games with the rate among all games—or at least with a representative sample of unevaluated games.
+
+But a blunder rate requires engine evaluations, and the unevaluated games have none. The outcome needed to test representativeness is missing precisely because those games were not selected.
+
+Weighting does not create the missing outcomes. It asks us to assume that, after conditioning on the recorded game characteristics, the evaluated games adequately represent the unevaluated ones. The excluded-variable checks in Section 5 show whether that assumption transfers to other *recorded* characteristics; they cannot verify it for an unrecorded engine quantity.
+
+This is not impossible to test in principle. A researcher could run the engine on the full population or on a probability sample that includes unevaluated games. It is untestable only from the pre-existing annotations alone.
+:::
+
+### A practical workflow
+
+For researchers who still use the evaluated subset, the results suggest five steps.
+
+1. **State the selection explicitly.** Report both the rule and the resulting share: “We use the 7.5% of games carrying pre-existing evaluations.” None of the nine studies I inspected reported that share.[^1]
+2. **Compare the subset with the population on relevant free fields.** Time control, rating, game length, tournament status, result, and termination are available for every game. The accompanying tables make these comparisons straightforward for November 2017; the same checks can be rerun for another month.
+3. **Check support before weighting.** If a relevant category contains no evaluated games—or only a handful—no weighting method can make it dependable. This is the **overlap condition**[^t-pos] from Section 5.
+4. **Treat weighting as an adjustment to be tested, not a certificate.** Matching the variables used to construct the weights is necessary but unsurprising. More informative validation comes from recorded variables that the model was not shown. In this study, those checks improved substantially but remained far from perfect.
+5. **Keep the untestable part visible.** A game-level pattern may partly reflect clustering around participants, and the dataset does not reveal who requested each analysis. For engine-derived outcomes, the remaining selection bias is unknown unless the engine is rerun on games outside the pre-evaluated subset.
 
 
-## 9. Limitations
+## 8. Limitations
 
-Scope. Everything here is one month of one site: November 2017 on Lichess. The month was chosen for being ordinary, but 2017 predates several interface changes, and the analysis-request culture of 2026 may select differently; re-running the pipeline on a fresh month is the obvious replication, and the code makes it mechanical. Nothing licenses extrapolation to other platforms.
+**Time and place.** This study covers one month on one platform: November 2017 on Lichess. A single month is also what one laptop can process end to end, which is why the design is a deep audit of one month rather than a shallow pass over many. The month was chosen as an ordinary case, not sampled to represent other periods. A 2017 selection process should not be assumed to describe current Lichess use, and nothing here establishes that other platforms select games in the same way. Repeating the pipeline on a recent month is the clearest replication.
 
-Measurement. Participants' analysis history is a leave-one-out proxy, not a disposition measure: noisy for light players, undefined for 435 games, and mildly pathological in an exactly-zero bin that mixes true never-analyzers with thin histories (appendix). In the composition-only synthetic scenario such noise attenuated the collapse; that validates the machinery under that scenario and does not establish the direction of any bias in the real data. Ratings are pool-specific (Section 4), so "same rating band" means same number, not same strength, across controls.
+**Participant-history measurement.** The participant-history score is a leave-one-out summary of where evaluations appeared, not a direct measure of a player’s disposition or behavior. It is noisy for players with few other games, and the dataset does not identify who requested the analysis. A synthetic check reported in the appendix shows that this noise causes the observed score to absorb only part of a pattern that was created entirely by player composition; it validates the implementation under one known scenario and says nothing about the direction or size of measurement error in the real data.
 
-Model form. The selection model is bins plus one interaction, chosen for having no tunable curvature; its coarseness is visible in the 72% closure on game length. Richer specifications (splines, more interactions) might close the excluded-variable discrepancies somewhat further; they would not change what Section 7 says about where selection lives.
+**Rating comparability.** Lichess maintains separate rating pools across time controls. Conditioning on the same numerical rating band therefore does not necessarily compare players of the same underlying strength across formats. The time-control coefficients should be read as comparisons at the same recorded rating, not as comparisons between demonstrably equal players.
 
-Identification. The collapse of the time-control hierarchy is associational. The box in Section 7 spells out the two observationally equivalent readings; the within-player design that would separate them (the same player's slow versus fast games) is future work, not this article.
+**Model specification.** The selection model uses categorical bins and one prespecified rating × time-control interaction. This avoids imposing a single linear shape, but it treats all games inside a bin alike. The remaining length discrepancy shows the cost of that coarseness. Splines, narrower bins, or additional interactions might improve adjustment, but would introduce further modeling choices. Alternative bin boundaries were not tested, so sensitivity to discretization remains unknown.
 
-Inference. The month is a complete enumeration: point values carry no sampling error, and the intervals throughout are player-resampling stability measures whose construction, calibration, and crossed-clustering check live in the appendix. AUCs are in-sample. The robustness suite is deliberately minimal: dropping Correspondence, the one structurally different control, changes nothing that matters (numbers in the appendix), and alternative bin edges were not explored, a knob-avoidance choice declared in Section 6.
+Dropping Correspondence—the most structurally unusual time control—does not materially change the main results; those checks appear in the appendix. That limited robustness test does not cover every plausible specification.
 
-What cannot be limited away. The absence of evaluations on unanalyzed games is not a gap in this study but the structural fact about the data: move-level selection bias is unmeasurable from the dump alone, for anyone, by construction.
+**Causal identification.** The collapse of the time-control hierarchy after adding participant history is associational. As Section 6 explains, the same result can arise because different kinds of players choose different formats, or because formats influence analysis and participant history absorbs that influence.
+
+Comparing slow and fast games played by the same people would reduce differences due to stable player characteristics and would sharpen the distinction. It would not automatically identify a causal effect: the games may still differ in other ways, and the identity and motivation of the person requesting analysis remain unknown.
+
+**Inference.** The dump is a complete enumeration of the target month, so its descriptive point values are finite-population quantities rather than estimates from a random sample of November games. The intervals throughout the article are player-resampling stability intervals: they show how results vary under player-level reweighting and dependence, not uncertainty about unobserved games from that month. Their construction and crossed-player checks appear in the appendix. All reported AUCs are in-sample and should not be interpreted as forecasting performance.
+
+**Unobserved engine outcomes.** The most consequential limitation is structural rather than methodological. Move-level engine quantities are absent for the unevaluated games, so their selection distortion cannot be measured or bounded from the released annotations alone. No alternative regression, weighting method, or robustness check can replace that missing benchmark. Obtaining one requires running the engine on additional games.
 
 
-## 10. Whose games get looked at
+## 9. Which games — or whose?
 
-The article opened with a dataset that exists because people chose to create it, and a promise that this particular curse could, for once, be audited. Three guesses died on the way. The rating story refused to be one story: the pooled curve points down where intuition points up, and underneath it fast and slow chess run in opposite directions. Longer games are not analyzed more; both tails go dark and the peak sits on ordinary, complete games. And the biggest one, the guess so natural nobody notices making it: that any of this was organized at the level of games. One number measured on the people at the board absorbs the tidy hierarchy of time controls entirely; whether as cause or as marker, the pattern lives with the players.
+I began with a convenient-looking dataset: more than a million games already carrying engine evaluations. The evaluations were ready for analysis, but the games had not been chosen at random. This article asked what human selection had placed in front of the machine.
 
-None of this says the evaluated games are bad data. It says they are somebody's data: the evaluated subset is a portrait of the players whose games get looked at: it overweights the slow, the occasional, and the people whose chess tends to end up under the engine — whoever pressed the button. Researchers who inherit the annotations inherit that portrait as their denominator. The repair kit is real but bounded: weights recover composition, halve some hidden gaps, and cannot resurrect what selection never touched or verify what only the subset contains.
+Three simple stories failed along the way. Evaluated games were not generally higher-rated; the pooled rating pattern concealed opposite relationships in fast and slow chess. Longer games were not steadily more likely to be analyzed; both very short and very long games were underrepresented. Most importantly, selection was not well described by the properties of games alone. A single summary of the participants’ other games carried more information than all the recorded game characteristics together and reorganized the apparent hierarchy of time controls.
 
-The dump will do this audit again for any month, and the tables published with this article do it for one. The machine sees only games. Which games reach it is organized, more strongly than by any property of the games themselves, around the people who play them.
+That does not make the evaluated games bad data. It makes them selected data. Compared with the full month, the subset contains too much slow chess, too many games from lower-volume participants, and far more games involving people whose other games also tend to receive evaluations. Researchers who inherit the annotations inherit this particular mixture as their denominator.
+
+Some of that mixture can be repaired. Game-level weighting nearly reconstructs the characteristics it was designed to match and partially improves others. But it cannot represent categories that selection barely touched, and it cannot verify the engine-derived quantities observed only inside the subset. The weights narrow several gaps; they do not turn the subset into a random sample.
+
+The central distinction is therefore simple. The engine may evaluate every position it receives by the same procedure. The dataset is shaped by the human choices that determine which positions reach it. In this month, those choices are organized more strongly around the participants than around any recorded property of the games themselves.
 
 
 
 ## Notes
 
-[^t-logit]: A standard model for yes/no outcomes: it combines group memberships into one probability, on a scale (log-odds) where contributions add. First used in §6.
-[^t-ipw]: Weight each selected unit by one over its probability of selection, so the weighted sample stands in for the population it was drawn from. §6.
-[^t-auc]: The probability that a randomly chosen positive case is ranked above a randomly chosen negative one; 0.5 means no information, 1.0 perfect separation. §6.
+[^t-logit]: A standard model for yes/no outcomes: it combines recorded characteristics into an estimated probability on a log-odds scale. First used in §5.
+[^t-ipw]: Inverse-probability weighting gives each selected unit a weight equal to one divided by its estimated probability of selection, allowing rarely selected groups to represent more of the population. §5.
+[^t-model-spec]: The full model specification, reference categories, and coefficient table appear in the appendix. §5.
+[^t-auc]: The probability that a randomly chosen positive case is ranked above a randomly chosen negative one; 0.5 means no ranking information and 1.0 means perfect separation. §6.
 [^t-or]: The odds of an event are $p/(1-p)$; an odds ratio compares two groups' odds, and equal odds give a ratio of 1. §6.
-[^t-smd]: A gap in means divided by a pooled standard deviation, so gaps on different scales can be compared; |0.1| is conventionally "small". §4.
-[^t-w1]: The average distance probability mass must travel to turn one distribution into the other; in one dimension, the area between the two cumulative curves. §5.
-[^t-pos]: For reweighting to be possible at all, every kind of unit you care about must retain analyzed members to stand on. §6.
-[^t-kita]: An accounting identity splitting a difference of averages into a composition part (who is in each group) and a within part (gaps at fixed composition). §4.
-[^t-stab]: A 95% interval from resampling the month's players: how much the number would move under a different draw of the same player population. Appendix. §4.
-[^t-loo]: Compute a player's rate from their *other* games only, so the feature never contains the very outcome it is used to predict. §7.
+[^t-w1]: The one-dimensional Wasserstein-1 distance equals the absolute area between two cumulative distribution functions. Equivalently, it is the smallest possible average absolute difference when observations from the two distributions are optimally matched. It has the same unit as the measured variable. §4.
+[^t-length-comparison]: The 3.5-ply gap in §4 compares evaluated games with the unevaluated remainder. When evaluated games are compared with the entire month, which includes the evaluated subset itself, the corresponding gap is about 3.2 plies.
+[^t-pos]: Positivity, or overlap, requires every type of game relevant to the target estimate to have a nonzero—and practically adequate—chance of appearing in the evaluated subset. §5.
+[^t-mar]: Missing at random here means that, after conditioning on the modeled game characteristics, selection into the evaluated subset does not still depend on the engine-derived quantity being estimated. §5.
+[^t-kita]: An accounting identity splitting a difference of averages into a composition part (who is in each group) and a within part (gaps at fixed composition). This article uses the symmetric convention; other conventions shift the split somewhat, and the formula is in the appendix. §3.
+[^t-stab]: A 95% interval from resampling the month's players: how much the number would move under a different draw of the same player population. Appendix. §3.
+[^t-history]: Participant history is the mean of the two players’ analysis rates among their other games in the same month. It is retrospective and need not precede the focal game in time. §6.
+[^t-loo]: A leave-one-out statistic for a game is calculated after excluding that game itself, preventing its outcome from entering its own predictor directly. §6.
+[^t-leakage]: Target leakage occurs when information from the outcome being predicted is included, directly or indirectly, in a model input. §6.
+[^t-proxy]: A proxy variable is an observed measurement used to stand in for an underlying characteristic that is not observed directly. A proxy may absorb several different causal pathways. §6.
+[^t-over]: Overadjustment occurs when conditioning on a variable removes part of the relationship of interest because that variable lies on, or already contains, the relevant pathway. §6.
 
+
+[^5]: In a synthetic check where the apparent time-control effect was created entirely by player composition, the observed leave-one-out score absorbed about half of the constructed effect, while the underlying true player propensity absorbed nearly all of it. That verifies the pipeline under one known scenario; it does not establish the direction or size of measurement error in the real data. Full results appear in the appendix.
+
+[^6]: Doing so would require adding participant history to the weighting model and rerunning the excluded-variable checks. I did not perform that experiment.
+
+[^0]: The population is every game in `lichess_db_standard_rated_2017-11.pgn`. That file holds standard *rated* games only: chess variants are published as separate files, and casual games are not released at all, so neither needs to be excluded here. The single exclusion applied by my parser is games whose rating field is non-numeric; 14,306,375 is what remains.
 
 [^1]: Scope caveat: I inspected nine candidate studies, chosen purposively for their data pipelines, not sampled. The counts describe the inspected set only and say nothing about how common each pipeline is in the literature at large.
 
+[^3]: The file does not record who requested an analysis. It is typically one of the two players, but this is not verifiable: spectators, and anyone opening the game later, can request one too.
+
+[^4]: Measured against unevaluated games rather than the full month, the gap is 44 points. As a standardized difference — the gap divided by a pooled standard deviation, so gaps on different scales can be compared — it is −0.16.
+
 [^2]: Lichess classifies games by estimated duration (initial clock + 40 × increment). "Classical" means an estimated 25 minutes or more per player; typical settings such as 30+0 or 30+20 run half an hour to an hour per side. UltraBullet is under 30 seconds total.
+
+
+## References
+
+::: {#refs}
+:::
 
 
 ## Appendix
@@ -328,20 +462,23 @@ The dump will do this audit again for any month, and the tables published with t
 | Share of games with evaluations | 7.54% (1,078,379 / 14,306,375) | `agg_headline.csv` | step1 | full | Wilson |
 | Classical vs UltraBullet selection | 25.0% vs 4.3% (5.9×) | `t3_1_rates.csv` | step3 | full | one-way player bootstrap (B=200; crossed check in appendix) |
 | Classical share overstated | 5.6% vs 1.7% (3.32×) | `t3_2_composition.csv` | step3 | full | — |
+| Tournament share understated (§2) | 11.3% vs 16.5% | `t3_2_composition.csv` | step3 | full | — |
+| Participants' monthly games (§2) | 368 in evaluated games vs 508 overall | `t7_4_threepoint.csv` | step10 | full | see IPW row below |
 | Rating gap | eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated | `t4_5_elo_balance.csv` | step4 | full | one-way player bootstrap: −40.9 [−42.8, −39.0] |
 | Kitagawa split | 24.2% composition / 75.8% within | `t4_4_kitagawa.csv` | step4 | full | exact identity; means from lossless counts |
-| Rating-pool spread | 278 points (medians) | `t4_1_elo_by_speed.csv` | step4 | full | — |
+| Rating-pool spread | 278 points: median 1733 UltraBullet vs 1455 Classical | `t4_1_elo_by_speed.csv` | step4 | full | — |
 | Composition shift along rating | <1000: >25% Rapid+Classical; 2400+: 96% Bullet+Blitz | `t4_2_grid.csv` | step4 | full | — |
 | Six within-control ratios | 0.26 → 3.68, reversal Blitz↔Rapid | `t4_3_crossover.csv` | step4 | full | one-way player bootstrap on log ratio (B=200; crossed check in appendix) |
 | U-shape of marginal rating curve | 10.9% → 6.2% (1800–2000) → 11.3% | `t3_4_rate_by_elo.csv` | step3 | full | one-way player bootstrap (B=200; crossed check in appendix) |
 | Length means / distance | −3.5 plies / Wasserstein 6.84 | `t5_2_ply_balance.csv` | step5 | full | exact from lossless counts |
 | 16-fold hump, peak 41–60 | 0.65% → 10.4% | `t5_1_ply_bins.csv` | step5 | full | one-way player bootstrap (B=200; crossed check in appendix) |
+| Length tail shares (§4) | ≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); >120 plies: 3.86% vs 6.24% | `t5_1_ply_bins.csv` | step5 | full | — |
 | Hump within every control | 6/6 peaks interior | `t5_4_ply_by_speed.csv` | step5 | full | — |
 | Zero-evaluation categories | Unterminated 0/7,592 | `t3_1_rates.csv` | step3 | full | Wilson upper 0.05% |
 | Selection-model AUC (in-sample) | 0.664 | `t7_2_model_fit.csv` | step9 | full | one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665] |
 | Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band) | ref = Blitz/1400–1600/41–60/non-tour | `t7_1_model_coefs.csv` | step9 | full | same bootstrap, per-coefficient CIs |
 | In-model closure after IPW (machinery check) | Classical share 99.2%; mean rating 98.6%; length 72.4% | `t7_4_threepoint.csv` | step10 | full | gap CIs from same bootstrap |
-| Held-out closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | step10 | full | same |
+| Excluded-variable closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | step10 | full | same |
 | Games-per-player after IPW | 368 → 425 (benchmark 508) | `t7_4_threepoint.csv` | step10 | full | weighted point CI [418, 433] |
 | Cannot-fix categories (positivity failures) | Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent | `t7_4_threepoint.csv` | step10 | full | flagged absent-in-selected |
 | Harm case (M15) | Rules infraction: benchmark 0.0069% → weighted 0.0127% | `t7_4_threepoint.csv` | step10 | full | CI [0.0092%, 0.0162%] excludes truth |
@@ -359,11 +496,15 @@ The dump will do this audit again for any month, and the tables published with t
 
 **Estimand and intervals (whole article).** November 2017 is treated as a complete finite population: the point values are exact descriptions of that month, carrying no sampling error. The intervals answer a stability question — how much a number would move under a different draw of the month's players — and can equally be read as superpopulation CIs under an independent-player sampling model; nothing in the article depends on the second reading. Wherever the article says "CI", read these stability intervals; Wilson bounds on thin bins are the one exception, kept to display small-count instability (the n = 4 bin, the k = 0 category). Games sharing a player are not independent (41.5% of games are repeat pairings; design effects on headline rates run 6 to 34, so no single correction factor exists). All CIs are one-way player-bootstrap intervals: resample the 276,345 players with replacement, weight each game by its owner's draw count, recompute the entire statistic, B = 200; run once with games assigned to their white player and once to their black, report the wider seat; ratio statistics combine on the log scale. The scheme reads a design effect of 1 on synthetic data with no clustering (a calibration that caught and retired a defective earlier scheme), and the white-seat design effect on the headline rate (12.9) independently matches a closed-form estimate (13.2). A crossed-clustering check (white + black − pairing, à la Cameron–Gelbach–Miller) widens intervals by roughly ×1.4 and changes no conclusion.
 
-**Robustness (drop-Correspondence; §9 note).** Dropping Correspondence entirely (50,489 games, 0.35% of the month, but the control where 21.65% of games are degenerate) moves the headline evaluated share from 7.54% to 7.53%, the rating gap from −40.9 to −41.5 rating points, and the composition share of the Kitagawa split from 24.2% to 24.1%; the five remaining within-control ratios are unchanged by construction, and no conclusion moves. Robustness comparisons are point-value only.
+**Robustness (drop-Correspondence; §8 note).** Dropping Correspondence entirely (50,489 games, 0.35% of the month, but the control where 21.65% of games are degenerate) moves the headline evaluated share from 7.54% to 7.53%, the rating gap from −40.9 to −41.5 rating points, and the composition share of the Kitagawa split from 24.2% to 24.1%; the five remaining within-control ratios are unchanged by construction, and no conclusion moves. Robustness comparisons are point-value only.
 
-**Data and pipeline.** One pass over the 14,306,375-game dump compresses losslessly into contingency tables (~4 MB, published with this article); every §3–§5 headline is recomputed from them and cross-checked 41/41 against two independent implementations; the parser is validated against python-chess on a pilot; distributional identities (Wasserstein = eCDF area; Kitagawa components sum to the exact total) assert at runtime.
+**Weight truncation (§5 note).** Extreme inverse-probability weights are a standard source of instability, so every quantity was recomputed with the weights winsorized — capped at a threshold, with all smaller weights left untouched. Because every target here is a weighted mean or share, capping renormalizes automatically. Four caps were tried: the 99.9th, 99th and 95th percentiles of the evaluated games' weights (100.7, 40.8 and 26.2, binding on 1,072, 10,776 and 51,334 of the 1,078,379 evaluated games) and a fixed cap of 200 (119 games). Kish effective sample size rises from 753,325 to 835,618 at the 99th percentile, confirming the caps do what they are meant to do.
 
-**Kitagawa decomposition (§4).** With c indexing time controls, w_c the share of games in control c (evaluated set vs. all games) and m_c the mean rating in control c, the gap splits as
+The excluded-variable results reported in §5 are insensitive to this. Under the three milder caps, the closure figures for time forfeits, normal terminations, draws and participants' monthly game counts each move by less than one percentage point; even the 95th-percentile cap, which binds on 4.8% of the evaluated subset, moves them by at most 4.5 points. The 29% low end of the reported range is the black-win share, whose initial discrepancy is only 2.7% and whose closure is correspondingly the least stable of the set (28.9% untruncated, 18.7% under the 95th-percentile cap). Two quantities move further, and both movements clarify rather than undercut the reading in §5. Mean-length closure rises from 72.4% to 89.0% under the 99th-percentile cap, which shows that part of the residual length gap is carried by a few very large weights and not only by the width of the length bins. And the rules-infraction estimate — the harm case in §5 — becomes markedly less harmful as the cap tightens (closure −234% untruncated, −126% at the 95th percentile), confirming directly that its failure is driven by a handful of heavily weighted games. Truncation comparisons are point-value only, on the same convention as the drop-Correspondence check above.
+
+**Data and pipeline.** One pass over the 14,306,375-game dump compresses losslessly into contingency tables (~4 MB; see Appendix D); every §2–§4 headline is recomputed from them and cross-checked 41/41 against two independent implementations; the parser is validated against python-chess on a pilot; distributional identities (Wasserstein = eCDF area; Kitagawa components sum to the exact total) assert at runtime.
+
+**Kitagawa decomposition (§3).** With c indexing time controls, w_c the share of games in control c (evaluated set vs. all games) and m_c the mean rating in control c, the gap splits as
 
 $$\Delta=\sum_c w_c^{\mathrm{ev}}m_c^{\mathrm{ev}}-\sum_c w_c^{\mathrm{all}}m_c^{\mathrm{all}}$$
 
@@ -371,13 +512,13 @@ $$\underbrace{\sum_c\bigl(w_c^{\mathrm{ev}}-w_c^{\mathrm{all}}\bigr)\tfrac{m_c^{
 
 an algebraic identity, asserted at runtime. This is the symmetric (midpoint-weighted) convention, invariant to which set is called the baseline. Sequential conventions — weighting composition by baseline means or by evaluated-set means — allocate the split differently; 24.2% is the symmetric convention's allocation, not a unique decomposition; the symmetric convention is the one reported.
 
-**Selection model and weighting (§6).** Model:
+**Selection model and weighting (§5).** Model:
 
 $$\log\frac{\pi}{1-\pi}=\alpha+\beta_{\text{control}}+\beta_{\text{rating band}}+\beta_{\text{length band}}+\beta_{\text{tournament}}+\gamma_{\text{control}\times\text{rating}};$$
 
 654 populated cells, 59 parameters, unpenalized MLE fit by iteratively reweighted least squares; coefficients referenced to a non-tournament Blitz game, rated 1400–1600, 41–60 plies (with the interaction, main effects are contrasts at these reference conditions); full coefficient table with bootstrap CIs in `t7_1_model_coefs.csv`; the fitting identity (predicted analyzed games equal observed analyzed games, column by column) is asserted at every run, worst residual 4 × 10⁻¹⁶. Margins are heavily populated but a few cross-cells are thin. The fallback rule was fixed in code before any output was inspected: a speed-by-rating interaction term is dropped (its games served by main effects) when that margin has zero games, zero evaluated games, or only evaluated games, since its coefficient would otherwise run to a boundary. Two margins trip it: Correspondence below 1000 (no games at all this month — nobody is affected) and Classical above 2400 (exactly two games, both analyzed — two games' predictions, and the weights of those two evaluated games, are served by main effects). At two games in 14.3 million, no headline quantity is sensitive to any reasonable alternative treatment of these cells; the model is best described as a 59-parameter MLE with a declared exception for two empty-or-degenerate interaction cells. AUC is computed in-sample; with 14.3M games against 59 parameters the optimism is negligible, but it is not out-of-sample. Weight diagnostics: largest weight 660 (a cell analyzed 0.15% of the time); Kish effective sample size 753,325 of 1,078,379 (70%) — this reflects weight inequality only, not the player-clustering information loss, which the bootstrap handles separately; the heaviest 1% of weights carry 4.5% of the total. Intervals: one-way player bootstrap, B = 200 per seat (games assigned once to their white and once to their black player, wider seat reported), with the entire pipeline, model refit included, inside every replicate; 400 refits in all, 0 unconverged; the identity-weight path reproduces every point estimate with zero drift. Games-per-player is treated as a fixed covariate of the game (measured in the real month), not re-derived inside replicates. The cell table `t7_3_cells.csv` allows any weight to be recomputed by hand as 1/p̂.
 
-**Participants' analysis history (§7).** Definition ("habit" in earlier drafts): per game, the leave-one-out share of each seat's player's other games that carry evaluations this month, averaged over the two seats:
+**Participants' analysis history (§6).** Definition: per game, the leave-one-out share of each seat's player's other games that carry evaluations this month, averaged over the two seats:
 
 $$h_g=\tfrac12\left(\frac{E_{w(g)}-e_g}{N_{w(g)}-1}+\frac{E_{b(g)}-e_g}{N_{b(g)}-1}\right),$$
 
@@ -407,6 +548,8 @@ where $N_p$ and $E_p$ are player $p$'s games and evaluated games this month and 
 
 : Within-control rating ratios (exact values behind @fig-interaction) {#tbl-c2}
 
+![Cell text is the raw analysis rate; color is its multiplicative distance from the overall rate, on a log scale. Hatched cells hold fewer than 200 games and are not interpreted. This is the cell-level view behind @fig-interaction: it shows levels well, but the trends are easier to read as lines.](images/fig3_heatmap.png){#fig-heatmap}
+
 | Length (plies) | Share of games | Share analyzed |
 |---|---:|---:|
 | 0–10 | 1.4% | **0.65%** |
@@ -428,5 +571,13 @@ where $N_p$ and $E_p$ are player $p$'s games and evaluated games this month and 
 | 50-100% | 52,021 | 79.5% |
 
 : Evaluation rate by participants' analysis history (exact values behind @fig-history) {#tbl-c4}
+
+The five bins above hold 14,285,234 games. The remaining 21,141 are the two bins omitted from @fig-history: 20,706 games whose participants have a leave-one-out rate of exactly zero, and 435 whose participants have no other games at all.
+
+### D. Data, code, and AI assistance {#appendix-d}
+
+**Data.** The source file is `lichess_db_standard_rated_2017-11.pgn`, published by Lichess at [database.lichess.org](https://database.lichess.org/) under a Creative Commons CC0 licence. It is not redistributed here; the analysis pipeline reads it directly.
+
+**Code.** The pipeline — parser, aggregation, bootstrap, selection model, weighting, and every figure here — is being prepared for public release and will be linked from this section; it is available on request in the meantime. Appendix B is written to stand on its own until then: it gives the model specification, the reference cell, the bin edges, the bootstrap scheme and seeds, and the diagnostic values needed to reimplement or check any number in the article.
 
 **AI assistance.** Code development and visualization were assisted by generative AI; the study design, estimand choices, pre-registered hypotheses, validation checks, interpretation, and final claims were decided and reviewed by the author.
