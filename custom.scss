@@ -254,6 +254,22 @@ figcaption,
   border-left: 2px solid var(--line);
   text-align: left;
 }
+// Wide figures overhang the reading column, but must not reach the TOC.
+// Quarto puts page-start and page-start-inset on the SAME grid line for pages
+// with no left sidebar (_bootstrap-mixins.scss, page-columns-default-*), so
+// .column-page-inset is only 35px narrower than .column-page and still lands
+// 180px on top of the margin sidebar — where the TOC's links then paint over
+// the figure. The TOC occupies body-end / page-end, so ending at body-end is
+// the widest a figure can be without touching it: measured 870px against a
+// 749px reading column, zero overlap at 1440px and 1280px.
+// Re-typesetting the four widest figures is still the better endgame; this is
+// the one-line stopgap that does not require touching them.
+// Selector must be `.page-columns .column-page-inset` to match the specificity
+// of Quarto's own rule (0,2,0); a bare `.column-page-inset` loses to it.
+.page-columns .column-page-inset {
+  grid-column: page-start-inset / body-end;
+}
+
 // Table captions sit above their table, so the 11px gap goes the other way
 .quarto-float-caption-top {
   margin-top: 0;
