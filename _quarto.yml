@@ -42,4 +42,14 @@ format:
     crossref:
       fig-title: "FIG."
       tbl-title: "TAB."
+      # The character before the em dash is a NO-BREAK SPACE (U+00A0), not a
+      # regular space, and the two are indistinguishable in an editor. Quarto
+      # trims leading ordinary whitespace from title-delim, so a plain " —"
+      # renders "FIG. 1— caption" with no gap before the dash; U+00A0 survives
+      # the trim and gives "FIG. 1 — caption". After touching this line, check
+      # the codepoints rather than trusting your eyes:
+      #   python3 -c "import pathlib; [print([hex(ord(c)) for c in l.strip()]) \
+      #     for l in pathlib.Path('_quarto.yml').read_text().splitlines() \
+      #     if 'title-delim' in l and not l.strip().startswith('#')]"
+      # It must print 0x22 0xa0 0x2014 0x22 — quote, nbsp, em dash, quote.
       title-delim: " —"
