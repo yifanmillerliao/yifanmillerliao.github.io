@@ -779,6 +779,10 @@ div.callout .callout-toggle::before { color: #41503D; }
   }
 }
 .project-card-filtered { display: none !important; }
+// The bar sets [hidden] when there is nothing worth filtering. This rule is
+// required, not defensive: .project-filter-bar's display:flex is a class
+// selector and beats the user-agent [hidden] rule on specificity.
+.project-filter-bar[hidden] { display: none; }
 .project-filter-button:focus-visible {
   outline: 2px solid var(--terra);
   outline-offset: 2px;

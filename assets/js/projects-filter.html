@@ -23,9 +23,18 @@
       )
     );
 
-    if (projectItems.length === 0) {
+    /*
+     * A filter that filters one project is a control that does nothing.
+     * Stay out of the way until there are at least two projects to choose
+     * between. This restores itself the moment a second project lands, so
+     * nobody has to remember to switch it back on.
+     */
+    if (projectItems.length < 2) {
+      filterBar.replaceChildren();
+      filterBar.hidden = true;
       return;
     }
+    filterBar.hidden = false;
 
     /*
      * Prevent duplicate buttons if initialization runs twice.
