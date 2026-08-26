@@ -1,0 +1,11 @@
+/.quarto/
+/_site/
+.DS_Store
+.Rhistory
+.Rproj.user/
+.env
+**/*.quarto_ipynb
+
+CLAUDE.md
+.claude/
+docs/project-context.md

@@ -1,0 +1,43 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "projects/**/*.qmd"
+
+website:
+  title: "Miller Liao"
+
+  navbar:
+    background: light
+    foreground: dark
+    left:
+      - href: index.qmd
+        text: Home
+
+      - href: projects.qmd
+        text: Projects
+
+      - href: about.qmd
+        text: About
+
+      - href: cv.qmd
+        text: CV
+
+execute:
+  freeze: auto
+
+lightbox: auto
+
+crossref:
+  fig-title: "FIG."
+  tbl-title: "TAB."
+  title-delim: " —"
+
+format:
+  html:
+    theme: custom.scss
+    toc: true
+    code-fold: true
+    include-in-header: assets/html/fonts.html
+    include-after-body: assets/html/design-system.html

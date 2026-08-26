@@ -1,0 +1,814 @@
+/*-- scss:defaults --*/
+
+// ─────────────────────────────────────────────────────────────
+// C2 · Atelier, de-templated
+// Three semantic colors (espresso / terracotta / sage) + two neutrals.
+// Spec: design/specimens/C2-atelier-detemplated.html  (specimen wins for pixels)
+// ─────────────────────────────────────────────────────────────
+
+$greige:   #F5F2EC;
+$paper:    #FFFFFF;
+$espresso: #2B2723;
+$bodyink:  #57504A;
+$sage:     #6E8168;
+$terra:    #C4623C;
+$line:     #E5DFD5;
+$mut:      #8C837A;
+$sagetint: #EDEFE8;
+
+// Type
+$font-family-sans-serif: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+$font-family-monospace:  "IBM Plex Mono", SFMono-Regular, Menlo, Consolas, monospace;
+$headings-font-family:   "Sora", $font-family-sans-serif;
+
+$font-size-root:    17px;
+$font-size-base:    1rem;
+$line-height-base:  1.72;
+$headings-font-weight: 700;
+$headings-color:    $espresso;
+$headings-line-height: 1.2;
+
+// Bootstrap's semantic colors, confined to the palette.
+// Without this, $primary stays Bootstrap blue and leaks through focus rings.
+$primary:   $terra;
+$secondary: $mut;
+$success:   $sage;
+$info:      $sage;
+$warning:   $terra;
+$danger:    $terra;
+$light:     $greige;
+$dark:      $espresso;
+
+// Core
+$body-bg:    $greige;
+$body-color: $bodyink;
+$link-color: $terra;
+$link-hover-color: $espresso;
+$link-decoration: none;
+$link-hover-decoration: none;
+
+// Shape — a radius *scale*, not one value everywhere
+$border-radius:    6px;   // buttons
+$border-radius-sm: 4px;   // figures
+$border-radius-lg: 10px;  // cards
+$border-color:     $line;
+
+// Tables: typographic rules only
+$table-border-color:  $line;
+$table-striped-bg:    transparent;
+$table-hover-bg:      transparent;
+$table-cell-padding-y: .625rem;
+$table-cell-padding-x: .75rem;
+
+// Navbar: light, hairline underline, no panel
+$navbar-bg: $greige;
+$navbar-fg: $bodyink;
+$navbar-hl: $espresso;
+
+// Quarto grid — the specimen's .narrow is a 700px reading column.
+// Quarto renders this as calc($grid-body-width - 3em), and 3em at a 17px root
+// is ~51px, so 750px here lands the actual column at ~700px.
+$grid-body-width:    750px;
+$grid-sidebar-width: 250px;
+$grid-margin-width:  250px;
+
+// Code
+$code-color: $terra;
+$code-bg:    rgba(196, 98, 60, .07);
+
+/*-- scss:rules --*/
+
+:root {
+  --bg: #{$greige};
+  --paper: #{$paper};
+  --ink: #{$espresso};
+  --body: #{$bodyink};
+  --sage: #{$sage};
+  --terra: #{$terra};
+  --line: #{$line};
+  --mut: #{$mut};
+
+  /* Elevation: three directional steps (y-offset > half the blur) */
+  --lift-0: 0 1px 2px rgba(43, 39, 35, .05);
+  --lift-1: 0 6px 14px -6px rgba(43, 39, 35, .14), 0 2px 4px rgba(43, 39, 35, .05);
+  --lift-2: 0 22px 44px -18px rgba(43, 39, 35, .24);
+
+  /* Radius scale */
+  --r-pill: 999px;
+  --r-card: 10px;
+  --r-btn: 6px;
+  --r-fig: 4px;
+}
+
+// ── Paper: 2.2% fractal-noise overlay. This is the line between "paper" and "a CSS color".
+body {
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url%28%23n%29' opacity='.022'/%3E%3C/svg%3E");
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono, .font-mono { font-family: $font-family-monospace; }
+
+// ── Navbar ───────────────────────────────────────────────────
+// Quarto hardcodes data-bs-theme="dark" on <nav> (nav-before-body.ejs), so
+// Bootstrap's dark-theme variables apply inside the navbar subtree no matter
+// what $navbar-bg says. Re-assert the light palette for descendants that read
+// the generic variables (the search box, chiefly).
+.navbar[data-bs-theme="dark"] {
+  --bs-body-color: #{$bodyink};
+  --bs-body-bg: #{$greige};
+  --bs-emphasis-color: #{$espresso};
+  --bs-secondary-color: #{$mut};
+  --bs-border-color: #{$line};
+  --bs-link-color: #{$terra};
+  --bs-link-hover-color: #{$espresso};
+  color-scheme: light;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg) !important;
+  padding: 0;
+}
+.navbar .navbar-container { max-width: 1120px; padding: 20px 40px; }
+.navbar-brand-container { margin-left: 0 !important; margin-right: auto !important; }
+.navbar-brand { display: flex; align-items: center; gap: 12px; }
+.navbar-title {
+  font-family: $headings-font-family;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+// The signature: U-curve sparkline drawn from this site's own data (§4, nine rating bins)
+.navbar-brand .spark {
+  width: 62px; height: 16px;
+  color: var(--terra);
+  opacity: .75;
+  flex: none;
+}
+.navbar .nav-link {
+  color: var(--body) !important;
+  font-size: 15px;
+  font-weight: 400;
+  margin-left: 30px;
+  padding-left: 0; padding-right: 0;
+  &:hover { color: var(--ink) !important; }
+  &.active {
+    color: var(--ink) !important;
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 var(--terra);
+  }
+}
+
+// ── Wide pages (home, listing): the specimen's 1120px .wrap ──
+.page-layout-full main.content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+// A section head is a rule, not a linkable heading
+.sechead h2.anchored .anchorjs-link { display: none; }
+
+// ── Headings ─────────────────────────────────────────────────
+h1, .h1 { font-size: 35px; letter-spacing: -.028em; font-weight: 700; }
+h2, .h2 { font-size: 24px; letter-spacing: -.02em; font-weight: 600; margin-top: 2.2rem; }
+h3, .h3 { font-size: 19px; letter-spacing: -.015em; font-weight: 600; }
+h4, .h4 { font-size: 17px; font-weight: 600; }
+
+#title-block-header .title { font-size: 35px; line-height: 1.2; letter-spacing: -.028em; }
+#title-block-header .subtitle {
+  color: var(--body);
+  font-size: 18px;
+  margin: 12px 0 0;
+  font-weight: 400;
+}
+#title-block-header .description {
+  color: var(--body);
+  font-size: 16px;
+  border-left: 2px solid var(--line);
+  padding-left: 14px;
+  margin-top: 20px;
+}
+#title-block-header .quarto-title-meta { border-top: 1px solid var(--line); padding-top: 14px; }
+.quarto-title-meta-heading {
+  font-family: $font-family-monospace;
+  font-size: 12px; font-weight: 400;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--mut);
+}
+.quarto-title-meta-contents p { color: var(--body); font-size: 14.5px; }
+
+// Categories on the article page → mono pills
+.quarto-title .quarto-categories { gap: 7px; padding-bottom: 0; margin-top: 18px; }
+.quarto-title .quarto-category {
+  font-family: $font-family-monospace;
+  font-size: 11.5px; font-weight: 400;
+  letter-spacing: .03em;
+  color: var(--body);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px 11px;
+  opacity: 1;
+}
+
+.abstract {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  .block-title {
+    font-family: $font-family-monospace;
+    font-size: 12.5px; font-weight: 400;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 12px;
+  }
+  p { font-size: 15.5px; color: var(--body); }
+}
+
+p { margin-bottom: 19px; }
+p strong, li strong { color: var(--ink); font-weight: 600; }
+
+// ── Card quota: only project cards are cards ──────────────────
+// Figures = hairline border + rule-anchored caption. No shadow, no panel.
+figure, .quarto-float-fig { margin: 36px 0; }
+// Figures are drawn on transparent grounds so the greige page shows through
+// the plot area — printed on the paper, not pasted on it (design-system §6).
+// A white background here would undo that.
+.quarto-float-fig img,
+figure img.figure-img {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--r-fig);
+  background: transparent;
+  box-shadow: none;
+}
+figcaption,
+.quarto-float-caption {
+  font-size: 14px !important;
+  color: var(--mut);
+  margin-top: 11px;
+  line-height: 1.6;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
+  text-align: left;
+}
+// Table captions sit above their table, so the 11px gap goes the other way
+.quarto-float-caption-top {
+  margin-top: 0;
+  margin-bottom: 11px;
+}
+.quarto-float-tbl { margin: 32px 0; }
+
+// FIG. N — set by JS into a span so only the number carries terracotta
+.fignum {
+  font-family: $font-family-monospace;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--terra);
+  letter-spacing: .04em;
+}
+
+// ── Tables: typographic rules only. No zebra, no panel. ───────
+table, .table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 32px 0;
+  font-size: 15px;
+  background: transparent;
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: transparent;
+  --bs-table-accent-bg: transparent;
+}
+.table > :not(caption) > * > * { background: transparent; box-shadow: none; }
+table caption, caption {
+  caption-side: top;
+  text-align: left;
+  font-family: $font-family-sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 11px;
+  padding: 0;
+}
+table thead th, .table thead th {
+  font-family: $font-family-monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--mut);
+  border-bottom: 1px solid var(--ink);
+  border-top: 0;
+  padding: 8px 12px 8px 0;
+  vertical-align: bottom;
+}
+table tbody td, .table tbody td {
+  border-bottom: 1px solid var(--line);
+  border-top: 0;
+  padding: 10px 12px 10px 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--body);
+}
+table tbody td:first-child, .table tbody td:first-child { color: var(--ink); }
+table tbody tr:last-child td, .table tbody tr:last-child td { border-bottom: 1px solid var(--ink); }
+table tbody tr:hover td { background: transparent; }
+
+// Wide tables scroll inside their own frame rather than breaking the page.
+// A stacked layout was the alternative, but turning each row into a panel
+// fights the card quota (§4) and doubles the text by repeating column names.
+// The two `local` layers are page-coloured covers that ride with the content,
+// so the shadow only shows while there is actually more table to reach.
+figure.quarto-float-tbl > div[aria-describedby] {
+  overflow-x: auto;
+  background-image:
+    linear-gradient(to right, var(--bg), rgba(245, 242, 236, 0)),
+    linear-gradient(to left,  var(--bg), rgba(245, 242, 236, 0)),
+    linear-gradient(to right, rgba(43, 39, 35, .10), rgba(43, 39, 35, 0)),
+    linear-gradient(to left,  rgba(43, 39, 35, .10), rgba(43, 39, 35, 0));
+  background-position: left center, right center, left center, right center;
+  background-repeat: no-repeat;
+  background-size: 26px 100%, 26px 100%, 11px 100%, 11px 100%;
+  background-attachment: local, local, scroll, scroll;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  &::-webkit-scrollbar { height: 8px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: var(--r-pill);
+  }
+  &:hover::-webkit-scrollbar-thumb { background: #D8D0C4; }
+}
+// The table must keep its natural width inside the scroller
+figure.quarto-float-tbl > div[aria-describedby] > table { min-width: 100%; width: auto; }
+
+// ── Callouts: sage tint, no border, no shadow, circular ? badge ─
+div.callout {
+  border: 0 !important;
+  border-radius: var(--r-card) !important;
+  background: $sagetint;
+  box-shadow: none !important;
+  margin: 30px 0;
+  overflow: hidden;
+}
+div.callout.callout-style-default > .callout-header {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  padding: 18px 24px;
+  opacity: 1;
+  align-items: baseline !important;
+}
+div.callout .callout-title-container {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 16px;
+  color: #41503D;
+}
+// Replace Quarto's note icon with the spec's circular "?" badge
+div.callout .callout-icon-container { display: none !important; }
+div.callout.callout-style-default > .callout-header::before {
+  content: "?";
+  font-family: $font-family-monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--paper);
+  background: var(--sage);
+  width: 19px; height: 19px;
+  border-radius: var(--r-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-right: 10px;
+  align-self: center;
+}
+div.callout .callout-body-container {
+  padding: 0 24px 18px 53px;
+  p { font-size: 15.5px; color: #4A5844; margin-bottom: 13px; }
+  p:last-child { margin-bottom: 2px; }
+}
+div.callout .callout-toggle::before { color: #41503D; }
+
+// ── Footnotes / hover cards: sage side-rule, no box ───────────
+.footnote-ref, a.footnote-ref {
+  color: var(--terra);
+  font-weight: 600;
+  font-size: .78em;
+}
+#footnotes {
+  border-top: 1px solid var(--line);
+  margin-top: 48px;
+  h2 {
+    font-family: $font-family-monospace;
+    font-size: 12.5px; font-weight: 400;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sage);
+    border: 0;
+  }
+  ol { padding-left: 0; list-style: none; counter-reset: fn; }
+  li {
+    counter-increment: fn;
+    border-left: 2px solid var(--sage);
+    padding: 2px 0 2px 16px;
+    margin-bottom: 16px;
+    max-width: 540px;
+    font-size: 14.5px;
+    color: var(--body);
+    &::before {
+      content: counter(fn);
+      font-family: $font-family-monospace;
+      font-size: 12px;
+      color: var(--sage);
+      margin-right: 8px;
+    }
+    p { display: inline; }
+  }
+}
+// Hover notes speak the callout's language: sage tint, card radius, no border.
+// Quarto builds these with theme: 'quarto', so match that for specificity.
+.tippy-box,
+.tippy-box[data-theme~="quarto"] {
+  background-color: $sagetint;
+  color: #4A5844;
+  border: 0;
+  border-radius: var(--r-card);
+  box-shadow: var(--lift-2);
+  font-size: 15px;
+  line-height: 1.6;
+  .tippy-content { padding: 16px 20px; }
+  p { margin: 0; color: #4A5844; }
+  p + p { margin-top: 11px; }
+  a { color: var(--terra); }
+  // Quarto appends the popup inside the article, so the footnote's
+  // return arrow rides along; it is meaningless in a hover card.
+  .footnote-back { display: none; }
+}
+.tippy-box[data-theme~="quarto"] > .tippy-arrow::before { color: $sagetint; }
+
+// A term with a note attached is explanatory — sage, per the three-colour roles.
+// The dotted rule is what tells the reader the word itself is hoverable.
+.term-hover {
+  border-bottom: 1px dotted var(--sage);
+  cursor: help;
+  transition: border-color .15s, color .15s;
+  &:hover { border-bottom-color: var(--terra); }
+}
+
+// ── TOC ──────────────────────────────────────────────────────
+// Quarto ships the TOC heading at weight 500, which §2 rules out
+// (only 400 / 600 / 700 are loaded, and 500 is the fence-sitting weight).
+.sidebar nav[role="doc-toc"] > h2,
+.sidebar nav[role="doc-toc"] > .h2,
+#toc-title {
+  font-family: $font-family-monospace;
+  font-weight: 400;
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+
+#TOC, .sidebar-toc {
+  .h2, h2, .toc-title {
+    font-family: $font-family-monospace;
+    font-size: 12.5px; font-weight: 400;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sage);
+  }
+  a {
+    color: var(--mut);
+    font-size: 14px;
+    border-left: 1px solid var(--line);
+    padding-left: 12px;
+    &:hover { color: var(--ink); }
+    &.active { color: var(--ink); border-left: 2px solid var(--terra); font-weight: 600; }
+  }
+}
+.sidebar nav[role="doc-toc"] > ul a.active { border-left-color: var(--terra); }
+
+// Margin sidebar (the article's other-links)
+.margin-sidebar a { color: var(--terra); font-size: 14px; }
+.quarto-other-links-text-target, .margin-sidebar .quarto-other-links h2 {
+  font-family: $font-family-monospace;
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+
+// ── Buttons ──────────────────────────────────────────────────
+.btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 24px;
+  border-radius: var(--r-btn);
+  box-shadow: var(--lift-0);
+  transition: .18s;
+  &:hover {
+    background: var(--terra);
+    border-color: var(--terra);
+    color: var(--paper);
+    transform: translateY(-1px);
+    box-shadow: var(--lift-1);
+  }
+}
+
+// ── Footer ───────────────────────────────────────────────────
+.nav-footer {
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--mut);
+  font-size: 13.5px;
+  margin-top: 48px;
+}
+
+// ── Hero: 7:5 asymmetric grid ─────────────────────────────────
+.hero { padding: 96px 0 84px; }
+.herogrid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  align-items: end;
+}
+.kicker {
+  font-family: $font-family-monospace;
+  font-size: 12.5px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 22px;
+}
+.hero h1 {
+  font-family: $headings-font-family;
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1.16;
+  letter-spacing: -.035em;
+  margin: 0;
+}
+.hero h1 em { font-style: normal; color: var(--terra); }
+.lede {
+  margin-top: 24px;
+  font-size: 18.5px;
+  color: var(--body);
+  max-width: 520px;
+}
+.cta {
+  display: inline-block;
+  margin-top: 30px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--paper) !important;
+  background: var(--ink);
+  padding: 12px 24px;
+  border-radius: var(--r-btn);
+  box-shadow: var(--lift-0);
+  transition: .18s;
+  &:hover {
+    background: var(--terra);
+    color: var(--paper) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--lift-1);
+  }
+}
+.heroside {
+  border-left: 1px solid var(--line);
+  padding-left: 28px;
+  padding-bottom: 6px;
+  p {
+    font-family: $font-family-monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--mut);
+    margin: 0;
+  }
+  b { color: var(--ink); font-weight: 400; }
+}
+
+// ── Section head: ink rule above, mono meta pushed right ──────
+.sechead {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 26px;
+  border-top: 1px solid var(--ink);
+  padding-top: 14px;
+  h2 {
+    font-family: $font-family-sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .02em;
+    margin: 0;
+  }
+  span {
+    font-family: $font-family-monospace;
+    font-size: 12.5px;
+    color: var(--mut);
+    margin-left: auto;
+  }
+}
+
+// A single muted line under a section rule, above the grid
+.sechead-lede {
+  margin: -12px 0 26px;
+  color: var(--mut);
+  font-size: 15.5px;
+}
+
+// ── Project listing ──────────────────────────────────────────
+// The only cards on the site. Card = grouping semantics, not decoration.
+.quarto-listing .list.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+  counter-reset: projnum;
+}
+.quarto-listing .list.grid > [data-index] {
+  counter-increment: projnum;
+  position: relative;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+// Numbered badge — echoes the numbering habit of statistics
+.quarto-listing .list.grid > [data-index]::before {
+  content: counter(projnum, decimal-leading-zero);
+  position: absolute;
+  top: 14px; left: 16px;
+  z-index: 3;
+  font-family: $font-family-monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: .06em;
+  color: var(--paper);
+  background: rgba(43, 39, 35, .72);
+  padding: 3px 8px;
+  border-radius: var(--r-btn);
+  pointer-events: none;
+}
+// Deliberate asymmetry: the first project spans both columns
+.quarto-listing .list.grid > [data-index="0"] { grid-column: span 2; }
+
+.quarto-listing .quarto-grid-link { text-decoration: none; display: block; height: 100%; }
+.quarto-listing .quarto-grid-item {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--lift-0);
+  overflow: hidden;
+  transition: .2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.quarto-listing .quarto-grid-link:hover .quarto-grid-item {
+  box-shadow: var(--lift-1);
+  transform: translateY(-2px);
+  border-color: #D8D0C4;
+}
+// Feature card: image left, copy right
+.quarto-listing .list.grid > [data-index="0"] .quarto-grid-item {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: stretch;
+}
+.quarto-listing .list.grid > [data-index="0"] .card-img-top {
+  border-right: 1px solid var(--line);
+  border-bottom: 0;
+  height: 100%;
+}
+.quarto-listing .list.grid > [data-index="0"] .card-title { font-size: 25px; }
+
+.quarto-listing .card-img-top {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  overflow: hidden;
+}
+.quarto-listing .thumbnail-image {
+  width: 100%;
+  height: 100% !important;
+  min-height: 200px;
+  object-fit: cover;
+  // card_thumbnail.png is vertically centred and carries no in-figure title,
+  // so a centre crop trims equally top and bottom. The earlier `top` was there
+  // to protect fig2's title, which the purpose-built thumbnail no longer has;
+  // keeping `top` now would clip the baseline and the trough marker.
+  object-position: center;
+  display: block;
+  border: 0;
+  border-radius: 0;
+}
+.quarto-listing .card-body {
+  padding: 24px 26px 26px;
+  display: flex;
+  flex-direction: column;
+}
+.quarto-listing .card-title {
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.28;
+  letter-spacing: -.018em;
+  color: var(--ink);
+  margin: 0;
+  order: 1;
+}
+.quarto-listing .listing-subtitle {
+  color: var(--body);
+  font-size: 15.5px;
+  margin: 9px 0 12px;
+  order: 2;
+}
+.quarto-listing .listing-description {
+  font-size: 15px;
+  color: var(--body);
+  order: 3;
+  p { margin: 0; }
+}
+// Chips last, per the specimen
+.quarto-listing .listing-categories {
+  order: 4;
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.quarto-listing .listing-category {
+  font-family: $font-family-monospace;
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: .03em;
+  color: var(--body);
+  border: 1px solid var(--line);
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  opacity: 1;
+  text-transform: none;
+}
+
+// ── Filter bar (existing component, restyled to the system) ───
+.project-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 26px;
+}
+.project-filter-button {
+  font-family: $font-family-monospace;
+  font-size: 11.5px;
+  letter-spacing: .03em;
+  color: var(--body);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 5px 13px;
+  cursor: pointer;
+  transition: .15s;
+  &:hover { border-color: var(--terra); color: var(--ink); }
+  &.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+}
+.project-card-filtered { display: none !important; }
+.project-filter-button:focus-visible {
+  outline: 2px solid var(--terra);
+  outline-offset: 2px;
+}
+// Chips stay visible inside cards but are not interactive (filtering lives in the bar)
+.quarto-grid-item .listing-category { cursor: default; user-select: none; }
+
+// ── Responsive ───────────────────────────────────────────────
+@media (max-width: 860px) {
+  .herogrid { grid-template-columns: 1fr; }
+  .heroside {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 20px 0 0;
+  }
+  .hero { padding: 56px 0 48px; }
+  .hero h1 { font-size: 34px; }
+
+  .quarto-listing .list.grid { grid-template-columns: 1fr; }
+  .quarto-listing .list.grid > [data-index="0"] { grid-column: span 1; }
+  .quarto-listing .list.grid > [data-index="0"] .quarto-grid-item { grid-template-columns: 1fr; }
+  .quarto-listing .list.grid > [data-index="0"] .card-img-top {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .quarto-listing .list.grid > [data-index="0"] .card-title { font-size: 21px; }
+
+  .navbar .navbar-container { padding: 16px 20px; }
+  .page-layout-full main.content { padding-left: 20px; padding-right: 20px; }
+
+  // Wide tables scroll rather than break the page
+  .table-responsive-wrap, .cell-output-display > table { overflow-x: auto; }
+}

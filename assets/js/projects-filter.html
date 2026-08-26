@@ -1,0 +1,178 @@
+<script>
+(function () {
+  function initializeProjectFilter() {
+    const filterBar =
+      document.getElementById("project-filter-bar");
+
+    const listing =
+      document.querySelector(
+        "#listing-project-listing, .quarto-listing-container-grid"
+      );
+
+    if (!filterBar || !listing) {
+      return;
+    }
+
+    /*
+     * Each item is the complete Quarto grid cell.
+     * Hiding this element allows the remaining cards to reflow.
+     */
+    const projectItems = Array.from(
+      listing.querySelectorAll(
+        ".list.grid > [data-index]"
+      )
+    );
+
+    if (projectItems.length === 0) {
+      return;
+    }
+
+    /*
+     * Prevent duplicate buttons if initialization runs twice.
+     */
+    filterBar.replaceChildren();
+
+    const normalize = function (value) {
+      return value.trim().toLowerCase();
+    };
+
+    const categoryMap = new Map();
+
+    projectItems.forEach(function (item) {
+      const categoryElements = Array.from(
+        item.querySelectorAll(".listing-category")
+      );
+
+      const categories = categoryElements
+        .map(function (element) {
+          return element.textContent.trim();
+        })
+        .filter(Boolean);
+
+      item.projectCategories =
+        categories.map(normalize);
+
+      categories.forEach(function (category) {
+        categoryMap.set(
+          normalize(category),
+          category
+        );
+      });
+
+      /*
+       * Keep categories visible inside cards,
+       * but prevent both category filtering and card navigation.
+       */
+      categoryElements.forEach(function (element) {
+        element.removeAttribute("onclick");
+        element.removeAttribute("href");
+        element.setAttribute("aria-disabled", "true");
+        element.setAttribute("tabindex", "-1");
+
+        element.addEventListener(
+          "click",
+          function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+          true
+        );
+      });
+    });
+
+    const buttons = [];
+
+    function applyFilter(selectedCategory) {
+      projectItems.forEach(function (item) {
+        const shouldShow =
+          selectedCategory === "all" ||
+          item.projectCategories.includes(
+            selectedCategory
+          );
+
+        item.classList.toggle(
+          "project-card-filtered",
+          !shouldShow
+        );
+      });
+
+      buttons.forEach(function (button) {
+        const isActive =
+          button.dataset.filter ===
+          selectedCategory;
+
+        button.classList.toggle(
+          "active",
+          isActive
+        );
+
+        button.setAttribute(
+          "aria-pressed",
+          String(isActive)
+        );
+      });
+    }
+
+    function createFilterButton(label, value) {
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+      button.className =
+        "project-filter-button";
+      button.textContent = label;
+      button.dataset.filter = value;
+      button.setAttribute(
+        "aria-pressed",
+        "false"
+      );
+
+      button.addEventListener(
+        "click",
+        function () {
+          applyFilter(value);
+        }
+      );
+
+      buttons.push(button);
+      filterBar.appendChild(button);
+    }
+
+    /*
+     * All always appears first.
+     */
+    createFilterButton("All", "all");
+
+    /*
+     * Remaining categories appear alphabetically.
+     */
+    const sortedCategories =
+      Array.from(categoryMap.entries())
+        .sort(function (a, b) {
+          return a[1].localeCompare(b[1]);
+        });
+
+    sortedCategories.forEach(function (entry) {
+      createFilterButton(
+        entry[1],
+        entry[0]
+      );
+    });
+
+    applyFilter("all");
+  }
+
+  /*
+   * Work whether the script loads before or after
+   * DOMContentLoaded.
+   */
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeProjectFilter
+    );
+  } else {
+    initializeProjectFilter();
+  }
+})();
+</script>

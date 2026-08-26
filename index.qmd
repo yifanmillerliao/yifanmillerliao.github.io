@@ -1,0 +1,43 @@
+---
+pagetitle: "Miller Liao — Statistics & Data Science"
+page-layout: full
+toc: false
+listing:
+  id: project-listing
+  contents: projects
+  type: grid
+  grid-columns: 2
+  fields: [image, title, subtitle, description, categories]
+  image-height: 240px
+  sort: "order"
+  sort-ui: false
+  filter-ui: false
+  categories: false
+  max-description-length: 300
+  page-size: 100
+---
+
+```{=html}
+<header class="hero">
+  <div class="herogrid">
+    <div>
+      <h1>Statistics &amp; Physics undergraduate at the University of Chicago</h1>
+      <p class="lede">I build statistical projects around real-world questions — data analysis, modeling, and the validation that decides whether the answer holds. My first long piece came out of a chess database; I also spend time behind a camera, at a piano, and somewhere unfamiliar with a map.</p>
+      <a class="cta" href="projects.html">View projects →</a>
+    </div>
+    <div class="heroside">
+      <p><b>Currently</b><br>Selection bias in open chess data<br><br>
+      <b>Working in</b><br>Python · R · Quarto<br><br>
+      <b>Elsewhere</b><br>Photography · piano · maps</p>
+    </div>
+  </div>
+</header>
+
+<div class="sechead">
+  <h2>Selected projects</h2><span class="mono">2026</span>
+</div>
+<p class="sechead-lede">One long-form data story, with more in progress.</p>
+```
+
+::: {#project-listing}
+:::

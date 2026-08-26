@@ -1,0 +1,31 @@
+---
+pagetitle: "Projects — Miller Liao"
+page-layout: full
+toc: false
+format:
+  html:
+    include-after-body: assets/js/projects-filter.html
+listing:
+  id: project-listing
+  contents: projects
+  type: grid
+  grid-columns: 2
+  fields: [image, title, subtitle, description, categories]
+  image-height: 240px
+  grid-item-border: true
+  grid-item-align: left
+  sort: "order"
+  sort-ui: false
+  filter-ui: false
+  categories: false
+  max-description-length: 300
+  page-size: 100
+---
+
+A selection of projects in statistical modeling, data analysis, visualization, and research.
+
+::: {#project-filter-bar .project-filter-bar role="group" aria-label="Filter projects by category"}
+:::
+
+::: {#project-listing}
+:::
