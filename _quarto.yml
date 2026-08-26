@@ -29,11 +29,6 @@ execute:
 
 lightbox: auto
 
-crossref:
-  fig-title: "FIG."
-  tbl-title: "TAB."
-  title-delim: " —"
-
 format:
   html:
     theme: custom.scss
@@ -41,3 +36,10 @@ format:
     code-fold: true
     include-in-header: assets/html/fonts.html
     include-after-body: assets/html/design-system.html
+    # Scoped to html deliberately: the caption LaTeX package rejects an em-dash
+    # title-delim, so a top-level crossref block makes every PDF build emit a
+    # warning. Kept here so that stays true whenever PDF output is added.
+    crossref:
+      fig-title: "FIG."
+      tbl-title: "TAB."
+      title-delim: " —"

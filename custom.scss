@@ -345,6 +345,25 @@ figure.quarto-float-tbl > div[aria-describedby] {
 // The table must keep its natural width inside the scroller
 figure.quarto-float-tbl > div[aria-describedby] > table { min-width: 100%; width: auto; }
 
+// MathJax renders wider than its column on narrow viewports (measured: a 673px
+// equation inside a 449px column, pushing the page to 698px at a 500px
+// viewport). The .math.display container is sized correctly; it is the inner
+// MJX-MATH that overflows. Let the equation scroll on its own line rather than
+// the whole page scroll sideways.
+.math.display,
+mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  &::-webkit-scrollbar { height: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--r-pill); }
+}
+
 // ── Callouts: sage tint, no border, no shadow, circular ? badge ─
 div.callout {
   border: 0 !important;
