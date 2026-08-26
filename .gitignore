@@ -6,6 +6,3 @@
 .env
 **/*.quarto_ipynb
 
-CLAUDE.md
-.claude/
-docs/project-context.md
