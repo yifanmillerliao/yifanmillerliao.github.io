@@ -1,0 +1,14 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/projects/lichess-evaluation-selection/index.html"
+    ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": [
+      "/projects/lichess-evaluation-selection/index.html"
+    ]
+  }
+]

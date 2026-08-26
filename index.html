@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Miller Liao</title>
+<title>Miller Liao — Statistics &amp; Data Science – Miller Liao</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,16 +33,18 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-listing/list.min.js"></script>
+<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dbe10b802debfe92f5d65ad9105f12a0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,12 +72,72 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-project-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
 
-<link rel="stylesheet" href="styles.css">
+    const options = {
+      valueNames: ['listing-image','listing-title','listing-subtitle','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-project-listing'] = new List('listing-project-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Figtree:wght@400;600&amp;family=IBM+Plex+Mono:wght@400&amp;display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 </head>
 
-<body class="nav-fixed fullcontent quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -116,52 +178,160 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><h1 class="title display-7">Statistics &amp; Physics undergraduate at the University of Chicago</h1></header>
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Miller Liao</h1>
-<p class="subtitle lead">Statistics, data science, and real-world questions</p>
+
+
+
+<header class="hero">
+  <div class="herogrid">
+    <div>
+      
+      <p class="lede">I build statistical projects around real-world questions — data analysis, modeling, and the validation that decides whether the answer holds. My first long piece came out of a chess database; I also spend time behind a camera, at a piano, and somewhere unfamiliar with a map.</p>
+      <a class="cta" href="projects.html">View projects →</a>
+    </div>
+    <div class="heroside">
+      <p><b>Currently</b><br>Selection bias in open chess data<br><br>
+      <b>Working in</b><br>Python · R · Quarto<br><br>
+      <b>Elsewhere</b><br>Photography · piano · maps</p>
+    </div>
+  </div>
+</header>
+
+<div class="sechead">
+  <h2 class="anchored">Selected projects</h2><span class="mono">2026</span>
+</div>
+<p class="sechead-lede">One long-form data story, with more in progress.</p>
+<div id="listing-project-listing" class="quarto-listing quarto-listing-container-grid">
+<div class="list grid quarto-listing-cols-2">
+<div class="g-col-1" data-index="0" data-categories="U2VsZWN0aW9uJTIwQmlhcyUyQ0ludmVyc2UlMjBQcm9iYWJpbGl0eSUyMFdlaWdodGluZyUyQ0NsdXN0ZXJlZCUyMERhdGElMkNPbmxpbmUlMjBDaGVzcw==" data-listing-date-sort="1785513600000" data-listing-file-modified-sort="1787757429346" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="55" data-listing-word-count-sort="10845">
+<a href="./projects/lichess-evaluation-selection/index.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img loading="lazy" src="./projects/lichess-evaluation-selection/images/card_thumbnail.png" class="thumbnail-image card-img" style="height: 240px;" alt="A curve falling then rising: the share of chess games that get engine-analyzed, by player rating">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+Which Chess Games Get Engine Analysis?
+</h5>
+<div class="card-subtitle listing-subtitle">
+A selection-bias audit of 14.3 million Lichess games
+</div>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('U2VsZWN0aW9uJTIwQmlhcw=='); return false;">Selection Bias</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('SW52ZXJzZSUyMFByb2JhYmlsaXR5JTIwV2VpZ2h0aW5n'); return false;">Inverse Probability Weighting</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('Q2x1c3RlcmVkJTIwRGF0YQ=='); return false;">Clustered Data</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('T25saW5lJTIwQ2hlc3M='); return false;">Online Chess</div>
+
+</div>
+<div class="card-text listing-description delink">
+<p>Only 7.5% of Lichess games carry engine evaluations, and they are not a random 7.5%. By comparing them with the full population, I examine how the analyzed subset differs, what simple summary statistics miss, and how much of those differences statistical adjustment can repair.</p>
+</div>
+</div>
+</div></a>
+</div>
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
 </div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>I am a Statistics and Physics student at the University of Chicago.</p>
-<p>This website will host my projects in applied statistics, data analysis, visualization, and computational research.</p>
-<section id="selected-projects" class="level2">
-<h2 class="anchored" data-anchor-id="selected-projects">Selected Projects</h2>
-<p>Projects are currently in development.</p>
-</section>
-<section id="current-interests" class="level2">
-<h2 class="anchored" data-anchor-id="current-interests">Current Interests</h2>
-<ul>
-<li>Applied statistics</li>
-<li>Data science and visualization</li>
-<li>Measurement and uncertainty</li>
-<li>Computational social science</li>
-</ul>
-
-
-</section>
 
 </main> <!-- /main -->
+<script>
+/*
+ * C2 · Atelier — two DOM touches Quarto's templates do not expose:
+ *   1. the signature sparkline beside the wordmark
+ *   2. wrapping "FIG. N —" so only the label carries terracotta
+ * Everything else is CSS in custom.scss.
+ */
+(function () {
+  /* The U-curve is drawn from this site's own data: evaluation rate across the
+     nine rating bins of §4. Path copied verbatim from the approved specimen. */
+  var SPARK =
+    '<svg class="spark" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M 3.0 5.2 L 32.2 10.1 L 61.5 16.2 L 90.8 21.1 L 120.0 27.7 L 149.2 31.0 L 178.5 30.2 L 207.8 29.4 L 237.0 3.0" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="3.0" cy="5.2" r="2.2" fill="currentColor"/>' +
+    '<circle cx="149.2" cy="31.0" r="2.2" fill="currentColor"/>' +
+    '<circle cx="237.0" cy="3.0" r="2.2" fill="currentColor"/></svg>';
+
+  function addSparkline() {
+    var brand = document.querySelector(".navbar-brand");
+    if (!brand || brand.querySelector(".spark")) return;
+    brand.insertAdjacentHTML("beforeend", SPARK);
+  }
+
+  /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
+     so the number can carry terracotta without touching the article source.
+     Tables get the same treatment (§5: the numbering habit is a signature). */
+  function markFigureNumbers() {
+    var caps = document.querySelectorAll(
+      "figcaption.quarto-float-caption, figure > figcaption, table > caption");
+    Array.prototype.forEach.call(caps, function (cap) {
+      if (cap.querySelector(".fignum")) return;
+      var node = null;
+      for (var i = 0; i < cap.childNodes.length; i++) {
+        if (cap.childNodes[i].nodeType === 3 && cap.childNodes[i].nodeValue.trim()) {
+          node = cap.childNodes[i];
+          break;
+        }
+      }
+      if (!node) return;
+      var m = node.nodeValue.match(/^(\s*)((?:FIG|TAB)\.[\s ]*\d+)(\s*[—:-]?\s*)/i);
+      if (!m) return;
+      var span = document.createElement("span");
+      span.className = "fignum";
+      span.textContent = m[2].replace(/[\s ]+/g, " ");
+      node.nodeValue = node.nodeValue.slice(m[0].length);
+      cap.insertBefore(document.createTextNode(" — "), node);
+      cap.insertBefore(span, cap.firstChild);
+    });
+  }
+
+  /* Ten glossary notes are written as <strong>term</strong><sup-ref>. Only the
+     superscript is hoverable by default, which is a small target for a word
+     the reader is actually stuck on. Extend each note's trigger to cover the
+     term itself. Quarto builds its tippy instances after this script runs, so
+     this waits for load rather than DOMContentLoaded. */
+  function linkTermsToNotes() {
+    var refs = document.querySelectorAll('a[role="doc-noteref"]');
+    Array.prototype.forEach.call(refs, function (ref) {
+      var term = ref.previousElementSibling;
+      if (!term || term.tagName !== "STRONG") return;
+      term.classList.add("term-hover");
+      if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
+      try {
+        ref._tippy.setProps({ triggerTarget: [term, ref] });
+      } catch (e) {
+        /* older tippy: the superscript stays the trigger, underline still hints */
+      }
+    });
+  }
+
+  function init() { addSparkline(); markFigureNumbers(); }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+  if (document.readyState === "complete") {
+    linkTermsToNotes();
+  } else {
+    window.addEventListener("load", linkTermsToNotes);
+  }
+})();
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -235,7 +405,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/yifanmillerliao\.github\.io\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

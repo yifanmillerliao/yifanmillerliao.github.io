@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Miller Liao">
+<meta name="dcterms.date" content="2026-08-01">
+<meta name="description" content="Only 7.5% of Lichess games carry engine evaluations, and they are not a random 7.5%. By comparing them with the full population, I examine how the analyzed subset differs, what simple summary statistics miss, and how much of those differences statistical adjustment can repair.">
+
+<title>Which Chess Games Get Engine Analysis? – Miller Liao</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-dbe10b802debfe92f5d65ad9105f12a0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Figtree:wght@400;600&amp;family=IBM+Plex+Mono:wght@400&amp;display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Miller Liao</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#a-useful-subset-but-not-a-random-one" id="toc-a-useful-subset-but-not-a-random-one" class="nav-link active" data-scroll-target="#a-useful-subset-but-not-a-random-one">1. A useful subset — but not a random one</a></li>
+  <li><a href="#slower-games-are-analyzed-far-more-often" id="toc-slower-games-are-analyzed-far-more-often" class="nav-link" data-scroll-target="#slower-games-are-analyzed-far-more-often">2. Slower games are analyzed far more often</a></li>
+  <li><a href="#why-are-evaluated-games-lower-rated" id="toc-why-are-evaluated-games-lower-rated" class="nav-link" data-scroll-target="#why-are-evaluated-games-lower-rated">3. Why are evaluated games lower-rated?</a></li>
+  <li><a href="#a-3.5-ply-mean-gap-hides-a-16-fold-pattern" id="toc-a-3.5-ply-mean-gap-hides-a-16-fold-pattern" class="nav-link" data-scroll-target="#a-3.5-ply-mean-gap-hides-a-16-fold-pattern">4. A 3.5-ply mean gap hides a 16-fold pattern</a></li>
+  <li><a href="#can-weighting-repair-the-evaluated-subset" id="toc-can-weighting-repair-the-evaluated-subset" class="nav-link" data-scroll-target="#can-weighting-repair-the-evaluated-subset">5. Can weighting repair the evaluated subset?</a></li>
+  <li><a href="#analysis-clusters-around-players" id="toc-analysis-clusters-around-players" class="nav-link" data-scroll-target="#analysis-clusters-around-players">6. Analysis clusters around players</a></li>
+  <li><a href="#bias-depends-on-what-you-measure" id="toc-bias-depends-on-what-you-measure" class="nav-link" data-scroll-target="#bias-depends-on-what-you-measure">7. Bias depends on what you measure</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">8. Limitations</a></li>
+  <li><a href="#which-games-or-whose" id="toc-which-games-or-whose" class="nav-link" data-scroll-target="#which-games-or-whose">9. Which games — or whose?</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Which Chess Games Get Engine Analysis?</h1>
+<p class="subtitle lead">A selection-bias audit of 14.3 million Lichess games</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Selection Bias</div>
+    <div class="quarto-category">Inverse Probability Weighting</div>
+    <div class="quarto-category">Clustered Data</div>
+    <div class="quarto-category">Online Chess</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Only 7.5% of Lichess games carry engine evaluations, and they are not a random 7.5%. By comparing them with the full population, I examine how the analyzed subset differs, what simple summary statistics miss, and how much of those differences statistical adjustment can repair.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Miller Liao </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 1, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Lichess, a major online chess platform, publishes a monthly database of its rated games. Some games carry engine evaluations: computer assessments of the position after each move. Studies of move quality often rely on this evaluated subset because generating equivalent evaluations for millions of games requires substantial computation. In November 2017, only 7.54% of 14,306,375 standard rated games contained them. Because users choose which games to analyze, <strong>this is not a random subset</strong>; unusually, the unevaluated games remain observable, allowing direct comparison between evaluated games and all games. I found that the evaluated subset overrepresents Classical chess (the slowest live time control) 3.3-fold and averages 41 rating points <strong>below</strong> all games, but such simple summaries conceal sharper patterns: the rating pattern reverses between fast and slow chess, and a small mean difference in game length masks a 16-fold range in analysis rates. Reweighting by game features removes only 29–47% of the discrepancies on prespecified variables the model never saw. The strongest structure lies at the player level: adding how often each player’s other games are evaluated raises in-sample discrimination (AUC, the chance the model ranks an evaluated game above an unevaluated one) from 0.664 to 0.827. Although this design cannot measure bias in unavailable move-quality outcomes, it shows that pre-existing evaluations form a user-selected, player-clustered sample that game-level adjustment can only partly repair.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<p><em>Data: Lichess open database, November 2017. Methods, data provenance, and code availability: <a href="#appendix-d">Appendix D</a>.</em></p>
+<section id="a-useful-subset-but-not-a-random-one" class="level2">
+<h2 class="anchored" data-anchor-id="a-useful-subset-but-not-a-random-one">1. A useful subset — but not a random one</h2>
+<p>Lichess is a major online chess platform, and every month it publishes every rated game played on the site. Some games also include engine evaluations: a number after each move estimating which side has the advantage, and by how much.</p>
+<p>These evaluations let researchers study blunders, the conversion of winning positions, and play under time pressure without running an engine over millions of positions themselves. That makes the evaluated games a valuable shortcut.</p>
+<p>In the November 2017 data, however, <strong>only 7.54% of standard rated games carried evaluations (1,078,379 of 14,306,375<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>), and they were not a random 7.54%.</strong> An evaluation appears because someone clicked “request analysis.”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Which games receive evaluations reflects a chain of human choices, so the evaluated 7.54% may not represent the full population of games.</p>
+<div id="fig-hero" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hero-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig_hero_headline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="FIG.&nbsp;1&nbsp;— Of 14,306,375 standard rated games played on Lichess in November 2017, 1,078,379 (7.54%) carry engine evaluations. Studies relying on these pre-existing annotations therefore begin with a small, user-selected subset of the month’s games."><img src="images/fig_hero_headline.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hero-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;1&nbsp;— Of 14,306,375 standard rated games played on Lichess in November 2017, 1,078,379 (7.54%) carry engine evaluations. Studies relying on these pre-existing annotations therefore begin with a small, user-selected subset of the month’s games.
+</figcaption>
+</figure>
+</div>
+<p>Self-selected data usually hides what was not selected. Product reviews come from people motivated to speak; the silent majority leaves no comparable record. But here Lichess offers a rare exception: all 13.2 million unevaluated games remain in the same database, together with their time controls, ratings, lengths, terminations, and results. I can therefore compare the evaluated subset with the full month on these observed features and ask how much statistical adjustment narrows the differences.</p>
+<p>That comparison has a firm boundary. Engine-derived, move-level quantities such as blunder rates do not exist for unevaluated games, so their bias cannot be identified from the existing annotations alone. My question here is narrower: how does the evaluated subset differ on what we can observe, and how much of that difference can be corrected?</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Does this apply to your study?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Whether a study inherits this problem depends on where its engine evaluations come from.</p>
+<p>Researchers who run the engine themselves choose their games first and then evaluate every selected game uniformly. <span class="citation" data-cites="cuvitoglu2026">Cüvitoğlu (<a href="#ref-cuvitoglu2026" role="doc-biblioref">2026</a>)</span> and <span class="citation" data-cites="elbert2026">Elbert et al. (<a href="#ref-elbert2026" role="doc-biblioref">2026</a>)</span>, for example, followed this approach. Because evaluation occurs after the games are chosen, user analysis requests cannot create this particular selection problem. The tradeoff is computational cost.</p>
+<p>Researchers who use evaluations already stored in the Lichess data avoid that cost, but inherit the sample that users chose to analyze. <span class="citation" data-cites="mcilroyyoung2020">McIlroy-Young et al. (<a href="#ref-mcilroyyoung2020" role="doc-biblioref">2020</a>)</span>, for example, restricted their study to the roughly 10% of games that already carried Stockfish evaluations.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> This article examines the selection problem created by this second approach.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="slower-games-are-analyzed-far-more-often" class="level2">
+<h2 class="anchored" data-anchor-id="slower-games-are-analyzed-far-more-often">2. Slower games are analyzed far more often</h2>
+<p>Before looking at the data, take a guess: which of 14.3 million games do people choose to analyze — the ones that took a long time to play, the ones between stronger players, or the ones that ran many moves? The next three sections test those three guesses in turn.</p>
+<p>Let us begin with time control. At each speed, what share of games carries an evaluation?</p>
+<div id="fig-controls" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-controls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig1_rates_by_control.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="FIG.&nbsp;2&nbsp;— Slow games are analyzed far more often than fast games, even though they make up a much smaller share of all games. The evaluated subset is shaped by what players choose to review, not by how the month’s chess is actually distributed. Panel (a): each control’s share of the month. Panel (b): the share of each control’s own games that carry evaluations, with 95% player-resampling stability intervals. Exact counts in Table&nbsp;4."><img src="images/fig1_rates_by_control.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-controls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;2&nbsp;— Slow games are analyzed far more often than fast games, even though they make up a much smaller share of all games. The evaluated subset is shaped by what players choose to review, not by how the month’s chess is actually distributed. Panel (a): each control’s share of the month. Panel (b): the share of each control’s own games that carry evaluations, with 95% player-resampling stability intervals. Exact counts in <a href="#tbl-c1" class="quarto-xref">Table&nbsp;4</a>.
+</figcaption>
+</figure>
+</div>
+<p>A Classical game is 5.9 times as likely to be analyzed as an UltraBullet game. The first guess is right: a game you spent half an hour playing feels worth revisiting; a thirty-second game often does not.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>If the evaluated subset were treated as representative, Classical chess would appear to make up 5.6% of Lichess games. Its actual share of the full month is only 1.7% (a 3.3x overrepresentation). The subset also underrepresents tournament games (11.3% versus 16.5%) and games involving highly active players: the two players’ average monthly game count is 368 in evaluated games, compared with 508 overall.</p>
+<p>Time control gives a clear first answer: slower games are overrepresented. Rating is more complicated, because its pattern changes with time control.</p>
+</section>
+<section id="why-are-evaluated-games-lower-rated" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="why-are-evaluated-games-lower-rated">3. Why are evaluated games lower-rated?</h2>
+<p>A natural guess is that stronger players review their games more often. It was also one of my prespecified expectations: evaluated games should have higher ratings.</p>
+<p>They do not. Evaluated games average 1580, compared with 1621 across the full month — a 41-point gap in the opposite direction.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> A game’s rating here is the average of its two players’ pre-game ratings.</p>
+<p>The pooled curve in <a href="#fig-rating-curve" class="quarto-xref">Figure&nbsp;3</a> points in the same direction. Except above 2400, games become less likely to carry an evaluation as rating rises. Why would stronger players appear less likely to analyze their games?</p>
+<div id="fig-rating-curve" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rating-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig2_marginal_rating.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="FIG.&nbsp;3&nbsp;— Pooled across time controls, the analysis rate falls from 10.9% below 1000 to 6.2% at 1800–2000, then rises to 11.3% above 2400. Taken alone, the curve suggests that higher-rated games are analyzed less often across most of the amateur range. Game rating is the mean of the two players’ pre-game ratings; Wilson intervals show bin-level uncertainty, and sparse bins are omitted."><img src="images/fig2_marginal_rating.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rating-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;3&nbsp;— Pooled across time controls, the analysis rate falls from 10.9% below 1000 to 6.2% at 1800–2000, then rises to 11.3% above 2400. Taken alone, the curve suggests that higher-rated games are analyzed less often across most of the amateur range. Game rating is the mean of the two players’ pre-game ratings; Wilson intervals show bin-level uncertainty, and sparse bins are omitted.
+</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why does each percentage need an interval?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Each point on the curve is a percentage, but those percentages are based on very different numbers of games. In an early version, the 700-rating bin showed a striking 25% analysis rate. It represented only four games, one of which had an evaluation.</p>
+<p>Without an interval, that point looked just as convincing as one based on 70,000 games. Its 95% Wilson interval, from 4% to 71%, revealed how little it actually told us. Wilson intervals remain within the possible range of 0% to 100% and behave better for small or extreme counts, so I use them here to expose — and omit — bins too sparse to interpret.</p>
+</div>
+</div>
+</div>
+<p>The initial expectation might simply have been wrong. Before drawing that conclusion, however, the pooled result needed to be taken apart. Section 2 showed that analysis rates differ sharply by time control. The mix of time controls also changes with rating: below 1000, more than a quarter of games are Rapid or Classical; above 2400, 96% are Bullet or Blitz.</p>
+<p>At any rating, the pooled analysis rate is an average of the rates in the six time controls, weighted by how many games each control contributes. Because those weights change across rating bands, the pooled curve combines two sources of variation: analysis behavior may change within a time control, or the mixture of time controls may change. It cannot tell us how much comes from each.</p>
+<p>The same mixture can affect the 41-point difference in average rating. I separated the gap with a Kitagawa decomposition<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. The decomposition is a piece of statistical bookkeeping: it assigns one part of the gap to the evaluated subset containing a different mix of time controls, and the other part to rating differences that remain within the same time controls.</p>
+<div id="tbl-kitagawa" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-kitagawa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;1&nbsp;— Splitting the 41-point rating gap. The composition part reflects the evaluated subset containing a different mix of time controls; the within part reflects rating differences that survive inside each control
+</figcaption>
+<div aria-describedby="tbl-kitagawa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Source of the rating gap</th>
+<th style="text-align: right;">Contribution</th>
+<th style="text-align: right;">Share</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Different mix of time controls</td>
+<td style="text-align: right;">−9.9 points</td>
+<td style="text-align: right;">24.2%</td>
+</tr>
+<tr class="even">
+<td>Rating differences within time controls</td>
+<td style="text-align: right;">−31.0 points</td>
+<td style="text-align: right;">75.8%</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>−40.9 points</strong></td>
+<td style="text-align: right;"><strong>100%</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Only 24.2% of it (stability interval 22.6–25.8%<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.</p>
+<p>The remaining 31 points arise within time controls. In other words, the lower average rating is not mainly an artifact of combining differently centered rating pools. The relationship between rating and analysis itself changes direction across time controls, as <a href="#fig-interaction" class="quarto-xref">Figure&nbsp;4</a> shows.</p>
+<div id="fig-interaction" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-interaction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<a href="images/fig3_interaction.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-4" title="FIG.&nbsp;4&nbsp;— Rating and time control are associated with analysis in opposite directions. (a) Across the common rating range, analysis rates fall with rating in UltraBullet, Bullet, and Blitz, but rise in Rapid, Classical, and Correspondence. (b) The analysis-rate ratio for games rated 2000–2200 versus 1200–1400 is below 1 for fast controls and above 1 for slow controls, reversing between Blitz and Rapid. Whiskers are 95% player-resampling stability intervals (B = 200); exact ratios appear in Table&nbsp;5."><img src="images/fig3_interaction.png" class="img-fluid figure-img column-page-inset"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-interaction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;4&nbsp;— Rating and time control are associated with analysis in opposite directions. (a) Across the common rating range, analysis rates fall with rating in UltraBullet, Bullet, and Blitz, but rise in Rapid, Classical, and Correspondence. (b) The analysis-rate ratio for games rated 2000–2200 versus 1200–1400 is below 1 for fast controls and above 1 for slow controls, reversing between Blitz and Rapid. Whiskers are 95% player-resampling stability intervals (B = 200); exact ratios appear in <a href="#tbl-c2" class="quarto-xref">Table&nbsp;5</a>.
+</figcaption>
+</figure>
+</div>
+<p>Within UltraBullet, Bullet, and Blitz, higher-rated games are analyzed less often. An UltraBullet game rated 2000–2200, for example, is analyzed only 0.26 times as often as one rated 1200–1400. Within Rapid, Classical, and Correspondence, the direction reverses. Analysis rates are relatively similar across time controls at lower ratings, but split sharply as rating rises: they fall in fast chess and rise in slow chess.</p>
+<p>One possible interpretation is that fast and slow chess encourage different reviewing habits. The data establishes the divergence, but not why it occurs.</p>
+<p>Because Bullet and Blitz make up 76% of all games, their downward rating gradients dominate the pooled results. Once the time controls are separated, both the lower average rating and the U-shaped pooled curve become understandable: they combine relationships pointing in opposite directions, with weights that change across rating bands. The pooled curve is numerically correct, but it does not describe a single rating pattern shared by all games.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why can’t we report one “effect of rating”?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Because the relationship depends on time control. In fast chess, higher rating goes with less analysis; in slow chess, it goes with more. A single rating coefficient would average relationships with opposite signs and describe neither one well.</p>
+<p>The selection model must therefore include a rating × time-control interaction, and the reweighting must balance their joint categories rather than treating rating and time control separately. I also refer to a selection-rate gradient or association, not a causal “effect”: these data do not identify one.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="a-3.5-ply-mean-gap-hides-a-16-fold-pattern" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="a-3.5-ply-mean-gap-hides-a-16-fold-pattern">4. A 3.5-ply mean gap hides a 16-fold pattern</h2>
+<p>Game length initially looked like the least interesting variable in the dataset. A <strong>ply</strong> is one move by one player, so two plies, back and forth, make one full move. Evaluated games averaged 64.2 plies; unevaluated games averaged 67.7. That 3.5-ply difference<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> looked modest enough that during my first pass of the dataset, I recorded it as “no significant effect.”</p>
+<p>Then I stopped comparing only the averages. I divided games into seven length groups and calculated the evaluation rate within each one.</p>
+<div id="fig-length" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-length-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<a href="images/fig4_length.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-5" title="FIG.&nbsp;5&nbsp;— Evaluation is concentrated among games of intermediate length. Across the full month, the rate rises from 0.65% for games lasting ten plies or fewer to 10.4% at 41–60 plies, then declines among longer games. The same interior peak appears within all six time controls, so the hump cannot be explained simply by their different mixtures. Rates are calculated among all games in each length group; the 41–60-ply group is shaded throughout. Exact counts and rates appear in Table&nbsp;6."><img src="images/fig4_length.png" class="img-fluid figure-img column-page-inset"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-length-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;5&nbsp;— Evaluation is concentrated among games of intermediate length. Across the full month, the rate rises from 0.65% for games lasting ten plies or fewer to 10.4% at 41–60 plies, then declines among longer games. The same interior peak appears within all six time controls, so the hump cannot be explained simply by their different mixtures. Rates are calculated among all games in each length group; the 41–60-ply group is shaded throughout. Exact counts and rates appear in <a href="#tbl-c3" class="quarto-xref">Table&nbsp;6</a>.
+</figcaption>
+</figure>
+</div>
+<p>The pattern is a hump, not a steady increase or decrease. Across the full month, the evaluation rate spans a factor of 16 between the shortest group and the peak. A low rate among very short games was unsurprising. The decline among very long games was not. Evaluations are most common for games lasting 41–60 plies—roughly 20–30 full moves—and become less common toward either tail.</p>
+<p>Repeating the calculation within each time control leaves the basic shape intact: all six peak in the same 41–60-ply group. Different time controls contain games of different typical lengths, but that compositional difference does not account for the hump.</p>
+<p>The evaluation-rate figure and the mean comparison look at the data from opposite directions. The figure groups games by length and asks what share received an evaluation. To understand the small mean gap, we instead group games by evaluation status and compare their length distributions.</p>
+<p>Unevaluated games are more common in both tails. Games lasting 10 plies or fewer make up 1.55% of the unevaluated group but only 0.124% of the evaluated group — a 12.5-fold difference. At the other end, games longer than 120 plies account for 6.2% of unevaluated games and 3.9% of evaluated games. The excess of very short games pulls the unevaluated mean downward; the excess of very long games pulls it upward. Those movements partially cancel, leaving only a 3.5-ply difference between the means.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why can a small mean gap hide a large pattern?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A mean records the balance point of a distribution. It does not show how observations are arranged around that point. Differences below the mean and differences above it can pull in opposite directions and disappear from the final average—which is what happens here.</p>
+<p>The cumulative distributions make that cancellation visible.</p>
+<div id="fig-ecdf" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ecdf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig4_why_distributions.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="FIG.&nbsp;6&nbsp;— Unevaluated games are more common in both length tails. The cumulative curves therefore cross: the direction of the difference at short lengths reverses at longer lengths. Integrating the absolute vertical gap between the curves over the full length range gives a one-dimensional Wasserstein distance of 6.8 plies."><img src="images/fig4_why_distributions.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ecdf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;6&nbsp;— Unevaluated games are more common in both length tails. The cumulative curves therefore cross: the direction of the difference at short lengths reverses at longer lengths. Integrating the absolute vertical gap between the curves over the full length range gives a one-dimensional Wasserstein distance of 6.8 plies.
+</figcaption>
+</figure>
+</div>
+<p>Alongside the mean gap, I therefore report the <strong>Wasserstein distance</strong><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>. In one dimension, it is obtained by integrating the absolute difference between the two cumulative distribution curves. Because the horizontal axis is measured in plies and the vertical axis is a proportion, the resulting distance is also measured in plies.</p>
+<p>Here, the Wasserstein distance is 6.8 plies, which is almost twice the absolute mean gap. The difference arises because the mean allows discrepancies in opposite tails to cancel, whereas the Wasserstein distance counts separation in both directions.</p>
+</div>
+</div>
+</div>
+<p>This is the second time a reasonable summary has concealed the more consequential pattern underneath it. With rating, pooling across time controls hid opposing gradients. With length, averaging across the two tails hid a hump. Neither summary was numerically wrong, but each answered a narrower question than the one I needed to ask, and each discarded information in the act of averaging.</p>
+<p>So far, selection has been described through properties of games: their time control, rating, length. The next question is whether those observed patterns can be turned into a useful correction: whether reweighting the evaluated games by what is recorded can reconstruct the full month. Section 5 builds a potential correction and puts that correction to the test.</p>
+</section>
+<section id="can-weighting-repair-the-evaluated-subset" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="can-weighting-repair-the-evaluated-subset">5. Can weighting repair the evaluated subset?</h2>
+<p>As the previous sections showed, the evaluated subset contains too much slow chess, too few tournament games, lower-rated games, and a different length distribution. Weighting offers a possible repair: give underrepresented games more influence and overrepresented games less, until the evaluated subset more closely resembles the full month.</p>
+<p>The ultimate goal is not to recover time control, rating, or the other fields already recorded for all 14.3 million games. We already know their full-month values. The goal is to estimate quantities <strong>available only for evaluated games</strong>, such as blunder rates or changes in engine advantage, and to extrapolate from the evaluated subset as if evaluations had been available for the entire month.</p>
+<section id="how-weighting-reconstructs-the-population" class="level3">
+<h3 class="anchored" data-anchor-id="how-weighting-reconstructs-the-population">How weighting reconstructs the population</h3>
+<p>Imagine two groups of 1,000 games each — say Classical games rated 2000–2200 and UltraBullet games rated 2000–2200. Suppose 20% of the Classical games are analyzed, so 200 appear in the evaluated subset, while only 1% of the UltraBullet games are, so just ten appear. The percentages are round numbers chosen to keep the arithmetic legible; the real rates are in <a href="#tbl-c1" class="quarto-xref">Table&nbsp;4</a>.</p>
+<p>The two groups are equally common in this imagined month, but the evaluated subset contains them in a ratio of 200 to 10. Left uncorrected, the first group would have twenty times as much influence simply because its games were analyzed more often.</p>
+<p>Weighting reverses that distortion. The 200 analyzed Classical games came from a population of 1,000, so each represents <span class="math inline">\(1{,}000/200 = 5\)</span> games: itself and, on average, four similar games without evaluations. Giving each a weight of five restores the group’s total representation because <span class="math inline">\(200 \times 5 = 1{,}000\)</span>.</p>
+<p>The ten analyzed UltraBullet games must represent their entire population of 1,000, so each receives a weight of <span class="math inline">\(1{,}000/10 = 100\)</span>. Its weighted total is likewise <span class="math inline">\(10 \times 100 = 1{,}000\)</span>. The original 200-to-10 imbalance has become 1,000 to 1,000, matching the full population.</p>
+<p>This is the logic of <strong>inverse-probability weighting</strong><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. For an analyzed game <span class="math inline">\(i\)</span>,</p>
+<p><span class="math display">\[
+w_i=\frac{1}{\hat{\pi}_i},
+\qquad
+\hat{\pi}_i=
+\widehat{P}
+\bigl(
+\text{evaluated}
+\mid
+\text{time control, rating, length, tournament}
+\bigr).
+\]</span></p>
+<p>A game estimated to have a 20% probability of being analyzed receives weight <span class="math inline">\(1/0.20 = 5\)</span>; one with a 1% probability receives weight <span class="math inline">\(1/0.01 = 100\)</span>. If the probabilities are estimated adequately and every relevant kind of game retains some analyzed examples, these weighted games reproduce the population’s composition in expectation.</p>
+<p>The reconstruction is virtual: weighting does not create engine evaluations for games that lack them. It instead lets an evaluated game contribute on behalf of similar unevaluated games. That requires an additional assumption. Among games alike on the modeled features, the evaluated games must also represent the unevaluated games on the engine-derived quantity being studied. If two otherwise similar games differ in their likelihood of analysis because one contained a dramatic blunder, weighting on the recorded features will not remove the resulting difference in blunder rates. This requirement is the <strong>missing-at-random assumption</strong><a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>.</p>
+</section>
+<section id="estimating-the-analysis-probabilities" class="level3">
+<h3 class="anchored" data-anchor-id="estimating-the-analysis-probabilities">Estimating the analysis probabilities</h3>
+<p>I estimate each game’s analysis probability with a <strong>logistic regression</strong><a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a> fitted to all 14,306,375 games. The model uses time control, a rating band rather than the exact average rating (2000–2200, for example), a game-length band, tournament status, and a time-control × rating interaction — the interaction required by the reversal in Section 3.</p>
+<p>These predictors enter as categories. That allows the rating reversals and length hump found earlier to remain visible, although it treats games within the same bin as equivalent.</p>
+<p>The model is used to estimate selection probabilities, not to determine why individual games were analyzed or which characteristic was responsible.<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a> Once every game has an estimated probability, the inverse weights can be constructed. The relevant test is not how accurately the model classifies games, but whether the weighted subset recovers quantities it was not explicitly trained to match.</p>
+</section>
+<section id="what-can-the-reconstruction-test" class="level3">
+<h3 class="anchored" data-anchor-id="what-can-the-reconstruction-test">What can the reconstruction test?</h3>
+<p>The quantities that weighting is ultimately meant to recover are engine-derived measures such as blunder rates and changes in engine advantage in the whole population (including games with no evaluation). Yet these quantities create a validation problem: they exist only for evaluated games. I can calculate a weighted estimate from that subset, but I cannot compare it with the true full-month value because the corresponding outcomes are missing for every unevaluated game. I therefore cannot observe directly how much of their selection bias the weighting removes, or test the missing-at-random assumption for the outcomes that matter most.</p>
+<p>To obtain an indirect test, I used variables whose full-month values are known as observable test cases. Among these recorded variables, I assigned two different roles. Time control, rating, game length, and tournament status were used to construct the weights. Because the weighted subset is explicitly designed to resemble the full month on these dimensions, matching them is a necessary diagnostic but weak evidence: it mainly shows that the machinery is doing what it was built to do.</p>
+<p>I then deliberately withheld several other recorded variables from the selection model. Lichess records game result, termination, and the participants’ monthly game counts as well. After constructing the weights without this information, I can ask whether these excluded variables also move toward their known full-month values.</p>
+<p>The logic runs in one direction only. If the weights improve nothing except the variables that built them, there is little reason to trust them on engine-derived quantities that cannot be checked. If they do improve several excluded variables, the modeled game characteristics are capturing selection structure beyond the dimensions they were designed to balance — which makes it more plausible, though not certain, that they help with blunder rates and evaluation swings too.</p>
+</section>
+<section id="testing-the-adjustment" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="testing-the-adjustment">Testing the adjustment</h3>
+<div id="fig-weighting" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-weighting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<a href="images/F5_correction.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-7" title="FIG.&nbsp;7&nbsp;— What weighting repairs, quantity by quantity. Each row runs from the unweighted evaluated subset (navy dot, 100% of its own discrepancy) toward the full-month value (dark line, discrepancy closed), with the weighted estimate in orange and the actual values printed. Upper block: variables used to build the weights; lower block: variables deliberately withheld from the model. Two categories with no usable evaluated games do not move. Underlying values and 95% player-resampling stability intervals are in t7_4_threepoint.csv."><img src="images/F5_correction.png" class="img-fluid figure-img column-page-inset"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-weighting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;7&nbsp;— What weighting repairs, quantity by quantity. Each row runs from the unweighted evaluated subset (navy dot, 100% of its own discrepancy) toward the full-month value (dark line, discrepancy closed), with the weighted estimate in orange and the actual values printed. Upper block: variables used to build the weights; lower block: variables deliberately withheld from the model. Two categories with no usable evaluated games do not move. Underlying values and 95% player-resampling stability intervals are in <code>t7_4_threepoint.csv</code>.
+</figcaption>
+</figure>
+</div>
+<p>The upper part of <a href="#fig-weighting" class="quarto-xref">Figure&nbsp;7</a> checks whether the weighting operates as intended. Classical games fall from 5.57% of the evaluated subset to 1.71% after weighting, almost exactly their 1.68% share of the full month. The 41-point rating gap shrinks to half a point, and 89% of the tournament gap closes.</p>
+<p>These are useful implementation checks, but not independent validation: all three variables helped determine the weights. The model was designed to restore their representation.</p>
+<p>Length is the instructive exception. Although length appears in the model, weighting closes only 72% of its gap. Length enters the model through seven broad bins — 81–120 plies, say, rather than an exact count of 96 — so the model can restore how many games fall in each bin without correcting the differences among games inside the same bin. Bin width is not the whole story, though: a truncation check in the appendix shows that capping the largest 1% of weights raises this figure to 89%, so a few extreme weights carry part of the residual gap too.</p>
+<p>The excluded variables provide the more meaningful test. Weighting closes 41% of the gap in participants’ monthly game counts, 44–47% of the major termination gaps, and 43% of the missing-draw gap. Across the nine prespecified checks, it removes 29–47% of each discrepancy that both existed initially and had enough evaluated games to be reweighted. The low end of that range is the black-win share, which started out only 2.7% off; when the initial gap is that small, the percentage closed is itself an unstable number.</p>
+<p>Why do variables omitted from the model move at all? Because they are related to variables the model does contain. Time forfeits, for example, are more common in fast chess. Correcting the over- and underrepresentation of different time controls therefore moves the termination distribution toward its benchmark, even though termination was never used to construct the weights.</p>
+<p>But it moves only partway. More than half of every fixable excluded-variable discrepancy remains. That is the central result of the test: the adjustment transfers beyond its inputs, but only partially.</p>
+<p>The residual discrepancies do not have a single explanation. Some may reflect a model that is too coarse: bins that are too wide or interactions that were omitted. Others may reflect selection related to information absent from the game-level model. The test measures how far this particular adjustment transferred; it cannot separate model misspecification from unmeasured selection.</p>
+</section>
+<section id="where-weighting-fails" class="level3">
+<h3 class="anchored" data-anchor-id="where-weighting-fails">Where weighting fails</h3>
+<p>The average improvement hides two harder limits.</p>
+<p>First, weighting can only amplify games that exist in the evaluated subset. Among the 7,592 games recorded as Unterminated, not one carries an evaluation. There is therefore no observed game that can represent this category, and its discrepancy closes by exactly 0.0%. Roughly 59,000 games are recorded as Abandoned, but only about forty are evaluated; their gap closes by just 0.2%.</p>
+<p>For weighting to work, every group relevant to the intended analysis must contain enough evaluated games to represent its unevaluated counterparts. This is the positivity, or overlap, condition<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>. Unterminated fails it outright in this month, while Abandoned fails it in practice. No weight can recover a category for which the evaluated subset supplies no usable examples.</p>
+<p>Second, weighting can make an estimate worse. Games ending through a rules infraction are extremely rare (about seven in every 100,000) and the unweighted evaluated subset already approximates their full-month share closely. After weighting, the estimate rises to nearly twice the benchmark, with an interval excluding the true value. The category is too rare to matter substantively here, but the failure mode matters.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why can a correction make an estimate worse?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Weighting does not move every variable automatically toward its population value. It changes the representation of the modeled game types, and other variables associated with those types move with them.</p>
+<p>If the selection model is incomplete, if an excluded variable is only weakly related to the modeled features, or if its original agreement with the population arose from offsetting discrepancies, reweighting can move it away from the benchmark. Rare categories are especially unstable because their weighted estimates depend on very few games.</p>
+<p>The diagnostics do not suggest that a handful of extreme weights drives the overall results; weight distributions, effective sample size, and truncation checks appear in the appendix. The broader lesson remains: weighting must be checked separately for the quantities a study intends to estimate.</p>
+</div>
+</div>
+</div>
+<p>The verdict is therefore partial rather than binary. Weighting on recorded game characteristics almost reconstructs the dimensions it was built to match, but those checks are largely mechanical. On variables deliberately withheld from the model, it removes 29–47% of each fixable discrepancy. It cannot recover categories absent from the evaluated subset.</p>
+<p>The weighted subset is therefore closer to the full month, but it is not equivalent to it. The remaining discrepancies also suggest that the game-level fields omit an important part of the selection process. Requests land on games, but they are made by people. The next section asks whether a summary built on the participants supplies the missing information.</p>
+</section>
+</section>
+<section id="analysis-clusters-around-players" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="analysis-clusters-around-players">6. Analysis clusters around players</h2>
+<p>Section 5 left one particularly suggestive mismatch. Even after weighting on recorded game characteristics, much of the discrepancy in the participants’ monthly activity remained. That was a clue that the selection model might be operating at the wrong level.</p>
+<p>Every predictor in that model described the game: its time control, rating, length, or tournament status. But an evaluation enters the file only after someone requests it.<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a> That human choice may be associated not only with what kind of game it is, but also with whose game it is. The next question was therefore whether evaluations repeatedly land on games involving the same participants.</p>
+<p>The most direct participant-level signal available in the data is the evaluation history of the participants’ other games. For each game, I calculated the share of each player’s <em>other</em> games that month that carried an evaluation, then averaged the two players’ rates. I call the result the game’s <strong>participant-history score</strong><a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a>. It is an evaluation percentage, not a measure of how many games the players played.</p>
+<p>The current game is excluded from both players’ rates. This <strong>leave-one-out</strong><a href="#fn17" class="footnote-ref" id="fnref17" role="doc-noteref"><sup>17</sup></a> rule prevents the game’s own evaluation status from entering the variable used to predict it. “History” is also only shorthand: the score summarizes the full month, so some of the other games may have occurred later than the focal game. It is a retrospective measure of clustering, not a forecasting variable.</p>
+<div id="fig-history" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-history-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/F6b_habit_gradient.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="FIG.&nbsp;8&nbsp;— Games involving participants whose other games are frequently evaluated are themselves far more likely to carry an evaluation. The rate rises from 1.7% to 79.5% across participant-history bins, a 47-fold range. Participant history is the mean of the two players’ leave-one-out analysis rates among their other games that month; the denominator is all games in each bin. Two sparse or structurally ambiguous bins are omitted, with exact counts reported in Table&nbsp;7."><img src="images/F6b_habit_gradient.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-history-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;8&nbsp;— Games involving participants whose other games are frequently evaluated are themselves far more likely to carry an evaluation. The rate rises from 1.7% to 79.5% across participant-history bins, a 47-fold range. Participant history is the mean of the two players’ leave-one-out analysis rates among their other games that month; the denominator is all games in each bin. Two sparse or structurally ambiguous bins are omitted, with exact counts reported in <a href="#tbl-c4" class="quarto-xref">Table&nbsp;7</a>.
+</figcaption>
+</figure>
+</div>
+<p>The raw gradient is striking. Analysis rates varied 5.9-fold across time controls and 16-fold across game-length groups, but across participant-history groups, they vary from 1.7% to 79.5%, a 47-fold range. These ranges are not a causal comparison or a formal ranking of variable importance. They show that evaluations are far more concentrated around participants than the earlier game-level summaries revealed.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why must the current game be left out?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Suppose the current game were included when calculating its players’ analysis rates. If the game carries an evaluation, it would automatically push its own predictor upward; if it does not, it would push the predictor downward. Part of the answer would therefore be built into the feature used to predict it. This is <strong>target leakage</strong><a href="#fn18" class="footnote-ref" id="fnref18" role="doc-noteref"><sup>18</sup></a>, not genuine predictive information.</p>
+<p>The leave-one-out rule does not turn the score into a forecast: it still uses the evaluation status of other games from the same month. It simply ensures that each game does not help predict itself.</p>
+</div>
+</div>
+</div>
+<p>The raw gradient alone cannot tell us whether participant history contains genuinely new information. Players with high history scores might simply play more Classical games, occupy different rating bands, or produce games of different lengths. To separate participant history from those recorded game characteristics, I added the score, in bins, to the selection model from Section 5.</p>
+<p>I compared the two models using the AUC<a href="#fn19" class="footnote-ref" id="fnref19" role="doc-noteref"><sup>19</sup></a>, which measures how well a model distinguishes evaluated from unevaluated games. If we draw one game from each group, the AUC is the probability that the model assigns the higher estimated analysis probability to the evaluated game. A model that ranks the two at random scores 0.5; a model that ranks every evaluated game above every unevaluated one scores 1.0. Note that this is a statement about ordering, not about labelling any individual game correctly.</p>
+<p>Using only time control, rating, length, and tournament status, the model has an in-sample AUC of 0.664 (95% CI 0.662–0.665): it identifies the evaluated game about two times in three. Adding the participant-history score raises the AUC to 0.827 (95% CI 0.826–0.828), or roughly five times in six. Participant history therefore carries substantial information about where evaluations appear, beyond everything contained in the modeled game characteristics.</p>
+<p>This is an incremental comparison. It measures what participant history adds to the game-feature model, not how well participant history would perform by itself—a model I did not run. It is also retrospective within-month discrimination, not evidence that the model could forecast which future games will be analyzed.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why compare the models with AUC rather than accuracy?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Only 7.54% of games are analyzed. A model that labels every game “not analyzed” would therefore be 92.46% accurate while identifying no analyzed games at all. Ordinary accuracy would mostly repeat the base rate and would also require choosing an arbitrary probability threshold.</p>
+<p>AUC instead compares the models’ rankings across all possible thresholds. This makes it useful here because the question is comparative: how much better can the model separate evaluated from unevaluated games once participant history is added?</p>
+<p>AUC still does not measure how much of the selection process has been “explained,” establish causality, or show that the estimated probabilities are well calibrated. Nor does a higher AUC by itself imply better inverse-probability weights. Here it is used only to compare the discriminatory information contained in two sets of predictors.</p>
+</div>
+</div>
+</div>
+<section id="the-time-control-hierarchy-collapses" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-time-control-hierarchy-collapses">The time-control hierarchy collapses</h3>
+<p>The larger AUC shows that participant history adds information. The more consequential result is what happens to the apparent time-control patterns after that information enters the model.</p>
+<p>In the game feature model, a Classical game had 4.7 times the odds of analysis of a Blitz game at the reference profile. After conditioning on participant history, the odds ratio<a href="#fn20" class="footnote-ref" id="fnref20" role="doc-noteref"><sup>20</sup></a> falls to 0.99 (95% CI 0.96–1.02), which means that among games in the same history bin and at the reference profile, Classical is no more likely to be analyzed than Blitz.</p>
+<p>That is striking! The evaluated subset contains 3.3 times the population share of Classical chess, a pattern that initially looked like a property of the format: serious games receive more serious review. Yet the Classical–Blitz difference is almost entirely absorbed by one variable measured on the participants.</p>
+<p>The middle of the time-control hierarchy follows the same pattern. Bullet falls from 1.06 to 1.00, and Rapid from 1.59 to 0.96. At the two ends, the estimates cross to the other side of Blitz: UltraBullet rises to 1.50 (95% CI 1.41–1.60), while Correspondence falls to 0.59 (0.55–0.63).</p>
+<p>Participant history is also an imperfect measurement: a leave-one-out rate built on a few other games is far noisier than one built on hundreds, so the coefficients above should not be read as perfectly purged of player composition.<a href="#fn21" class="footnote-ref" id="fnref21" role="doc-noteref"><sup>21</sup></a></p>
+<div id="fig-players" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-players-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<a href="images/F6_player.png" class="lightbox page-columns page-full" data-gallery="quarto-lightbox-gallery-9" title="FIG.&nbsp;9&nbsp;— Adding participant history changes both discrimination and the apparent time-control hierarchy. Left: in-sample AUC rises from 0.664 for the game-feature model to 0.827 once participant history is added. Right: time-control odds ratios against Blitz at the reference profile, before (navy) and after (orange) adding history. Classical, Rapid, and Bullet collapse toward 1, while UltraBullet and Correspondence cross to opposite sides. Whiskers are 95% player-resampling stability intervals (B = 200)."><img src="images/F6_player.png" class="img-fluid figure-img column-page-inset"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-players-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;9&nbsp;— Adding participant history changes both discrimination and the apparent time-control hierarchy. Left: in-sample AUC rises from 0.664 for the game-feature model to 0.827 once participant history is added. Right: time-control odds ratios against Blitz at the reference profile, before (navy) and after (orange) adding history. Classical, Rapid, and Bullet collapse toward 1, while UltraBullet and Correspondence cross to opposite sides. Whiskers are 95% player-resampling stability intervals (B = 200).
+</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Does the collapse prove that time control does nothing?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>No.&nbsp;At least two different worlds can produce the same pattern.</p>
+<p>In world A, an unobserved kind of player (for example, someone who is very serious about chess and treats chess as something to study) both chooses slower formats and tends to have games analyzed. Participant history acts as a proxy variable<a href="#fn22" class="footnote-ref" id="fnref22" role="doc-noteref"><sup>22</sup></a> for that underlying disposition. Conditioning on it removes a Classical–Blitz difference that came from which players chose the two formats rather than from the formats themselves.</p>
+<p>In world B, playing Classical genuinely makes a game more likely to receive an analysis request. But players tend to specialize: a Classical player’s other games are mostly Classical too. Their high participant-history score would then partly reflect the accumulated influence of the format itself. Conditioning on that score would remove part of the relationship we were trying to measure—an instance of overadjustment<a href="#fn23" class="footnote-ref" id="fnref23" role="doc-noteref"><sup>23</sup></a>.</p>
+<div id="fig-two-worlds" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-two-worlds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig_two_worlds.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="FIG.&nbsp;10&nbsp;— Two causal structures that produce the same joint pattern in one month of data. Arrows read as “influences”; the dashed box is unobserved. In world A the format has no arrow to evaluation at all, and participant history stands in for the unobserved kind of player. In world B the format does affect evaluation, and participant history partly carries that same influence, because a player’s other games share the format. Conditioning on history is a repair in the first world and an overadjustment in the second."><img src="images/fig_two_worlds.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-two-worlds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;10&nbsp;— Two causal structures that produce the same joint pattern in one month of data. Arrows read as “influences”; the dashed box is unobserved. In world A the format has no arrow to evaluation at all, and participant history stands in for the unobserved kind of player. In world B the format does affect evaluation, and participant history partly carries that same influence, because a player’s other games share the format. Conditioning on history is a repair in the first world and an overadjustment in the second.
+</figcaption>
+</figure>
+</div>
+<p>Both worlds make Classical games, high participant history, and evaluation travel together. This one month of observational data cannot distinguish them. A comparison of slow and fast games played by the same people would reduce differences due to stable player characteristics and is a natural next step. It would not, by itself, prove a causal effect: the games may still differ in other ways, and the requester’s identity remains unknown.</p>
+<p>For within-month discrimination, the two worlds make similar predictions. For explaining why the time-control hierarchy collapses, they imply very different answers.</p>
+</div>
+</div>
+</div>
+<p>The finding therefore has a strong descriptive meaning but a limited causal one. Evaluations are heavily clustered among games involving the same participants, and a participant-level summary absorbs associations that previously appeared to belong to time control. The data do not tell us whether that summary represents a stable player disposition, the accumulated influence of the formats those players choose, or some combination of the two.</p>
+<p>Nor does this result establish that participant history would solve the weighting problem in Section 5.<a href="#fn24" class="footnote-ref" id="fnref24" role="doc-noteref"><sup>24</sup></a> The score is constructed from the same month’s evaluation outcomes, is unstable for players with few games, and may not be available in the population to which another researcher wants to transport results. It is more useful here as a diagnostic than as a ready-made weighting recipe.</p>
+<p>The diagnosis is still important: a model based only on game characteristics omits a major participant-level structure in where analysis lands.</p>
+</section>
+</section>
+<section id="bias-depends-on-what-you-measure" class="level2">
+<h2 class="anchored" data-anchor-id="bias-depends-on-what-you-measure">7. Bias depends on what you measure</h2>
+<p>There is no single answer to “How biased is the evaluated subset?” Selection bias matters relative to a particular quantity. For some quantities, the evaluated games closely match the full month. For others, the discrepancy is large but partly repairable. Some categories are almost entirely missing, and the engine-derived quantities researchers care about most cannot be checked from the existing annotations at all.</p>
+<p>The more useful question is therefore:</p>
+<blockquote class="blockquote">
+<p>For the quantity I want to estimate, what does the evaluated subset get wrong—and can anything in the observed data repair it?</p>
+</blockquote>
+<div id="tbl-bias-by-quantity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-bias-by-quantity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;2&nbsp;— Selection distortion and the success of weighting depend on the target quantity. Percentages in the final column report the share of the original evaluated-versus-population discrepancy removed by the game-feature weights. Every row compares the evaluated subset with the full month; §4’s 3.5-ply figure instead compares it with the unevaluated remainder, which is why the length row reads 3.2.
+</figcaption>
+<div aria-describedby="tbl-bias-by-quantity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 17%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Target quantity</th>
+<th style="text-align: right;">Evaluated subset</th>
+<th style="text-align: right;">Full month</th>
+<th>Observed distortion</th>
+<th>What game-level weighting does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Share of Classical games</td>
+<td style="text-align: right;">5.57%</td>
+<td style="text-align: right;">1.68%</td>
+<td>3.3× too high</td>
+<td>Nearly repaired (99% closed)</td>
+</tr>
+<tr class="even">
+<td>Mean rating</td>
+<td style="text-align: right;">1580</td>
+<td style="text-align: right;">1621</td>
+<td>41 points lower</td>
+<td>Nearly repaired (99%)</td>
+</tr>
+<tr class="odd">
+<td>Share of tournament games</td>
+<td style="text-align: right;">11.3%</td>
+<td style="text-align: right;">16.5%</td>
+<td>31% too low</td>
+<td>Mostly repaired (89%)</td>
+</tr>
+<tr class="even">
+<td>Mean game length</td>
+<td style="text-align: right;">64.2 plies</td>
+<td style="text-align: right;">67.5 plies</td>
+<td>3.2 plies shorter</td>
+<td>Mostly repaired (72%)</td>
+</tr>
+<tr class="odd">
+<td>Participants’ monthly games, game-weighted mean</td>
+<td style="text-align: right;">368</td>
+<td style="text-align: right;">508</td>
+<td>28% too low</td>
+<td>Partly repaired (41%)</td>
+</tr>
+<tr class="even">
+<td>Share ending by time forfeit</td>
+<td style="text-align: right;">26.5%</td>
+<td style="text-align: right;">32.8%</td>
+<td>6.3 percentage points lower</td>
+<td>Partly repaired (47%)</td>
+</tr>
+<tr class="odd">
+<td>Share ending in a draw</td>
+<td style="text-align: right;">2.53%</td>
+<td style="text-align: right;">3.78%</td>
+<td>33% too low</td>
+<td>Partly repaired (43%)</td>
+</tr>
+<tr class="even">
+<td>White-win share</td>
+<td style="text-align: right;">49.8%</td>
+<td style="text-align: right;">49.7%</td>
+<td>Essentially none</td>
+<td>No correction needed; weighting slightly worsens it</td>
+</tr>
+<tr class="odd">
+<td>Unterminated games</td>
+<td style="text-align: right;">0 evaluated games</td>
+<td style="text-align: right;">7,592 games (0.05%)</td>
+<td>Completely absent</td>
+<td>Cannot be repaired: zero support</td>
+</tr>
+<tr class="even">
+<td>Abandoned games</td>
+<td style="text-align: right;">About 40 evaluated games</td>
+<td style="text-align: right;">About 59,000 games (0.41%)</td>
+<td>Almost absent</td>
+<td>Too little overlap for a dependable estimate</td>
+</tr>
+<tr class="odd">
+<td>Engine-derived move quantities, such as blunder rates</td>
+<td style="text-align: right;">Observed only for evaluated games</td>
+<td style="text-align: right;">Not recorded for the rest</td>
+<td>Cannot be measured from the dump</td>
+<td>Cannot be validated from the existing annotations</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The table separates three situations. Quantities included in the weighting model are reconstructed almost completely. Recorded quantities deliberately excluded from the model move in the right direction, but only partially: weighting removes 29–47% of their fixable discrepancies. Categories with no usable evaluated examples cannot be reconstructed at all.</p>
+<p>The final row is different. Blunder rates, evaluation swings, and similar move-level quantities are the reason researchers want the evaluated subset in the first place. But those quantities are missing for every unevaluated game, so the full-month benchmark needed to measure their selection bias does not exist in the dump.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why can’t the existing evaluations reveal their own selection bias?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Suppose the target is the average blunder rate. To measure the selection distortion directly, we would need to compare the blunder rate among evaluated games with the rate among all games—or at least with a representative sample of unevaluated games.</p>
+<p>But a blunder rate requires engine evaluations, and the unevaluated games have none. The outcome needed to test representativeness is missing precisely because those games were not selected.</p>
+<p>Weighting does not create the missing outcomes. It asks us to assume that, after conditioning on the recorded game characteristics, the evaluated games adequately represent the unevaluated ones. The excluded-variable checks in Section 5 show whether that assumption transfers to other <em>recorded</em> characteristics; they cannot verify it for an unrecorded engine quantity.</p>
+<p>This is not impossible to test in principle. A researcher could run the engine on the full population or on a probability sample that includes unevaluated games. It is untestable only from the pre-existing annotations alone.</p>
+</div>
+</div>
+</div>
+<section id="a-practical-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="a-practical-workflow">A practical workflow</h3>
+<p>For researchers who still use the evaluated subset, the results suggest five steps.</p>
+<ol type="1">
+<li><strong>State the selection explicitly.</strong> Report both the rule and the resulting share: “We use the 7.5% of games carrying pre-existing evaluations.” None of the nine studies I inspected reported that share.<a href="#fn25" class="footnote-ref" id="fnref25" role="doc-noteref"><sup>25</sup></a></li>
+<li><strong>Compare the subset with the population on relevant free fields.</strong> Time control, rating, game length, tournament status, result, and termination are available for every game. The accompanying tables make these comparisons straightforward for November 2017; the same checks can be rerun for another month.</li>
+<li><strong>Check support before weighting.</strong> If a relevant category contains no evaluated games—or only a handful—no weighting method can make it dependable. This is the <strong>overlap condition</strong><a href="#fn26" class="footnote-ref" id="fnref26" role="doc-noteref"><sup>26</sup></a> from Section 5.</li>
+<li><strong>Treat weighting as an adjustment to be tested, not a certificate.</strong> Matching the variables used to construct the weights is necessary but unsurprising. More informative validation comes from recorded variables that the model was not shown. In this study, those checks improved substantially but remained far from perfect.</li>
+<li><strong>Keep the untestable part visible.</strong> A game-level pattern may partly reflect clustering around participants, and the dataset does not reveal who requested each analysis. For engine-derived outcomes, the remaining selection bias is unknown unless the engine is rerun on games outside the pre-evaluated subset.</li>
+</ol>
+</section>
+</section>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">8. Limitations</h2>
+<p><strong>Time and place.</strong> This study covers one month on one platform: November 2017 on Lichess. A single month is also what one laptop can process end to end, which is why the design is a deep audit of one month rather than a shallow pass over many. The month was chosen as an ordinary case, not sampled to represent other periods. A 2017 selection process should not be assumed to describe current Lichess use, and nothing here establishes that other platforms select games in the same way. Repeating the pipeline on a recent month is the clearest replication.</p>
+<p><strong>Participant-history measurement.</strong> The participant-history score is a leave-one-out summary of where evaluations appeared, not a direct measure of a player’s disposition or behavior. It is noisy for players with few other games, and the dataset does not identify who requested the analysis. A synthetic check reported in the appendix shows that this noise causes the observed score to absorb only part of a pattern that was created entirely by player composition; it validates the implementation under one known scenario and says nothing about the direction or size of measurement error in the real data.</p>
+<p><strong>Rating comparability.</strong> Lichess maintains separate rating pools across time controls. Conditioning on the same numerical rating band therefore does not necessarily compare players of the same underlying strength across formats. The time-control coefficients should be read as comparisons at the same recorded rating, not as comparisons between demonstrably equal players.</p>
+<p><strong>Model specification.</strong> The selection model uses categorical bins and one prespecified rating × time-control interaction. This avoids imposing a single linear shape, but it treats all games inside a bin alike. The remaining length discrepancy shows the cost of that coarseness. Splines, narrower bins, or additional interactions might improve adjustment, but would introduce further modeling choices. Alternative bin boundaries were not tested, so sensitivity to discretization remains unknown.</p>
+<p>Dropping Correspondence—the most structurally unusual time control—does not materially change the main results; those checks appear in the appendix. That limited robustness test does not cover every plausible specification.</p>
+<p><strong>Causal identification.</strong> The collapse of the time-control hierarchy after adding participant history is associational. As Section 6 explains, the same result can arise because different kinds of players choose different formats, or because formats influence analysis and participant history absorbs that influence.</p>
+<p>Comparing slow and fast games played by the same people would reduce differences due to stable player characteristics and would sharpen the distinction. It would not automatically identify a causal effect: the games may still differ in other ways, and the identity and motivation of the person requesting analysis remain unknown.</p>
+<p><strong>Inference.</strong> The dump is a complete enumeration of the target month, so its descriptive point values are finite-population quantities rather than estimates from a random sample of November games. The intervals throughout the article are player-resampling stability intervals: they show how results vary under player-level reweighting and dependence, not uncertainty about unobserved games from that month. Their construction and crossed-player checks appear in the appendix. All reported AUCs are in-sample and should not be interpreted as forecasting performance.</p>
+<p><strong>Unobserved engine outcomes.</strong> The most consequential limitation is structural rather than methodological. Move-level engine quantities are absent for the unevaluated games, so their selection distortion cannot be measured or bounded from the released annotations alone. No alternative regression, weighting method, or robustness check can replace that missing benchmark. Obtaining one requires running the engine on additional games.</p>
+</section>
+<section id="which-games-or-whose" class="level2">
+<h2 class="anchored" data-anchor-id="which-games-or-whose">9. Which games — or whose?</h2>
+<p>I began with a convenient-looking dataset: more than a million games already carrying engine evaluations. The evaluations were ready for analysis, but the games had not been chosen at random. This article asked what human selection had placed in front of the machine.</p>
+<p>Three simple stories failed along the way. Evaluated games were not generally higher-rated; the pooled rating pattern concealed opposite relationships in fast and slow chess. Longer games were not steadily more likely to be analyzed; both very short and very long games were underrepresented. Most importantly, selection was not well described by the properties of games alone. A single summary of the participants’ other games carried more information than all the recorded game characteristics together and reorganized the apparent hierarchy of time controls.</p>
+<p>That does not make the evaluated games bad data. It makes them selected data. Compared with the full month, the subset contains too much slow chess, too many games from lower-volume participants, and far more games involving people whose other games also tend to receive evaluations. Researchers who inherit the annotations inherit this particular mixture as their denominator.</p>
+<p>Some of that mixture can be repaired. Game-level weighting nearly reconstructs the characteristics it was designed to match and partially improves others. But it cannot represent categories that selection barely touched, and it cannot verify the engine-derived quantities observed only inside the subset. The weights narrow several gaps; they do not turn the subset into a random sample.</p>
+<p>The central distinction is therefore simple. The engine may evaluate every position it receives by the same procedure. The dataset is shaped by the human choices that determine which positions reach it. In this month, those choices are organized more strongly around the participants than around any recorded property of the games themselves.</p>
+</section>
+<section id="notes" class="level2">
+<h2 class="anchored" data-anchor-id="notes">Notes</h2>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-cuvitoglu2026" class="csl-entry" role="listitem">
+Cüvitoğlu, Ali. 2026. <span>“Interpretable Machine Learning Analysis of Nonlinear Error Amplification Under Time Pressure and Positional Ambiguity in Elite Blitz Chess.”</span> <em>Scientific Reports</em>, ahead of print, June. <a href="https://doi.org/10.1038/s41598-026-59689-z">https://doi.org/10.1038/s41598-026-59689-z</a>.
+</div>
+<div id="ref-elbert2026" class="csl-entry" role="listitem">
+Elbert, Nico, Philipp Landeck, and Christoph Flath. 2026. <span>“From Engine-Optimal to Human-Optimal: Designing Behavior-Grounded <span>AI</span> Training Systems.”</span> <em><span>ECIS</span> 2026 Proceedings</em>. <a href="https://aisel.aisnet.org/ecis2026/esports/esports/5">https://aisel.aisnet.org/ecis2026/esports/esports/5</a>.
+</div>
+<div id="ref-mcilroyyoung2020" class="csl-entry" role="listitem">
+McIlroy-Young, Reid, Siddhartha Sen, Jon Kleinberg, and Ashton Anderson. 2020. <span>“Aligning Superhuman <span>AI</span> with Human Behavior: Chess as a Model System.”</span> <em>Proceedings of the 26th <span>ACM</span> <span>SIGKDD</span> International Conference on Knowledge Discovery &amp; Data Mining (<span>KDD</span> ’20)</em>. <a href="https://doi.org/10.1145/3394486.3403219">https://doi.org/10.1145/3394486.3403219</a>.
+</div>
+</div>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="a.-headline-claims-audit-table-17" class="level3">
+<h3 class="anchored" data-anchor-id="a.-headline-claims-audit-table-17">A. Headline-claims audit table (§1–§7)</h3>
+<p><em>Every headline number in the article, with its source.</em></p>
+<div id="tbl-audit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-audit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;3&nbsp;— Headline-claims audit. Every headline number in the article with its source table, script, scope, and interval method
+</figcaption>
+<div aria-describedby="tbl-audit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Claim</th>
+<th>Value</th>
+<th>Table</th>
+<th>Script</th>
+<th>Scope</th>
+<th>Interval</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Share of games with evaluations</td>
+<td>7.54% (1,078,379 / 14,306,375)</td>
+<td><code>agg_headline.csv</code></td>
+<td>step1</td>
+<td>full</td>
+<td>Wilson</td>
+</tr>
+<tr class="even">
+<td>Classical vs UltraBullet selection</td>
+<td>25.0% vs 4.3% (5.9×)</td>
+<td><code>t3_1_rates.csv</code></td>
+<td>step3</td>
+<td>full</td>
+<td>one-way player bootstrap (B=200; crossed check in appendix)</td>
+</tr>
+<tr class="odd">
+<td>Classical share overstated</td>
+<td>5.6% vs 1.7% (3.32×)</td>
+<td><code>t3_2_composition.csv</code></td>
+<td>step3</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Tournament share understated (§2)</td>
+<td>11.3% vs 16.5%</td>
+<td><code>t3_2_composition.csv</code></td>
+<td>step3</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Participants’ monthly games (§2)</td>
+<td>368 in evaluated games vs 508 overall</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>see IPW row below</td>
+</tr>
+<tr class="even">
+<td>Rating gap</td>
+<td>eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated</td>
+<td><code>t4_5_elo_balance.csv</code></td>
+<td>step4</td>
+<td>full</td>
+<td>one-way player bootstrap: −40.9 [−42.8, −39.0]</td>
+</tr>
+<tr class="odd">
+<td>Kitagawa split</td>
+<td>24.2% composition / 75.8% within</td>
+<td><code>t4_4_kitagawa.csv</code></td>
+<td>step4</td>
+<td>full</td>
+<td>exact identity; means from lossless counts</td>
+</tr>
+<tr class="even">
+<td>Rating-pool spread</td>
+<td>278 points: median 1733 UltraBullet vs 1455 Classical</td>
+<td><code>t4_1_elo_by_speed.csv</code></td>
+<td>step4</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Composition shift along rating</td>
+<td>&lt;1000: &gt;25% Rapid+Classical; 2400+: 96% Bullet+Blitz</td>
+<td><code>t4_2_grid.csv</code></td>
+<td>step4</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Six within-control ratios</td>
+<td>0.26 → 3.68, reversal Blitz↔︎Rapid</td>
+<td><code>t4_3_crossover.csv</code></td>
+<td>step4</td>
+<td>full</td>
+<td>one-way player bootstrap on log ratio (B=200; crossed check in appendix)</td>
+</tr>
+<tr class="odd">
+<td>U-shape of marginal rating curve</td>
+<td>10.9% → 6.2% (1800–2000) → 11.3%</td>
+<td><code>t3_4_rate_by_elo.csv</code></td>
+<td>step3</td>
+<td>full</td>
+<td>one-way player bootstrap (B=200; crossed check in appendix)</td>
+</tr>
+<tr class="even">
+<td>Length means / distance</td>
+<td>−3.5 plies / Wasserstein 6.84</td>
+<td><code>t5_2_ply_balance.csv</code></td>
+<td>step5</td>
+<td>full</td>
+<td>exact from lossless counts</td>
+</tr>
+<tr class="odd">
+<td>16-fold hump, peak 41–60</td>
+<td>0.65% → 10.4%</td>
+<td><code>t5_1_ply_bins.csv</code></td>
+<td>step5</td>
+<td>full</td>
+<td>one-way player bootstrap (B=200; crossed check in appendix)</td>
+</tr>
+<tr class="even">
+<td>Length tail shares (§4)</td>
+<td>≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); &gt;120 plies: 3.86% vs 6.24%</td>
+<td><code>t5_1_ply_bins.csv</code></td>
+<td>step5</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Hump within every control</td>
+<td>6/6 peaks interior</td>
+<td><code>t5_4_ply_by_speed.csv</code></td>
+<td>step5</td>
+<td>full</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Zero-evaluation categories</td>
+<td>Unterminated 0/7,592</td>
+<td><code>t3_1_rates.csv</code></td>
+<td>step3</td>
+<td>full</td>
+<td>Wilson upper 0.05%</td>
+</tr>
+<tr class="odd">
+<td>Selection-model AUC (in-sample)</td>
+<td>0.664</td>
+<td><code>t7_2_model_fit.csv</code></td>
+<td>step9</td>
+<td>full</td>
+<td>one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665]</td>
+</tr>
+<tr class="even">
+<td>Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band)</td>
+<td>ref = Blitz/1400–1600/41–60/non-tour</td>
+<td><code>t7_1_model_coefs.csv</code></td>
+<td>step9</td>
+<td>full</td>
+<td>same bootstrap, per-coefficient CIs</td>
+</tr>
+<tr class="odd">
+<td>In-model closure after IPW (machinery check)</td>
+<td>Classical share 99.2%; mean rating 98.6%; length 72.4%</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>gap CIs from same bootstrap</td>
+</tr>
+<tr class="even">
+<td>Excluded-variable closure after IPW</td>
+<td>29–47% per quantity (fixable median 43%)</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Games-per-player after IPW</td>
+<td>368 → 425 (benchmark 508)</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>weighted point CI [418, 433]</td>
+</tr>
+<tr class="even">
+<td>Cannot-fix categories (positivity failures)</td>
+<td>Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>flagged absent-in-selected</td>
+</tr>
+<tr class="odd">
+<td>Harm case (M15)</td>
+<td>Rules infraction: benchmark 0.0069% → weighted 0.0127%</td>
+<td><code>t7_4_threepoint.csv</code></td>
+<td>step10</td>
+<td>full</td>
+<td>CI [0.0092%, 0.0162%] excludes truth</td>
+</tr>
+<tr class="even">
+<td>Analysis-history gradient</td>
+<td>1.7% → 79.5% analyzed (47-fold) across history bins</td>
+<td><code>t8_4_habit_bins.csv</code></td>
+<td>step11</td>
+<td>full</td>
+<td>descriptive counts</td>
+</tr>
+<tr class="odd">
+<td>AUC ladder (in-sample)</td>
+<td>0.664 → 0.827 adding one participant-history variable</td>
+<td><code>t8_3_auc_ladder.csv</code></td>
+<td>step11</td>
+<td>full</td>
+<td>one-way player bootstrap: [0.826, 0.828]</td>
+</tr>
+<tr class="even">
+<td>Classical OR collapse</td>
+<td>4.69 [4.51, 4.88] → 0.99 [0.96, 1.02]</td>
+<td><code>t8_2_or_collapse.csv</code></td>
+<td>step11</td>
+<td>full</td>
+<td>same bootstrap, both models refit per replicate</td>
+</tr>
+<tr class="odd">
+<td>Hierarchy ends flip</td>
+<td>UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63]</td>
+<td><code>t8_2_or_collapse.csv</code></td>
+<td>step11</td>
+<td>full</td>
+<td>same</td>
+</tr>
+<tr class="even">
+<td>Leak demo (leave-one-out justification)</td>
+<td>AUC 0.827 (LOO) vs 0.853 (current game included; invalid)</td>
+<td><code>t8_3_auc_ladder.csv</code></td>
+<td>step11</td>
+<td>full</td>
+<td>teaching check, not a result</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Verification chain:</strong> pipeline totals assert against registered constants (step1 exits on mismatch); speed rates cross-checked to two independent legacy implementations, 41/41 exact (<code>t7_crosscheck.csv</code>); parser validated against python-chess on a 1,000-game pilot; Wasserstein = eCDF-area identity asserted at runtime; Kitagawa components assert to the exact total.</p>
+</section>
+<section id="b.-methods-notes" class="level3">
+<h3 class="anchored" data-anchor-id="b.-methods-notes">B. Methods notes</h3>
+<p><strong>Estimand and intervals (whole article).</strong> November 2017 is treated as a complete finite population: the point values are exact descriptions of that month, carrying no sampling error. The intervals answer a stability question — how much a number would move under a different draw of the month’s players — and can equally be read as superpopulation CIs under an independent-player sampling model; nothing in the article depends on the second reading. Wherever the article says “CI”, read these stability intervals; Wilson bounds on thin bins are the one exception, kept to display small-count instability (the n = 4 bin, the k = 0 category). Games sharing a player are not independent (41.5% of games are repeat pairings; design effects on headline rates run 6 to 34, so no single correction factor exists). All CIs are one-way player-bootstrap intervals: resample the 276,345 players with replacement, weight each game by its owner’s draw count, recompute the entire statistic, B = 200; run once with games assigned to their white player and once to their black, report the wider seat; ratio statistics combine on the log scale. The scheme reads a design effect of 1 on synthetic data with no clustering (a calibration that caught and retired a defective earlier scheme), and the white-seat design effect on the headline rate (12.9) independently matches a closed-form estimate (13.2). A crossed-clustering check (white + black − pairing, à la Cameron–Gelbach–Miller) widens intervals by roughly ×1.4 and changes no conclusion.</p>
+<p><strong>Robustness (drop-Correspondence; §8 note).</strong> Dropping Correspondence entirely (50,489 games, 0.35% of the month, but the control where 21.65% of games are degenerate) moves the headline evaluated share from 7.54% to 7.53%, the rating gap from −40.9 to −41.5 rating points, and the composition share of the Kitagawa split from 24.2% to 24.1%; the five remaining within-control ratios are unchanged by construction, and no conclusion moves. Robustness comparisons are point-value only.</p>
+<p><strong>Weight truncation (§5 note).</strong> Extreme inverse-probability weights are a standard source of instability, so every quantity was recomputed with the weights winsorized — capped at a threshold, with all smaller weights left untouched. Because every target here is a weighted mean or share, capping renormalizes automatically. Four caps were tried: the 99.9th, 99th and 95th percentiles of the evaluated games’ weights (100.7, 40.8 and 26.2, binding on 1,072, 10,776 and 51,334 of the 1,078,379 evaluated games) and a fixed cap of 200 (119 games). Kish effective sample size rises from 753,325 to 835,618 at the 99th percentile, confirming the caps do what they are meant to do.</p>
+<p>The excluded-variable results reported in §5 are insensitive to this. Under the three milder caps, the closure figures for time forfeits, normal terminations, draws and participants’ monthly game counts each move by less than one percentage point; even the 95th-percentile cap, which binds on 4.8% of the evaluated subset, moves them by at most 4.5 points. The 29% low end of the reported range is the black-win share, whose initial discrepancy is only 2.7% and whose closure is correspondingly the least stable of the set (28.9% untruncated, 18.7% under the 95th-percentile cap). Two quantities move further, and both movements clarify rather than undercut the reading in §5. Mean-length closure rises from 72.4% to 89.0% under the 99th-percentile cap, which shows that part of the residual length gap is carried by a few very large weights and not only by the width of the length bins. And the rules-infraction estimate — the harm case in §5 — becomes markedly less harmful as the cap tightens (closure −234% untruncated, −126% at the 95th percentile), confirming directly that its failure is driven by a handful of heavily weighted games. Truncation comparisons are point-value only, on the same convention as the drop-Correspondence check above.</p>
+<p><strong>Data and pipeline.</strong> One pass over the 14,306,375-game dump compresses losslessly into contingency tables (~4 MB; see Appendix D); every §2–§4 headline is recomputed from them and cross-checked 41/41 against two independent implementations; the parser is validated against python-chess on a pilot; distributional identities (Wasserstein = eCDF area; Kitagawa components sum to the exact total) assert at runtime.</p>
+<p><strong>Kitagawa decomposition (§3).</strong> With c indexing time controls, w_c the share of games in control c (evaluated set vs.&nbsp;all games) and m_c the mean rating in control c, the gap splits as</p>
+<p><span class="math display">\[\Delta=\sum_c w_c^{\mathrm{ev}}m_c^{\mathrm{ev}}-\sum_c w_c^{\mathrm{all}}m_c^{\mathrm{all}}\]</span></p>
+<p><span class="math display">\[\underbrace{\sum_c\bigl(w_c^{\mathrm{ev}}-w_c^{\mathrm{all}}\bigr)\tfrac{m_c^{\mathrm{ev}}+m_c^{\mathrm{all}}}{2}}_{\text{composition}}\;+\;\underbrace{\sum_c\tfrac{w_c^{\mathrm{ev}}+w_c^{\mathrm{all}}}{2}\bigl(m_c^{\mathrm{ev}}-m_c^{\mathrm{all}}\bigr)}_{\text{within}}\;=\;\Delta,\]</span></p>
+<p>an algebraic identity, asserted at runtime. This is the symmetric (midpoint-weighted) convention, invariant to which set is called the baseline. Sequential conventions — weighting composition by baseline means or by evaluated-set means — allocate the split differently; 24.2% is the symmetric convention’s allocation, not a unique decomposition; the symmetric convention is the one reported.</p>
+<p><strong>Selection model and weighting (§5).</strong> Model:</p>
+<p><span class="math display">\[\log\frac{\pi}{1-\pi}=\alpha+\beta_{\text{control}}+\beta_{\text{rating band}}+\beta_{\text{length band}}+\beta_{\text{tournament}}+\gamma_{\text{control}\times\text{rating}};\]</span></p>
+<p>654 populated cells, 59 parameters, unpenalized MLE fit by iteratively reweighted least squares; coefficients referenced to a non-tournament Blitz game, rated 1400–1600, 41–60 plies (with the interaction, main effects are contrasts at these reference conditions); full coefficient table with bootstrap CIs in <code>t7_1_model_coefs.csv</code>; the fitting identity (predicted analyzed games equal observed analyzed games, column by column) is asserted at every run, worst residual 4 × 10⁻¹⁶. Margins are heavily populated but a few cross-cells are thin. The fallback rule was fixed in code before any output was inspected: a speed-by-rating interaction term is dropped (its games served by main effects) when that margin has zero games, zero evaluated games, or only evaluated games, since its coefficient would otherwise run to a boundary. Two margins trip it: Correspondence below 1000 (no games at all this month — nobody is affected) and Classical above 2400 (exactly two games, both analyzed — two games’ predictions, and the weights of those two evaluated games, are served by main effects). At two games in 14.3 million, no headline quantity is sensitive to any reasonable alternative treatment of these cells; the model is best described as a 59-parameter MLE with a declared exception for two empty-or-degenerate interaction cells. AUC is computed in-sample; with 14.3M games against 59 parameters the optimism is negligible, but it is not out-of-sample. Weight diagnostics: largest weight 660 (a cell analyzed 0.15% of the time); Kish effective sample size 753,325 of 1,078,379 (70%) — this reflects weight inequality only, not the player-clustering information loss, which the bootstrap handles separately; the heaviest 1% of weights carry 4.5% of the total. Intervals: one-way player bootstrap, B = 200 per seat (games assigned once to their white and once to their black player, wider seat reported), with the entire pipeline, model refit included, inside every replicate; 400 refits in all, 0 unconverged; the identity-weight path reproduces every point estimate with zero drift. Games-per-player is treated as a fixed covariate of the game (measured in the real month), not re-derived inside replicates. The cell table <code>t7_3_cells.csv</code> allows any weight to be recomputed by hand as 1/p̂.</p>
+<p><strong>Participants’ analysis history (§6).</strong> Definition: per game, the leave-one-out share of each seat’s player’s other games that carry evaluations this month, averaged over the two seats:</p>
+<p><span class="math display">\[h_g=\tfrac12\left(\frac{E_{w(g)}-e_g}{N_{w(g)}-1}+\frac{E_{b(g)}-e_g}{N_{b(g)}-1}\right),\]</span></p>
+<p>where <span class="math inline">\(N_p\)</span> and <span class="math inline">\(E_p\)</span> are player <span class="math inline">\(p\)</span>’s games and evaluated games this month and <span class="math inline">\(e_g\)</span> is the current game’s own evaluation status. The variable does not identify who requested any analysis; the PGN records no requester, and requests may come from non-participants. Entered as fixed bins (0%, 0-5, 5-10, 10-20, 20-50, 50-100%, no-history), reference = exactly 0%. 435 games (0.003%) have no history on either seat. The exactly-0% bin (20,706 games, 3.1% analyzed, above the 0-5% bin’s 1.7%) mixes genuine never-analyzers with players whose few other games make the rate uninformative; a measurement artifact, not behavior. History values and bin edges are fixed on the point data and treated as covariates inside the bootstrap (same convention as games-per-player). Both models are refit inside every replicate (B = 200 per seat, 400 refits, 0 unconverged; score equations assert at 4 x 10^-16). Leave-one-out justification: deliberately including the current game inflates in-sample AUC by +0.026 (real data) and +0.16 (synthetic). Collapse validation on known ground truth: on synthetic data where the control effect was pure player composition, the spurious Classical odds ratio read 1.66 with no history term, 1.25 with the LOO proxy, and 1.05 with the true (oracle) history binned identically — the implementation recovers composition fully when measurement is clean, and in that composition-only scenario the noisy proxy attenuates the collapse. This validates the pipeline under that scenario; it says nothing about the direction of any bias in the real data.</p>
+</section>
+<section id="c.-exact-tables-behind-the-figures" class="level3">
+<h3 class="anchored" data-anchor-id="c.-exact-tables-behind-the-figures">C. Exact tables behind the figures</h3>
+<div id="tbl-c1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-c1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;4&nbsp;— Evaluation rate by time control (exact values behind <a href="#fig-controls" class="quarto-xref">Figure&nbsp;2</a>)
+</figcaption>
+<div aria-describedby="tbl-c1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Time control</th>
+<th style="text-align: right;">Games</th>
+<th style="text-align: right;">Share analyzed</th>
+<th style="text-align: right;">vs overall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>UltraBullet (&lt; 30s)</td>
+<td style="text-align: right;">304,569</td>
+<td style="text-align: right;">4.3%</td>
+<td style="text-align: right;">0.57×</td>
+</tr>
+<tr class="even">
+<td>Bullet</td>
+<td style="text-align: right;">3,831,325</td>
+<td style="text-align: right;">6.1%</td>
+<td style="text-align: right;">0.81×</td>
+</tr>
+<tr class="odd">
+<td>Blitz</td>
+<td style="text-align: right;">7,009,403</td>
+<td style="text-align: right;">6.4%</td>
+<td style="text-align: right;">0.84×</td>
+</tr>
+<tr class="even">
+<td>Rapid</td>
+<td style="text-align: right;">2,870,138</td>
+<td style="text-align: right;">11.2%</td>
+<td style="text-align: right;">1.49×</td>
+</tr>
+<tr class="odd">
+<td><strong>Classical (slowest live)</strong></td>
+<td style="text-align: right;">240,451</td>
+<td style="text-align: right;"><strong>25.0%</strong></td>
+<td style="text-align: right;"><strong>3.32×</strong></td>
+</tr>
+<tr class="even">
+<td>Correspondence</td>
+<td style="text-align: right;">50,489</td>
+<td style="text-align: right;">10.7%</td>
+<td style="text-align: right;">1.41×</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-c2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-c2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;5&nbsp;— Within-control rating ratios (exact values behind <a href="#fig-interaction" class="quarto-xref">Figure&nbsp;4</a>)
+</figcaption>
+<div aria-describedby="tbl-c2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 40%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Within…</th>
+<th style="text-align: right;">Selection-rate ratio, rating 1200–1400 → 2000–2200</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>UltraBullet</td>
+<td style="text-align: right;">0.26 [0.22, 0.30]</td>
+<td>falling</td>
+</tr>
+<tr class="even">
+<td>Bullet</td>
+<td style="text-align: right;">0.30 [0.28, 0.31]</td>
+<td>falling</td>
+</tr>
+<tr class="odd">
+<td>Blitz</td>
+<td style="text-align: right;">0.86 [0.82, 0.89]</td>
+<td>falling</td>
+</tr>
+<tr class="even">
+<td>Rapid</td>
+<td style="text-align: right;">2.39 [2.30, 2.49]</td>
+<td>rising</td>
+</tr>
+<tr class="odd">
+<td>Classical</td>
+<td style="text-align: right;">2.50 [2.33, 2.68]</td>
+<td>rising</td>
+</tr>
+<tr class="even">
+<td>Correspondence</td>
+<td style="text-align: right;">3.68 [2.83, 4.77]</td>
+<td>rising</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-heatmap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/fig3_heatmap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="FIG.&nbsp;11&nbsp;— Cell text is the raw analysis rate; color is its multiplicative distance from the overall rate, on a log scale. Hatched cells hold fewer than 200 games and are not interpreted. This is the cell-level view behind Figure&nbsp;4: it shows levels well, but the trends are easier to read as lines."><img src="images/fig3_heatmap.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+FIG.&nbsp;11&nbsp;— Cell text is the raw analysis rate; color is its multiplicative distance from the overall rate, on a log scale. Hatched cells hold fewer than 200 games and are not interpreted. This is the cell-level view behind <a href="#fig-interaction" class="quarto-xref">Figure&nbsp;4</a>: it shows levels well, but the trends are easier to read as lines.
+</figcaption>
+</figure>
+</div>
+<div id="tbl-c3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-c3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;6&nbsp;— Evaluation rate by game length (exact values behind <a href="#fig-length" class="quarto-xref">Figure&nbsp;5</a>)
+</figcaption>
+<div aria-describedby="tbl-c3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Length (plies)</th>
+<th style="text-align: right;">Share of games</th>
+<th style="text-align: right;">Share analyzed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0–10</td>
+<td style="text-align: right;">1.4%</td>
+<td style="text-align: right;"><strong>0.65%</strong></td>
+</tr>
+<tr class="even">
+<td>11–20</td>
+<td style="text-align: right;">2.8%</td>
+<td style="text-align: right;">3.0%</td>
+</tr>
+<tr class="odd">
+<td>21–40</td>
+<td style="text-align: right;">14.2%</td>
+<td style="text-align: right;">6.7%</td>
+</tr>
+<tr class="even">
+<td><strong>41–60</strong></td>
+<td style="text-align: right;">27.0%</td>
+<td style="text-align: right;"><strong>10.4%</strong></td>
+</tr>
+<tr class="odd">
+<td>61–80</td>
+<td style="text-align: right;">24.8%</td>
+<td style="text-align: right;">8.7%</td>
+</tr>
+<tr class="even">
+<td>81–120</td>
+<td style="text-align: right;">23.7%</td>
+<td style="text-align: right;">5.3%</td>
+</tr>
+<tr class="odd">
+<td>120+</td>
+<td style="text-align: right;">6.1%</td>
+<td style="text-align: right;">4.8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-c4" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-c4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+TAB.&nbsp;7&nbsp;— Evaluation rate by participants’ analysis history (exact values behind <a href="#fig-history" class="quarto-xref">Figure&nbsp;8</a>)
+</figcaption>
+<div aria-describedby="tbl-c4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Participants’ analysis history</th>
+<th style="text-align: right;">Games</th>
+<th style="text-align: right;">Share analyzed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0-5%</td>
+<td style="text-align: right;">6,605,029</td>
+<td style="text-align: right;">1.7%</td>
+</tr>
+<tr class="even">
+<td>5-10%</td>
+<td style="text-align: right;">4,801,713</td>
+<td style="text-align: right;">5.5%</td>
+</tr>
+<tr class="odd">
+<td>10-20%</td>
+<td style="text-align: right;">2,084,886</td>
+<td style="text-align: right;">16.3%</td>
+</tr>
+<tr class="even">
+<td>20-50%</td>
+<td style="text-align: right;">741,585</td>
+<td style="text-align: right;">43.1%</td>
+</tr>
+<tr class="odd">
+<td>50-100%</td>
+<td style="text-align: right;">52,021</td>
+<td style="text-align: right;">79.5%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The five bins above hold 14,285,234 games. The remaining 21,141 are the two bins omitted from <a href="#fig-history" class="quarto-xref">Figure&nbsp;8</a>: 20,706 games whose participants have a leave-one-out rate of exactly zero, and 435 whose participants have no other games at all.</p>
+</section>
+<section id="appendix-d" class="level3">
+<h3 class="anchored" data-anchor-id="appendix-d">D. Data, code, and AI assistance</h3>
+<p><strong>Data.</strong> The source file is <code>lichess_db_standard_rated_2017-11.pgn</code>, published by Lichess at <a href="https://database.lichess.org/">database.lichess.org</a> under a Creative Commons CC0 licence. It is not redistributed here; the analysis pipeline reads it directly.</p>
+<p><strong>Code.</strong> The pipeline — parser, aggregation, bootstrap, selection model, weighting, and every figure here — is being prepared for public release and will be linked from this section; it is available on request in the meantime. Appendix B is written to stand on its own until then: it gives the model specification, the reference cell, the bin edges, the bootstrap scheme and seeds, and the diagnostic values needed to reimplement or check any number in the article.</p>
+<p><strong>AI assistance.</strong> Code development and visualization were assisted by generative AI; the study design, estimand choices, pre-registered hypotheses, validation checks, interpretation, and final claims were decided and reviewed by the author.</p>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The population is every game in <code>lichess_db_standard_rated_2017-11.pgn</code>. That file holds standard <em>rated</em> games only: chess variants are published as separate files, and casual games are not released at all, so neither needs to be excluded here. The single exclusion applied by my parser is games whose rating field is non-numeric; 14,306,375 is what remains.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The file does not record who requested an analysis. It is typically one of the two players, but this is not verifiable: spectators, and anyone opening the game later, can request one too.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Scope caveat: I inspected nine candidate studies, chosen purposively for their data pipelines, not sampled. The counts describe the inspected set only and say nothing about how common each pipeline is in the literature at large.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Lichess classifies games by estimated duration (initial clock + 40 × increment). “Classical” means an estimated 25 minutes or more per player; typical settings such as 30+0 or 30+20 run half an hour to an hour per side. UltraBullet is under 30 seconds total.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Measured against unevaluated games rather than the full month, the gap is 44 points. As a standardized difference — the gap divided by a pooled standard deviation, so gaps on different scales can be compared — it is −0.16.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>An accounting identity splitting a difference of averages into a composition part (who is in each group) and a within part (gaps at fixed composition). This article uses the symmetric convention; other conventions shift the split somewhat, and the formula is in the appendix. §3.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>A 95% interval from resampling the month’s players: how much the number would move under a different draw of the same player population. Appendix. §3.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>The 3.5-ply gap in §4 compares evaluated games with the unevaluated remainder. When evaluated games are compared with the entire month, which includes the evaluated subset itself, the corresponding gap is about 3.2 plies.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>The one-dimensional Wasserstein-1 distance equals the absolute area between two cumulative distribution functions. Equivalently, it is the smallest possible average absolute difference when observations from the two distributions are optimally matched. It has the same unit as the measured variable. §4.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>Inverse-probability weighting gives each selected unit a weight equal to one divided by its estimated probability of selection, allowing rarely selected groups to represent more of the population. §5.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>Missing at random here means that, after conditioning on the modeled game characteristics, selection into the evaluated subset does not still depend on the engine-derived quantity being estimated. §5.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>A standard model for yes/no outcomes: it combines recorded characteristics into an estimated probability on a log-odds scale. First used in §5.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>The full model specification, reference categories, and coefficient table appear in the appendix. §5.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>Positivity, or overlap, requires every type of game relevant to the target estimate to have a nonzero—and practically adequate—chance of appearing in the evaluated subset. §5.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p>The file does not record who requested an analysis. It is typically one of the two players, but this is not verifiable: spectators, and anyone opening the game later, can request one too.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p>Participant history is the mean of the two players’ analysis rates among their other games in the same month. It is retrospective and need not precede the focal game in time. §6.<a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p>A leave-one-out statistic for a game is calculated after excluding that game itself, preventing its outcome from entering its own predictor directly. §6.<a href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn18"><p>Target leakage occurs when information from the outcome being predicted is included, directly or indirectly, in a model input. §6.<a href="#fnref18" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn19"><p>The probability that a randomly chosen positive case is ranked above a randomly chosen negative one; 0.5 means no ranking information and 1.0 means perfect separation. §6.<a href="#fnref19" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn20"><p>The odds of an event are <span class="math inline">\(p/(1-p)\)</span>; an odds ratio compares two groups’ odds, and equal odds give a ratio of 1. §6.<a href="#fnref20" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn21"><p>In a synthetic check where the apparent time-control effect was created entirely by player composition, the observed leave-one-out score absorbed about half of the constructed effect, while the underlying true player propensity absorbed nearly all of it. That verifies the pipeline under one known scenario; it does not establish the direction or size of measurement error in the real data. Full results appear in the appendix.<a href="#fnref21" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn22"><p>A proxy variable is an observed measurement used to stand in for an underlying characteristic that is not observed directly. A proxy may absorb several different causal pathways. §6.<a href="#fnref22" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn23"><p>Overadjustment occurs when conditioning on a variable removes part of the relationship of interest because that variable lies on, or already contains, the relevant pathway. §6.<a href="#fnref23" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn24"><p>Doing so would require adding participant history to the weighting model and rerunning the excluded-variable checks. I did not perform that experiment.<a href="#fnref24" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn25"><p>Scope caveat: I inspected nine candidate studies, chosen purposively for their data pipelines, not sampled. The counts describe the inspected set only and say nothing about how common each pipeline is in the literature at large.<a href="#fnref25" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn26"><p>Positivity, or overlap, requires every type of game relevant to the target estimate to have a nonzero—and practically adequate—chance of appearing in the evaluated subset. §5.<a href="#fnref26" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script>
+/*
+ * C2 · Atelier — two DOM touches Quarto's templates do not expose:
+ *   1. the signature sparkline beside the wordmark
+ *   2. wrapping "FIG. N —" so only the label carries terracotta
+ * Everything else is CSS in custom.scss.
+ */
+(function () {
+  /* The U-curve is drawn from this site's own data: evaluation rate across the
+     nine rating bins of §4. Path copied verbatim from the approved specimen. */
+  var SPARK =
+    '<svg class="spark" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M 3.0 5.2 L 32.2 10.1 L 61.5 16.2 L 90.8 21.1 L 120.0 27.7 L 149.2 31.0 L 178.5 30.2 L 207.8 29.4 L 237.0 3.0" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="3.0" cy="5.2" r="2.2" fill="currentColor"/>' +
+    '<circle cx="149.2" cy="31.0" r="2.2" fill="currentColor"/>' +
+    '<circle cx="237.0" cy="3.0" r="2.2" fill="currentColor"/></svg>';
+
+  function addSparkline() {
+    var brand = document.querySelector(".navbar-brand");
+    if (!brand || brand.querySelector(".spark")) return;
+    brand.insertAdjacentHTML("beforeend", SPARK);
+  }
+
+  /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
+     so the number can carry terracotta without touching the article source.
+     Tables get the same treatment (§5: the numbering habit is a signature). */
+  function markFigureNumbers() {
+    var caps = document.querySelectorAll(
+      "figcaption.quarto-float-caption, figure > figcaption, table > caption");
+    Array.prototype.forEach.call(caps, function (cap) {
+      if (cap.querySelector(".fignum")) return;
+      var node = null;
+      for (var i = 0; i < cap.childNodes.length; i++) {
+        if (cap.childNodes[i].nodeType === 3 && cap.childNodes[i].nodeValue.trim()) {
+          node = cap.childNodes[i];
+          break;
+        }
+      }
+      if (!node) return;
+      var m = node.nodeValue.match(/^(\s*)((?:FIG|TAB)\.[\s ]*\d+)(\s*[—:-]?\s*)/i);
+      if (!m) return;
+      var span = document.createElement("span");
+      span.className = "fignum";
+      span.textContent = m[2].replace(/[\s ]+/g, " ");
+      node.nodeValue = node.nodeValue.slice(m[0].length);
+      cap.insertBefore(document.createTextNode(" — "), node);
+      cap.insertBefore(span, cap.firstChild);
+    });
+  }
+
+  /* Ten glossary notes are written as <strong>term</strong><sup-ref>. Only the
+     superscript is hoverable by default, which is a small target for a word
+     the reader is actually stuck on. Extend each note's trigger to cover the
+     term itself. Quarto builds its tippy instances after this script runs, so
+     this waits for load rather than DOMContentLoaded. */
+  function linkTermsToNotes() {
+    var refs = document.querySelectorAll('a[role="doc-noteref"]');
+    Array.prototype.forEach.call(refs, function (ref) {
+      var term = ref.previousElementSibling;
+      if (!term || term.tagName !== "STRONG") return;
+      term.classList.add("term-hover");
+      if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
+      try {
+        ref._tippy.setProps({ triggerTarget: [term, ref] });
+      } catch (e) {
+        /* older tippy: the superscript stays the trigger, underline still hints */
+      }
+    });
+  }
+
+  function init() { addSparkline(); markFigureNumbers(); }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+  if (document.readyState === "complete") {
+    linkTermsToNotes();
+  } else {
+    window.addEventListener("load", linkTermsToNotes);
+  }
+})();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/yifanmillerliao\.github\.io\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

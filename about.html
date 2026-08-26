@@ -39,10 +39,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dbe10b802debfe92f5d65ad9105f12a0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,9 +70,11 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Figtree:wght@400;600&amp;family=IBM+Plex+Mono:wght@400&amp;display=swap" rel="stylesheet">
 
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed fullcontent quarto-light">
@@ -149,6 +151,91 @@ ul.task-list li input[type="checkbox"] {
 
 
 </main> <!-- /main -->
+<script>
+/*
+ * C2 · Atelier — two DOM touches Quarto's templates do not expose:
+ *   1. the signature sparkline beside the wordmark
+ *   2. wrapping "FIG. N —" so only the label carries terracotta
+ * Everything else is CSS in custom.scss.
+ */
+(function () {
+  /* The U-curve is drawn from this site's own data: evaluation rate across the
+     nine rating bins of §4. Path copied verbatim from the approved specimen. */
+  var SPARK =
+    '<svg class="spark" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M 3.0 5.2 L 32.2 10.1 L 61.5 16.2 L 90.8 21.1 L 120.0 27.7 L 149.2 31.0 L 178.5 30.2 L 207.8 29.4 L 237.0 3.0" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="3.0" cy="5.2" r="2.2" fill="currentColor"/>' +
+    '<circle cx="149.2" cy="31.0" r="2.2" fill="currentColor"/>' +
+    '<circle cx="237.0" cy="3.0" r="2.2" fill="currentColor"/></svg>';
+
+  function addSparkline() {
+    var brand = document.querySelector(".navbar-brand");
+    if (!brand || brand.querySelector(".spark")) return;
+    brand.insertAdjacentHTML("beforeend", SPARK);
+  }
+
+  /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
+     so the number can carry terracotta without touching the article source.
+     Tables get the same treatment (§5: the numbering habit is a signature). */
+  function markFigureNumbers() {
+    var caps = document.querySelectorAll(
+      "figcaption.quarto-float-caption, figure > figcaption, table > caption");
+    Array.prototype.forEach.call(caps, function (cap) {
+      if (cap.querySelector(".fignum")) return;
+      var node = null;
+      for (var i = 0; i < cap.childNodes.length; i++) {
+        if (cap.childNodes[i].nodeType === 3 && cap.childNodes[i].nodeValue.trim()) {
+          node = cap.childNodes[i];
+          break;
+        }
+      }
+      if (!node) return;
+      var m = node.nodeValue.match(/^(\s*)((?:FIG|TAB)\.[\s ]*\d+)(\s*[—:-]?\s*)/i);
+      if (!m) return;
+      var span = document.createElement("span");
+      span.className = "fignum";
+      span.textContent = m[2].replace(/[\s ]+/g, " ");
+      node.nodeValue = node.nodeValue.slice(m[0].length);
+      cap.insertBefore(document.createTextNode(" — "), node);
+      cap.insertBefore(span, cap.firstChild);
+    });
+  }
+
+  /* Ten glossary notes are written as <strong>term</strong><sup-ref>. Only the
+     superscript is hoverable by default, which is a small target for a word
+     the reader is actually stuck on. Extend each note's trigger to cover the
+     term itself. Quarto builds its tippy instances after this script runs, so
+     this waits for load rather than DOMContentLoaded. */
+  function linkTermsToNotes() {
+    var refs = document.querySelectorAll('a[role="doc-noteref"]');
+    Array.prototype.forEach.call(refs, function (ref) {
+      var term = ref.previousElementSibling;
+      if (!term || term.tagName !== "STRONG") return;
+      term.classList.add("term-hover");
+      if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
+      try {
+        ref._tippy.setProps({ triggerTarget: [term, ref] });
+      } catch (e) {
+        /* older tippy: the superscript stays the trigger, underline still hints */
+      }
+    });
+  }
+
+  function init() { addSparkline(); markFigureNumbers(); }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+  if (document.readyState === "complete") {
+    linkTermsToNotes();
+  } else {
+    window.addEventListener("load", linkTermsToNotes);
+  }
+})();
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -222,7 +309,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/yifanmillerliao\.github\.io\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
