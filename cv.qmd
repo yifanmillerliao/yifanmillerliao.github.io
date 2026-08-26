@@ -1,15 +1,6 @@
 ---
 title: "CV"
+toc: false
 ---
 
-You can view or download my current résumé below.
-
-[Open Résumé (PDF)](files/miller-liao-resume.pdf){.btn .btn-primary target="_blank"}
-
-<iframe
-  src="files/miller-liao-resume.pdf"
-  width="100%"
-  height="950px"
-  style="border: 1px solid #ddd; border-radius: 6px;"
-  title="Miller Liao Résumé">
-</iframe>
+Résumé available on request.
