@@ -288,6 +288,79 @@ figcaption,
   box-shadow: var(--lift-2);
 }
 
+// Desktop: figure and caption on one sheet. With desc-position: right the
+// caption is a column beside the image; left alone it floats on the scrim as
+// grey text next to a paper card — two islands. The sheet is the whole
+// .ginner-container, so --lift-2 moves up to it and the image stops lifting
+// on its own inside a flat box. The 60px side margins keep the sheet clear of
+// the close button. The caption column already scrolls internally (glightbox's
+// .gdesc-inner), so a long caption never takes height from the image.
+body:not(.glightbox-mobile) .glightbox-container .ginner-container {
+  max-width: calc(100vw - 120px) !important;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-fig);
+  box-shadow: var(--lift-2);
+  overflow: hidden;
+}
+body:not(.glightbox-mobile) .glightbox-container .gslide-media {
+  box-shadow: none;
+  background: transparent;
+}
+body:not(.glightbox-mobile) .glightbox-container .gslide-image img {
+  // Only the horizontal margin has to clear the close button (the sheet's
+  // right edge already sits left of it), so vertical margin stays small and
+  // the height goes to the portrait figures, which are height-limited.
+  max-height: calc(100vh - 48px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body:not(.glightbox-mobile) .glightbox-container .gslide-description {
+  background: transparent;
+  border-left: 1px solid var(--line);
+}
+body:not(.glightbox-mobile) .glightbox-container .gslide-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+// Below 1280px, and on phones and tablets (glightbox-mobile = touch device or
+// width <= 768): image only. The caption sits directly under the figure in the
+// page, one tap away.
+// - On phones, glightbox lays the caption over the image, which covers the
+//   figure when the caption is academic prose rather than a photo credit.
+// - Between 769 and 1279px the 275px caption column costs the wide figures
+//   more than it is worth: measured at 1100px, a landscape figure opened at
+//   703px beside its caption while the same figure is 834px in the page — the
+//   lightbox made it smaller. At 1280px the two are level (883 vs 870); above
+//   that the lightbox enlarges. Portrait figures are height-limited in either
+//   mode, so they lose nothing here.
+// Every figure is its own one-image gallery, so there is no swiping between
+// figures that would need a FIG. N label to stay oriented.
+.glightbox-mobile .glightbox-container .gslide-description {
+  display: none !important;
+}
+// The close button sits in the top-right 50px. On a short phone the two
+// portrait figures grew into it, so keep the image clear of that band above
+// and below (it stays vertically centred). dvh tracks the collapsing URL bar
+// where supported.
+.glightbox-mobile .glightbox-container .gslide-image img {
+  max-height: calc(100vh - 112px);
+  max-height: calc(100dvh - 112px);
+}
+@media (max-width: 1279.98px) {
+  .glightbox-container .gslide-description {
+    display: none !important;
+  }
+}
+
+// Each figure is a one-image gallery, so glightbox marks prev/next as
+// disabled and hidden but still draws them at 10% opacity on the sheet's edge.
+.glightbox-container .gbtn.glightbox-button-hidden {
+  display: none;
+}
+
 // Table captions sit above their table, so the 11px gap goes the other way
 .quarto-float-caption-top {
   margin-top: 0;

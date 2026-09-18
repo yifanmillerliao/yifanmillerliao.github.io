@@ -27,7 +27,15 @@ website:
 execute:
   freeze: auto
 
-lightbox: auto
+lightbox:
+  # `match: auto` is the standing decision: every figure opens in the lightbox,
+  # not only wide ones. The shorthand `lightbox: auto` supplied it implicitly.
+  match: auto
+  # Captions sit beside the figure, not under it. Stacked below, a long caption
+  # takes height from the image, and the two portrait figures (FIG. 7, FIG. 10)
+  # collapsed into narrow strips. On phones glightbox ignores this; see
+  # custom.scss for the phone treatment.
+  desc-position: right
 
 format:
   html:
