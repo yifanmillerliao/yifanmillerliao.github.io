@@ -270,6 +270,24 @@ figcaption,
   grid-column: page-start-inset / body-end;
 }
 
+// ── Lightbox: the page supplies the paper; the lightbox has no page ──
+// Figures are transparent PNGs (see above). Quarto's lightbox.css paints a
+// paper ground behind them only under body:not(.glightbox-mobile), and
+// glightbox sets that class on phones and tablets, so there the transparent
+// figure composited straight onto a black scrim and its dark lines vanished.
+// Put the paper on the image itself, at every width: a card lifted off the
+// scrim, which is what --lift-2 exists for. Scoped to .glightbox-container so
+// in-page figures are untouched. border-box keeps glightbox's max-width /
+// max-height caps true with the padding included.
+.glightbox-container .gslide-image img {
+  box-sizing: border-box;
+  background: var(--bg);
+  padding: clamp(8px, 2vw, 20px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-fig);
+  box-shadow: var(--lift-2);
+}
+
 // Table captions sit above their table, so the 11px gap goes the other way
 .quarto-float-caption-top {
   margin-top: 0;
