@@ -42,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-c901e9f3b51baf968642423cba09a5b9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-9efecfadb6cd9f6ed93acdd275c1b809.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -207,11 +207,24 @@ ul.task-list li input[type="checkbox"] {
      the reader is actually stuck on. Extend each note's trigger to cover the
      term itself. Quarto builds its tippy instances after this script runs, so
      this waits for load rather than DOMContentLoaded. */
+  /* The term must be immediately before the reference, with nothing but
+     whitespace between. previousElementSibling is not enough: it skips over
+     text nodes, so a run-in bold heading earlier in the same paragraph would
+     be claimed by a note at the end of the sentence. The article has 42 bold
+     spans and only 11 are glossary terms. */
+  function adjacentStrong(ref) {
+    var n = ref.previousSibling;
+    while (n && n.nodeType === 3 && n.nodeValue.trim() === "") {
+      n = n.previousSibling;
+    }
+    return (n && n.nodeType === 1 && n.tagName === "STRONG") ? n : null;
+  }
+
   function linkTermsToNotes() {
     var refs = document.querySelectorAll('a[role="doc-noteref"]');
     Array.prototype.forEach.call(refs, function (ref) {
-      var term = ref.previousElementSibling;
-      if (!term || term.tagName !== "STRONG") return;
+      var term = adjacentStrong(ref);
+      if (!term) return;
       term.classList.add("term-hover");
       if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
       try {

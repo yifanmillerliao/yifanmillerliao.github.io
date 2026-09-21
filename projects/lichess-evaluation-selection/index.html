@@ -64,7 +64,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-c901e9f3b51baf968642423cba09a5b9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-9efecfadb6cd9f6ed93acdd275c1b809.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -190,7 +190,6 @@ window.Quarto = {
   <li><a href="#bias-depends-on-what-you-measure" id="toc-bias-depends-on-what-you-measure" class="nav-link" data-scroll-target="#bias-depends-on-what-you-measure">7. Bias depends on what you measure</a></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">8. Limitations</a></li>
   <li><a href="#conclusion-selection-is-about-both-games-and-players" id="toc-conclusion-selection-is-about-both-games-and-players" class="nav-link" data-scroll-target="#conclusion-selection-is-about-both-games-and-players">9. Conclusion: selection is about both games and players</a></li>
-  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a></li>
   </ul>
@@ -254,7 +253,7 @@ window.Quarto = {
 <section id="a-useful-subset-but-not-a-random-one" class="level2">
 <h2 class="anchored" data-anchor-id="a-useful-subset-but-not-a-random-one">1. A useful subset — but not a random one</h2>
 <p>Lichess publishes millions of rated games each month. Some also contain engine evaluations: a score after each move indicating which side the computer thinks is ahead, and by roughly how much. These annotations are convenient for research that needs engine-based measures, because generating comparable evaluations for millions of positions requires substantial computation.</p>
-<p>But the evaluations are not assigned at random. In November 2017, only 1,078,379 of 14,306,375 standard rated games — 7.54% — contained them.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> A game receives an evaluation only when someone requests analysis,<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> so the evaluated subset reflects users’ choices about which games are worth examining.</p>
+<p>But the evaluations are not assigned at random. In November 2017, only 1,078,379 of 14,306,375 standard rated games (7.54%) contained them.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> A game receives an evaluation only when someone requests analysis,<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> so the evaluated subset reflects users’ choices about which games are worth examining.</p>
 <div id="fig-hero" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-hero-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -307,7 +306,7 @@ FIG.&nbsp;2&nbsp;— Slow time controls are disproportionately likely to be anal
 <section id="why-are-evaluated-games-lower-rated" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="why-are-evaluated-games-lower-rated">3. Why are evaluated games lower-rated?</h2>
 <p>A natural guess is that stronger players review their games more often. It was also one of my prespecified expectations: evaluated games should have higher ratings.</p>
-<p>They do not. Evaluated games average a game rating<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> of 1580, compared with a higher average of 1621 across all games in the full month. That is a 41-point gap in the opposite direction from the one I expected.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<p>They do not. Evaluated games average a <strong>game rating</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> of 1580, compared with a higher average of 1621 across all games in the full month. That is a 41-point gap in the opposite direction from the one I expected.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
 <p>The pooled curve in <a href="#fig-rating-curve" class="quarto-xref">Figure&nbsp;3</a> points in the same direction. Except above 2400, games become less likely to carry an evaluation as rating rises. Why would stronger players appear less likely to analyze their games?</p>
 <div id="fig-rating-curve" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -339,7 +338,7 @@ FIG.&nbsp;3&nbsp;— Pooling all time controls produces a U-shaped relationship 
 </div>
 <p>The initial expectation might simply have been wrong. Before drawing that conclusion, however, the pooled result needed to be taken apart. Section 2 showed that analysis rates differ sharply by time control. The mix of time controls also changes with rating: below 1000, more than a quarter of games are Rapid or Classical; above 2400, 96% are Bullet or Blitz.</p>
 <p>At any rating, the pooled analysis rate is an average of the rates in the six time controls, weighted by how many games each control contributes. Because those weights change across rating bands, the pooled curve combines two sources of variation: analysis behavior may change within a time control, or the mixture of time controls may change. It cannot tell us how much comes from each.</p>
-<p>The same mixture can affect the 41-point difference in average rating. I separated the gap with a Kitagawa decomposition<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. The decomposition splits the 41-point gap into two pieces: how much comes from the evaluated subset containing a different mix of time controls, and how much remains when evaluated and unevaluated games are compared within the same time controls.</p>
+<p>The same mixture can affect the 41-point difference in average rating. I separated the gap with a <strong>Kitagawa decomposition</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. The decomposition splits the 41-point gap into two pieces: how much comes from the evaluated subset containing a different mix of time controls, and how much remains when evaluated and unevaluated games are compared within the same time controls.</p>
 <div id="tbl-kitagawa" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-kitagawa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -375,7 +374,7 @@ TAB.&nbsp;1&nbsp;— Kitagawa decomposition of the 41-point rating gap. Differen
 </div>
 </figure>
 </div>
-<p>Only 24.2% of it (stability interval 22.6–25.8%<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.</p>
+<p>Only 24.2% of it (<strong>stability interval</strong><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> 22.6–25.8%) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.</p>
 <p>The remaining 31 points arise within time controls. In other words, the lower average rating is not mainly an artifact of combining differently centered rating pools. The relationship between rating and analysis itself changes direction across time controls, as <a href="#fig-interaction" class="quarto-xref">Figure&nbsp;4</a> shows.</p>
 <div id="fig-interaction" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
@@ -615,7 +614,7 @@ FIG.&nbsp;8&nbsp;— Analysis is strongly concentrated among games involving par
 <section id="the-time-control-hierarchy-nearly-disappears" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="the-time-control-hierarchy-nearly-disappears">The time-control hierarchy nearly disappears</h3>
 <p>The AUC result shows that participant history adds information. What is more revealing is what happens to the time-control pattern once that information enters the model.</p>
-<p>In the game-feature model, a Classical game had 4.7 times the odds of analysis of a comparable Blitz game. After adding participant history, that odds ratio<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a> falls to 0.99 (95% CI 0.96–1.02). Among games with similar recorded characteristics and participant histories, Classical is therefore no more likely to be analyzed than Blitz.</p>
+<p>In the game-feature model, a Classical game had 4.7 times the odds of analysis of a comparable Blitz game. After adding participant history, that <strong>odds ratio</strong><a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a> falls to 0.99 (95% CI 0.96–1.02). Among games with similar recorded characteristics and participant histories, Classical is therefore no more likely to be analyzed than Blitz.</p>
 <p>This sharply changes the interpretation of the raw pattern. Classical chess is overrepresented 3.3-fold in the evaluated subset, which initially looked like a feature of slow chess itself. But most of that Classical–Blitz difference disappears once players’ prior analysis behavior is taken into account. Bullet (1.06 to 1.00) and Rapid (1.59 to 0.96) show the same collapse toward Blitz, while UltraBullet (to 1.50, 95% CI 1.41–1.60) and Correspondence (to 0.59, 0.55–0.63) move past it in opposite directions.</p>
 <p>This does not prove that time control has no independent role. Participant history is a noisy proxy, especially for players with few other games, and it can absorb many differences between players.<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a> But it shows that much of the apparent time-control hierarchy is associated with who plays and analyzes those games, not just with the games’ recorded features.</p>
 <div id="fig-players" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -843,9 +842,6 @@ TAB.&nbsp;2&nbsp;— Both the size of selection bias and the success of adjustme
 <p>That does not make the evaluated games bad data. It makes them selected data. Game-level weighting can remove much of the discrepancy on variables it was built to balance, and some of the discrepancy on variables it never saw. But the correction is incomplete. It cannot recover categories with little or no evaluated support, and it cannot directly validate engine-derived outcomes such as blunder rates, because those outcomes are unobserved for the games outside the subset.</p>
 <p>The distinction that matters is therefore between how the engine evaluates a game and how that game comes to be evaluated in the first place. The engine may apply the same procedure once a game reaches it, but the sample reaching it has already been shaped by human choices. In this dataset, those choices are structured not only by properties of the games, but also by the people who play and analyze them.</p>
 </section>
-<section id="notes" class="level2">
-<h2 class="anchored" data-anchor-id="notes">Notes</h2>
-</section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <div id="refs" class="references csl-bib-body hanging-indent" role="list">
@@ -873,21 +869,19 @@ TAB.&nbsp;3&nbsp;— Source and verification record for the article’s headline
 <div aria-describedby="tbl-audit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 16%">
-<col style="width: 16%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Claim</th>
 <th>Value</th>
-<th>Table</th>
-<th>Script</th>
-<th>Scope</th>
-<th>Interval</th>
+<th>Output table</th>
+<th>Python script</th>
+<th>Interval method</th>
 </tr>
 </thead>
 <tbody>
@@ -895,224 +889,196 @@ TAB.&nbsp;3&nbsp;— Source and verification record for the article’s headline
 <td>Share of games with evaluations</td>
 <td>7.54% (1,078,379 / 14,306,375)</td>
 <td><code>agg_headline.csv</code></td>
-<td>step1</td>
-<td>full</td>
+<td><code>code_w1/step1_aggregate.py</code></td>
 <td>Wilson</td>
 </tr>
 <tr class="even">
 <td>Classical vs UltraBullet selection</td>
 <td>25.0% vs 4.3% (5.9×)</td>
 <td><code>t3_1_rates.csv</code></td>
-<td>step3</td>
-<td>full</td>
+<td><code>code_w1/step3_selection.py</code></td>
 <td>one-way player bootstrap (B=200; crossed check in appendix)</td>
 </tr>
 <tr class="odd">
 <td>Classical share overstated</td>
 <td>5.6% vs 1.7% (3.32×)</td>
 <td><code>t3_2_composition.csv</code></td>
-<td>step3</td>
-<td>full</td>
+<td><code>code_w1/step3_selection.py</code></td>
 <td>—</td>
 </tr>
 <tr class="even">
 <td>Tournament share understated (§2)</td>
 <td>11.3% vs 16.5%</td>
 <td><code>t3_2_composition.csv</code></td>
-<td>step3</td>
-<td>full</td>
+<td><code>code_w1/step3_selection.py</code></td>
 <td>—</td>
 </tr>
 <tr class="odd">
 <td>Participants’ monthly games (§2)</td>
 <td>368 in evaluated games vs 508 overall</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>see IPW row below</td>
 </tr>
 <tr class="even">
 <td>Rating gap</td>
 <td>eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated</td>
 <td><code>t4_5_elo_balance.csv</code></td>
-<td>step4</td>
-<td>full</td>
+<td><code>code_w1/step4_elo.py</code></td>
 <td>one-way player bootstrap: −40.9 [−42.8, −39.0]</td>
 </tr>
 <tr class="odd">
 <td>Kitagawa split</td>
 <td>24.2% composition / 75.8% within</td>
 <td><code>t4_4_kitagawa.csv</code></td>
-<td>step4</td>
-<td>full</td>
+<td><code>code_w1/step4_elo.py</code></td>
 <td>exact identity; means from lossless counts</td>
 </tr>
 <tr class="even">
 <td>Rating-pool spread</td>
 <td>278 points: median 1733 UltraBullet vs 1455 Classical</td>
 <td><code>t4_1_elo_by_speed.csv</code></td>
-<td>step4</td>
-<td>full</td>
+<td><code>code_w1/step4_elo.py</code></td>
 <td>—</td>
 </tr>
 <tr class="odd">
 <td>Composition shift along rating</td>
 <td>&lt;1000: &gt;25% Rapid+Classical; 2400+: 96% Bullet+Blitz</td>
 <td><code>t4_2_grid.csv</code></td>
-<td>step4</td>
-<td>full</td>
+<td><code>code_w1/step4_elo.py</code></td>
 <td>—</td>
 </tr>
 <tr class="even">
 <td>Six within-control ratios</td>
 <td>0.26 → 3.68, reversal Blitz↔︎Rapid</td>
 <td><code>t4_3_crossover.csv</code></td>
-<td>step4</td>
-<td>full</td>
+<td><code>code_w1/step4_elo.py</code></td>
 <td>one-way player bootstrap on log ratio (B=200; crossed check in appendix)</td>
 </tr>
 <tr class="odd">
 <td>U-shape of marginal rating curve</td>
 <td>10.9% → 6.2% (1800–2000) → 11.3%</td>
 <td><code>t3_4_rate_by_elo.csv</code></td>
-<td>step3</td>
-<td>full</td>
+<td><code>code_w1/step3_selection.py</code></td>
 <td>one-way player bootstrap (B=200; crossed check in appendix)</td>
 </tr>
 <tr class="even">
 <td>Length means / distance</td>
 <td>−3.5 plies / Wasserstein 6.84</td>
 <td><code>t5_2_ply_balance.csv</code></td>
-<td>step5</td>
-<td>full</td>
+<td><code>code_w1/step5_length.py</code></td>
 <td>exact from lossless counts</td>
 </tr>
 <tr class="odd">
 <td>16-fold hump, peak 41–60</td>
 <td>0.65% → 10.4%</td>
 <td><code>t5_1_ply_bins.csv</code></td>
-<td>step5</td>
-<td>full</td>
+<td><code>code_w1/step5_length.py</code></td>
 <td>one-way player bootstrap (B=200; crossed check in appendix)</td>
 </tr>
 <tr class="even">
 <td>Length tail shares (§4)</td>
 <td>≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); &gt;120 plies: 3.86% vs 6.24%</td>
 <td><code>t5_1_ply_bins.csv</code></td>
-<td>step5</td>
-<td>full</td>
+<td><code>code_w1/step5_length.py</code></td>
 <td>—</td>
 </tr>
 <tr class="odd">
 <td>Hump within every control</td>
 <td>6/6 peaks interior</td>
 <td><code>t5_4_ply_by_speed.csv</code></td>
-<td>step5</td>
-<td>full</td>
+<td><code>code_w1/step5_length.py</code></td>
 <td>—</td>
 </tr>
 <tr class="even">
 <td>Zero-evaluation categories</td>
 <td>Unterminated 0/7,592</td>
 <td><code>t3_1_rates.csv</code></td>
-<td>step3</td>
-<td>full</td>
+<td><code>code_w1/step3_selection.py</code></td>
 <td>Wilson upper 0.05%</td>
 </tr>
 <tr class="odd">
 <td>Selection-model AUC (in-sample)</td>
 <td>0.664</td>
 <td><code>t7_2_model_fit.csv</code></td>
-<td>step9</td>
-<td>full</td>
+<td><code>code_w4/step9_model.py</code></td>
 <td>one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665]</td>
 </tr>
 <tr class="even">
 <td>Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band)</td>
 <td>ref = Blitz/1400–1600/41–60/non-tour</td>
 <td><code>t7_1_model_coefs.csv</code></td>
-<td>step9</td>
-<td>full</td>
+<td><code>code_w4/step9_model.py</code></td>
 <td>same bootstrap, per-coefficient CIs</td>
 </tr>
 <tr class="odd">
 <td>In-model closure after IPW (machinery check)</td>
 <td>Classical share 99.2%; mean rating 98.6%; length 72.4%</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>gap CIs from same bootstrap</td>
 </tr>
 <tr class="even">
 <td>Excluded-variable closure after IPW</td>
 <td>29–47% per quantity (fixable median 43%)</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>same</td>
 </tr>
 <tr class="odd">
 <td>Games-per-player after IPW</td>
 <td>368 → 425 (benchmark 508)</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>weighted point CI [418, 433]</td>
 </tr>
 <tr class="even">
 <td>Cannot-fix categories (positivity failures)</td>
 <td>Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>flagged absent-in-selected</td>
 </tr>
 <tr class="odd">
 <td>Harm case (M15)</td>
 <td>Rules infraction: benchmark 0.0069% → weighted 0.0127%</td>
 <td><code>t7_4_threepoint.csv</code></td>
-<td>step10</td>
-<td>full</td>
+<td><code>code_w4/step10_ipw.py</code></td>
 <td>CI [0.0092%, 0.0162%] excludes truth</td>
 </tr>
 <tr class="even">
 <td>Analysis-history gradient</td>
 <td>1.7% → 79.5% analyzed (47-fold) across history bins</td>
 <td><code>t8_4_habit_bins.csv</code></td>
-<td>step11</td>
-<td>full</td>
+<td><code>code_w5/step11_player.py</code></td>
 <td>descriptive counts</td>
 </tr>
 <tr class="odd">
 <td>AUC ladder (in-sample)</td>
 <td>0.664 → 0.827 adding one participant-history variable</td>
 <td><code>t8_3_auc_ladder.csv</code></td>
-<td>step11</td>
-<td>full</td>
+<td><code>code_w5/step11_player.py</code></td>
 <td>one-way player bootstrap: [0.826, 0.828]</td>
 </tr>
 <tr class="even">
 <td>Classical OR collapse</td>
 <td>4.69 [4.51, 4.88] → 0.99 [0.96, 1.02]</td>
 <td><code>t8_2_or_collapse.csv</code></td>
-<td>step11</td>
-<td>full</td>
+<td><code>code_w5/step11_player.py</code></td>
 <td>same bootstrap, both models refit per replicate</td>
 </tr>
 <tr class="odd">
 <td>Hierarchy ends flip</td>
 <td>UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63]</td>
 <td><code>t8_2_or_collapse.csv</code></td>
-<td>step11</td>
-<td>full</td>
+<td><code>code_w5/step11_player.py</code></td>
 <td>same</td>
 </tr>
 <tr class="even">
 <td>Leak demo (leave-one-out justification)</td>
 <td>AUC 0.827 (LOO) vs 0.853 (current game included; invalid)</td>
 <td><code>t8_3_auc_ladder.csv</code></td>
-<td>step11</td>
-<td>full</td>
+<td><code>code_w5/step11_player.py</code></td>
 <td>teaching check, not a result</td>
 </tr>
 </tbody>
@@ -1458,11 +1424,24 @@ TAB.&nbsp;7&nbsp;— Exact analysis rates by participant-history bin, underlying
      the reader is actually stuck on. Extend each note's trigger to cover the
      term itself. Quarto builds its tippy instances after this script runs, so
      this waits for load rather than DOMContentLoaded. */
+  /* The term must be immediately before the reference, with nothing but
+     whitespace between. previousElementSibling is not enough: it skips over
+     text nodes, so a run-in bold heading earlier in the same paragraph would
+     be claimed by a note at the end of the sentence. The article has 42 bold
+     spans and only 11 are glossary terms. */
+  function adjacentStrong(ref) {
+    var n = ref.previousSibling;
+    while (n && n.nodeType === 3 && n.nodeValue.trim() === "") {
+      n = n.previousSibling;
+    }
+    return (n && n.nodeType === 1 && n.tagName === "STRONG") ? n : null;
+  }
+
   function linkTermsToNotes() {
     var refs = document.querySelectorAll('a[role="doc-noteref"]');
     Array.prototype.forEach.call(refs, function (ref) {
-      var term = ref.previousElementSibling;
-      if (!term || term.tagName !== "STRONG") return;
+      var term = adjacentStrong(ref);
+      if (!term) return;
       term.classList.add("term-hover");
       if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
       try {
