@@ -588,17 +588,20 @@ div.callout .callout-toggle::before { color: #41503D; }
   border-radius: 3px;
   transition: background-color .15s, text-decoration-color .15s;
 }
-// Pointing at a term turns it into a small callout: solid rule, sage tint.
-// The feedback is the same language as the popup it is about to open, which
-// is the whole point of keeping the glossary in sage.
+// Pointing at a term firms the rule from dotted to solid. There is no tint
+// behind it: the callout sage #EDEFE8 against the page #F5F2EC is 1.04:1,
+// which is not a faint signal, it is no signal.
+//
+// Keyboard focus is NOT carried by this rule. <strong> is not focusable, so
+// tabbing lands on the footnote superscript next to the term, and the browser's
+// own focus ring on that link is the indicator. Nothing here or elsewhere in
+// this file suppresses it; do not add outline:none to a.footnote-ref. The
+// :has() selector below firms the term's rule at the same time, as a second
+// cue rather than the only one.
 .term-hover:hover,
-.term-hover:focus,
-a.footnote-ref:focus-visible + .term-hover,
 .term-hover:has(+ a.footnote-ref:focus-visible) {
   text-decoration-style: solid;
   text-decoration-color: var(--sage);
-  background-color: $sagetint;
-  box-shadow: 0 0 0 2px #{$sagetint};
 }
 
 // Footnote superscripts: enlarge the hit area, not the glyph. The numerals
