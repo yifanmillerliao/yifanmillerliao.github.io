@@ -35,7 +35,7 @@ bibliography: references.bib
 
 Lichess publishes millions of rated games each month. Some also contain engine evaluations: a score after each move indicating which side the computer thinks is ahead, and by roughly how much. These annotations are convenient for research that needs engine-based measures, because generating comparable evaluations for millions of positions requires substantial computation.
 
-But the evaluations are not assigned at random. In November 2017, only 1,078,379 of 14,306,375 standard rated games — 7.54% — contained them.[^0] A game receives an evaluation only when someone requests analysis,[^3] so the evaluated subset reflects users' choices about which games are worth examining.
+But the evaluations are not assigned at random. In November 2017, only 1,078,379 of 14,306,375 standard rated games (7.54%) contained them.[^0] A game receives an evaluation only when someone requests analysis,[^3] so the evaluated subset reflects users' choices about which games are worth examining.
 
 ![Only 7.54% of standard rated Lichess games in November 2017 carried pre-existing engine evaluations. Because those evaluations appear only after someone requests analysis, this is a small, user-selected subset rather than a random slice of the month.](images/fig_hero_headline.png){#fig-hero}
 
@@ -71,7 +71,7 @@ Time control gives a clear first answer: slower games are overrepresented. Ratin
 
 A natural guess is that stronger players review their games more often. It was also one of my prespecified expectations: evaluated games should have higher ratings.
 
-They do not. Evaluated games average a game rating[^t-gamerating] of 1580, compared with a higher average of 1621 across all games in the full month. That is a 41-point gap in the opposite direction from the one I expected.[^4]
+They do not. Evaluated games average a **game rating**[^t-gamerating] of 1580, compared with a higher average of 1621 across all games in the full month. That is a 41-point gap in the opposite direction from the one I expected.[^4]
 
 The pooled curve in @fig-rating-curve points in the same direction. Except above 2400, games become less likely to carry an evaluation as rating rises. Why would stronger players appear less likely to analyze their games?
 
@@ -91,7 +91,7 @@ The initial expectation might simply have been wrong. Before drawing that conclu
 
 At any rating, the pooled analysis rate is an average of the rates in the six time controls, weighted by how many games each control contributes. Because those weights change across rating bands, the pooled curve combines two sources of variation: analysis behavior may change within a time control, or the mixture of time controls may change. It cannot tell us how much comes from each.
 
-The same mixture can affect the 41-point difference in average rating. I separated the gap with a Kitagawa decomposition[^t-kita]. The decomposition splits the 41-point gap into two pieces: how much comes from the evaluated subset containing a different mix of time controls, and how much remains when evaluated and unevaluated games are compared within the same time controls.
+The same mixture can affect the 41-point difference in average rating. I separated the gap with a **Kitagawa decomposition**[^t-kita]. The decomposition splits the 41-point gap into two pieces: how much comes from the evaluated subset containing a different mix of time controls, and how much remains when evaluated and unevaluated games are compared within the same time controls.
 
 | Source of the rating gap | Contribution | Share |
 |---|---:|---:|
@@ -101,7 +101,7 @@ The same mixture can affect the 41-point difference in average rating. I separat
 
 : Kitagawa decomposition of the 41-point rating gap. Differences in the mix of time controls account for 24.2% of the gap; 75.8% remains within time controls. {#tbl-kitagawa}
 
-Only 24.2% of it (stability interval 22.6–25.8%[^t-stab]) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.
+Only 24.2% of it (**stability interval**[^t-stab] 22.6–25.8%) comes from the mixture of time controls. This part is easy to explain. Lichess maintains a separate rating pool for each time control, and their numerical centers differ: the median game rating is 1733 in UltraBullet but 1455 in Classical. Classical has both the highest analysis rate and the lowest median rating, so its overrepresentation pulls down the evaluated subset’s average. The mechanism is real, but it explains only one quarter of the gap.
 
 The remaining 31 points arise within time controls. In other words, the lower average rating is not mainly an artifact of combining differently centered rating pools. The relationship between rating and analysis itself changes direction across time controls, as @fig-interaction shows.
 
@@ -197,7 +197,7 @@ In other words, after conditioning on the variables used for weighting, whether 
 
 ### Estimating the analysis probabilities
 
-I estimate each game’s analysis probability with a **logistic regression**[^t-logit] fitted to all 14,306,375 games. The model uses time control, a rating band (2000–2200, for example) rather than the exact average rating, a game-length band, tournament status, and a time-control × rating interaction — as we saw earlier, higher-rated games are analyzed less often in fast chess but more often in slow chess, so the interaction is needed.[^t-model-spec]
+I estimate each game’s analysis probability with a **logistic regression**[^t-logit] fitted to all 14,306,375 games. The model uses time control, a rating band (2000–2200, for example) rather than the exact average rating, a game-length band, tournament status, and a time-control × rating interaction — as we saw earlier, higher-rated games are analyzed less often in fast chess but more often in slow chess, so the interaction is needed.[^7]
 
 ### What can the reconstruction test?
 
@@ -294,7 +294,7 @@ A higher AUC means better discrimination. It does not mean the model has explain
 
 The AUC result shows that participant history adds information. What is more revealing is what happens to the time-control pattern once that information enters the model.
 
-In the game-feature model, a Classical game had 4.7 times the odds of analysis of a comparable Blitz game. After adding participant history, that odds ratio[^t-or] falls to 0.99 (95% CI 0.96–1.02). Among games with similar recorded characteristics and participant histories, Classical is therefore no more likely to be analyzed than Blitz.
+In the game-feature model, a Classical game had 4.7 times the odds of analysis of a comparable Blitz game. After adding participant history, that **odds ratio**[^t-or] falls to 0.99 (95% CI 0.96–1.02). Among games with similar recorded characteristics and participant histories, Classical is therefore no more likely to be analyzed than Blitz.
 
 This sharply changes the interpretation of the raw pattern. Classical chess is overrepresented 3.3-fold in the evaluated subset, which initially looked like a feature of slow chess itself. But most of that Classical–Blitz difference disappears once players' prior analysis behavior is taken into account. Bullet (1.06 to 1.00) and Rapid (1.59 to 0.96) show the same collapse toward Blitz, while UltraBullet (to 1.50, 95% CI 1.41–1.60) and Correspondence (to 0.59, 0.55–0.63) move past it in opposite directions.
 
@@ -419,11 +419,9 @@ The distinction that matters is therefore between how the engine evaluates a gam
 
 
 
-## Notes
-
 [^t-logit]: A statistical model for yes-or-no outcomes. Here it combines several game characteristics to estimate the probability that a game carries an evaluation.
 [^t-ipw]: A reweighting method that gives more influence to observations that were less likely to be selected. Here, an evaluated game with estimated analysis probability $p$ receives weight $1/p$, so rarely evaluated kinds of game represent more of their unevaluated counterparts.
-[^t-model-spec]: The predictors enter as categories rather than continuous values. This preserves the rating reversal and the length hump without imposing a single linear shape, but treats games within the same bin as equivalent. Full model details and reference categories are in the appendix.
+[^7]: The predictors enter as categories rather than continuous values. This preserves the rating reversal and the length hump without imposing a single linear shape, but treats games within the same bin as equivalent. Full model details and reference categories are in the appendix.
 [^t-holdout]: Recorded variables chosen in advance and deliberately excluded from the weighting model — not held-out games. If weighting also reduces their discrepancies, that is evidence the adjustment generalizes beyond simply balancing the variables it was built from.
 [^t-gamerating]: A game's rating is the mean of the two players' pre-game ratings.
 [^t-auc]: A measure of how well a model ranks the two groups apart. Here, AUC is the probability that a randomly chosen evaluated game receives a higher predicted analysis probability than a randomly chosen unevaluated game. An AUC of 0.5 corresponds to chance ranking; 1.0 to perfect ranking.
@@ -462,36 +460,36 @@ The distinction that matters is therefore between how the engine evaluates a gam
 
 *Every headline number in the article, with its source.*
 
-| Claim | Value | Table | Script | Scope | Interval |
-|---|---|---|---|---|---|
-| Share of games with evaluations | 7.54% (1,078,379 / 14,306,375) | `agg_headline.csv` | step1 | full | Wilson |
-| Classical vs UltraBullet selection | 25.0% vs 4.3% (5.9×) | `t3_1_rates.csv` | step3 | full | one-way player bootstrap (B=200; crossed check in appendix) |
-| Classical share overstated | 5.6% vs 1.7% (3.32×) | `t3_2_composition.csv` | step3 | full | — |
-| Tournament share understated (§2) | 11.3% vs 16.5% | `t3_2_composition.csv` | step3 | full | — |
-| Participants' monthly games (§2) | 368 in evaluated games vs 508 overall | `t7_4_threepoint.csv` | step10 | full | see IPW row below |
-| Rating gap | eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated | `t4_5_elo_balance.csv` | step4 | full | one-way player bootstrap: −40.9 [−42.8, −39.0] |
-| Kitagawa split | 24.2% composition / 75.8% within | `t4_4_kitagawa.csv` | step4 | full | exact identity; means from lossless counts |
-| Rating-pool spread | 278 points: median 1733 UltraBullet vs 1455 Classical | `t4_1_elo_by_speed.csv` | step4 | full | — |
-| Composition shift along rating | <1000: >25% Rapid+Classical; 2400+: 96% Bullet+Blitz | `t4_2_grid.csv` | step4 | full | — |
-| Six within-control ratios | 0.26 → 3.68, reversal Blitz↔Rapid | `t4_3_crossover.csv` | step4 | full | one-way player bootstrap on log ratio (B=200; crossed check in appendix) |
-| U-shape of marginal rating curve | 10.9% → 6.2% (1800–2000) → 11.3% | `t3_4_rate_by_elo.csv` | step3 | full | one-way player bootstrap (B=200; crossed check in appendix) |
-| Length means / distance | −3.5 plies / Wasserstein 6.84 | `t5_2_ply_balance.csv` | step5 | full | exact from lossless counts |
-| 16-fold hump, peak 41–60 | 0.65% → 10.4% | `t5_1_ply_bins.csv` | step5 | full | one-way player bootstrap (B=200; crossed check in appendix) |
-| Length tail shares (§4) | ≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); >120 plies: 3.86% vs 6.24% | `t5_1_ply_bins.csv` | step5 | full | — |
-| Hump within every control | 6/6 peaks interior | `t5_4_ply_by_speed.csv` | step5 | full | — |
-| Zero-evaluation categories | Unterminated 0/7,592 | `t3_1_rates.csv` | step3 | full | Wilson upper 0.05% |
-| Selection-model AUC (in-sample) | 0.664 | `t7_2_model_fit.csv` | step9 | full | one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665] |
-| Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band) | ref = Blitz/1400–1600/41–60/non-tour | `t7_1_model_coefs.csv` | step9 | full | same bootstrap, per-coefficient CIs |
-| In-model closure after IPW (machinery check) | Classical share 99.2%; mean rating 98.6%; length 72.4% | `t7_4_threepoint.csv` | step10 | full | gap CIs from same bootstrap |
-| Excluded-variable closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | step10 | full | same |
-| Games-per-player after IPW | 368 → 425 (benchmark 508) | `t7_4_threepoint.csv` | step10 | full | weighted point CI [418, 433] |
-| Cannot-fix categories (positivity failures) | Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent | `t7_4_threepoint.csv` | step10 | full | flagged absent-in-selected |
-| Harm case (M15) | Rules infraction: benchmark 0.0069% → weighted 0.0127% | `t7_4_threepoint.csv` | step10 | full | CI [0.0092%, 0.0162%] excludes truth |
-| Analysis-history gradient | 1.7% → 79.5% analyzed (47-fold) across history bins | `t8_4_habit_bins.csv` | step11 | full | descriptive counts |
-| AUC ladder (in-sample) | 0.664 → 0.827 adding one participant-history variable | `t8_3_auc_ladder.csv` | step11 | full | one-way player bootstrap: [0.826, 0.828] |
-| Classical OR collapse | 4.69 [4.51, 4.88] → 0.99 [0.96, 1.02] | `t8_2_or_collapse.csv` | step11 | full | same bootstrap, both models refit per replicate |
-| Hierarchy ends flip | UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63] | `t8_2_or_collapse.csv` | step11 | full | same |
-| Leak demo (leave-one-out justification) | AUC 0.827 (LOO) vs 0.853 (current game included; invalid) | `t8_3_auc_ladder.csv` | step11 | full | teaching check, not a result |
+| Claim | Value | Output table | Python script | Interval method |
+|---|---|---|---|---|
+| Share of games with evaluations | 7.54% (1,078,379 / 14,306,375) | `agg_headline.csv` | `code_w1/step1_aggregate.py` | Wilson |
+| Classical vs UltraBullet selection | 25.0% vs 4.3% (5.9×) | `t3_1_rates.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200; crossed check in appendix) |
+| Classical share overstated | 5.6% vs 1.7% (3.32×) | `t3_2_composition.csv` | `code_w1/step3_selection.py` | — |
+| Tournament share understated (§2) | 11.3% vs 16.5% | `t3_2_composition.csv` | `code_w1/step3_selection.py` | — |
+| Participants' monthly games (§2) | 368 in evaluated games vs 508 overall | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | see IPW row below |
+| Rating gap | eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated | `t4_5_elo_balance.csv` | `code_w1/step4_elo.py` | one-way player bootstrap: −40.9 [−42.8, −39.0] |
+| Kitagawa split | 24.2% composition / 75.8% within | `t4_4_kitagawa.csv` | `code_w1/step4_elo.py` | exact identity; means from lossless counts |
+| Rating-pool spread | 278 points: median 1733 UltraBullet vs 1455 Classical | `t4_1_elo_by_speed.csv` | `code_w1/step4_elo.py` | — |
+| Composition shift along rating | <1000: >25% Rapid+Classical; 2400+: 96% Bullet+Blitz | `t4_2_grid.csv` | `code_w1/step4_elo.py` | — |
+| Six within-control ratios | 0.26 → 3.68, reversal Blitz↔Rapid | `t4_3_crossover.csv` | `code_w1/step4_elo.py` | one-way player bootstrap on log ratio (B=200; crossed check in appendix) |
+| U-shape of marginal rating curve | 10.9% → 6.2% (1800–2000) → 11.3% | `t3_4_rate_by_elo.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200; crossed check in appendix) |
+| Length means / distance | −3.5 plies / Wasserstein 6.84 | `t5_2_ply_balance.csv` | `code_w1/step5_length.py` | exact from lossless counts |
+| 16-fold hump, peak 41–60 | 0.65% → 10.4% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | one-way player bootstrap (B=200; crossed check in appendix) |
+| Length tail shares (§4) | ≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); >120 plies: 3.86% vs 6.24% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | — |
+| Hump within every control | 6/6 peaks interior | `t5_4_ply_by_speed.csv` | `code_w1/step5_length.py` | — |
+| Zero-evaluation categories | Unterminated 0/7,592 | `t3_1_rates.csv` | `code_w1/step3_selection.py` | Wilson upper 0.05% |
+| Selection-model AUC (in-sample) | 0.664 | `t7_2_model_fit.csv` | `code_w4/step9_model.py` | one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665] |
+| Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band) | ref = Blitz/1400–1600/41–60/non-tour | `t7_1_model_coefs.csv` | `code_w4/step9_model.py` | same bootstrap, per-coefficient CIs |
+| In-model closure after IPW (machinery check) | Classical share 99.2%; mean rating 98.6%; length 72.4% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | gap CIs from same bootstrap |
+| Excluded-variable closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | same |
+| Games-per-player after IPW | 368 → 425 (benchmark 508) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | weighted point CI [418, 433] |
+| Cannot-fix categories (positivity failures) | Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | flagged absent-in-selected |
+| Harm case (M15) | Rules infraction: benchmark 0.0069% → weighted 0.0127% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | CI [0.0092%, 0.0162%] excludes truth |
+| Analysis-history gradient | 1.7% → 79.5% analyzed (47-fold) across history bins | `t8_4_habit_bins.csv` | `code_w5/step11_player.py` | descriptive counts |
+| AUC ladder (in-sample) | 0.664 → 0.827 adding one participant-history variable | `t8_3_auc_ladder.csv` | `code_w5/step11_player.py` | one-way player bootstrap: [0.826, 0.828] |
+| Classical OR collapse | 4.69 [4.51, 4.88] → 0.99 [0.96, 1.02] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same bootstrap, both models refit per replicate |
+| Hierarchy ends flip | UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same |
+| Leak demo (leave-one-out justification) | AUC 0.827 (LOO) vs 0.853 (current game included; invalid) | `t8_3_auc_ladder.csv` | `code_w5/step11_player.py` | teaching check, not a result |
 
 : Source and verification record for the article's headline results. Each row links a reported result to its underlying output table, pipeline step, analysis scope, and interval or uncertainty calculation. {#tbl-audit}
 
