@@ -576,11 +576,55 @@ div.callout .callout-toggle::before { color: #41503D; }
 
 // A term with a note attached is explanatory — sage, per the three-colour roles.
 // The dotted rule is what tells the reader the word itself is hoverable.
+// A glossary term: sage, because it explains in place rather than taking the
+// reader somewhere (terracotta's job). The dotted rule says "not a link".
+// text-decoration rather than border-bottom so the rule follows the word
+// across a line break instead of running to the edge of the line box.
 .term-hover {
-  border-bottom: 1px dotted var(--sage);
+  text-decoration: underline dotted var(--sage);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
   cursor: help;
-  transition: border-color .15s, color .15s;
-  &:hover { border-bottom-color: var(--terra); }
+  border-radius: 3px;
+  transition: background-color .15s, text-decoration-color .15s;
+}
+// Pointing at a term turns it into a small callout: solid rule, sage tint.
+// The feedback is the same language as the popup it is about to open, which
+// is the whole point of keeping the glossary in sage.
+.term-hover:hover,
+.term-hover:focus,
+a.footnote-ref:focus-visible + .term-hover,
+.term-hover:has(+ a.footnote-ref:focus-visible) {
+  text-decoration-style: solid;
+  text-decoration-color: var(--sage);
+  background-color: $sagetint;
+  box-shadow: 0 0 0 2px #{$sagetint};
+}
+
+// Footnote superscripts: enlarge the hit area, not the glyph. The numerals
+// render 4-11px wide by 16 tall, which is a pixel hunt with a mouse and worse
+// with a thumb. An invisible ::after gives the anchor a real target without
+// touching the type or the line box.
+a.footnote-ref {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    transform: translate(-50%, -50%);
+  }
+}
+// Touch: iOS asks for 44px, Android 48px. Height is free — it overlaps the
+// line above and below, which carries no other target. Width stays modest so
+// the overlay cannot swallow a neighbouring word.
+@media (pointer: coarse) {
+  a.footnote-ref::after {
+    width: 26px;
+    height: 44px;
+  }
 }
 
 // ── TOC ──────────────────────────────────────────────────────

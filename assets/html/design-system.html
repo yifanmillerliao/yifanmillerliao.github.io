@@ -54,11 +54,24 @@
      the reader is actually stuck on. Extend each note's trigger to cover the
      term itself. Quarto builds its tippy instances after this script runs, so
      this waits for load rather than DOMContentLoaded. */
+  /* The term must be immediately before the reference, with nothing but
+     whitespace between. previousElementSibling is not enough: it skips over
+     text nodes, so a run-in bold heading earlier in the same paragraph would
+     be claimed by a note at the end of the sentence. The article has 42 bold
+     spans and only 11 are glossary terms. */
+  function adjacentStrong(ref) {
+    var n = ref.previousSibling;
+    while (n && n.nodeType === 3 && n.nodeValue.trim() === "") {
+      n = n.previousSibling;
+    }
+    return (n && n.nodeType === 1 && n.tagName === "STRONG") ? n : null;
+  }
+
   function linkTermsToNotes() {
     var refs = document.querySelectorAll('a[role="doc-noteref"]');
     Array.prototype.forEach.call(refs, function (ref) {
-      var term = ref.previousElementSibling;
-      if (!term || term.tagName !== "STRONG") return;
+      var term = adjacentStrong(ref);
+      if (!term) return;
       term.classList.add("term-hover");
       if (!ref._tippy || typeof ref._tippy.setProps !== "function") return;
       try {
