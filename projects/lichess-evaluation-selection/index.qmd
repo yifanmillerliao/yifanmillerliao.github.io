@@ -29,7 +29,7 @@ format:
 bibliography: references.bib
 ---
 
-*Data: Lichess open database, November 2017. Methods, data provenance, and code availability: [Appendix D](#appendix-d).*
+*Data: Lichess open database, November 2017. Methods, diagnostics, and code availability: [the appendix](#appendix).*
 
 ## 1. A useful subset — but not a random one
 
@@ -428,7 +428,7 @@ The distinction that matters is therefore between how the engine evaluates a gam
 [^t-or]: An odds ratio compares the odds of an outcome between two groups. A ratio of 1 means equal odds; above 1 means the first group has higher odds, below 1 means lower. Here the comparison is against Blitz at the model's reference profile.
 [^t-kita]: A decomposition that splits a difference in group averages into a composition component and a within-group component. I use the symmetric (midpoint-weighted) version here; the formula and alternative conventions are described in the appendix.
 [^t-stab]: A 95% interval obtained by resampling players rather than individual games. It describes how stable the result is to changes in player composition while preserving the clustering of games within players.
-[^t-history]: For each game, participant history is the average of the two players' leave-one-out analysis rates among their other games that month. It is a retrospective within-month measure, not a record of behaviour strictly before the focal game.
+[^t-history]: For each game, participant history is the average of the participants' leave-one-out analysis rates among their other games that month. It is a retrospective within-month measure, not a record of behaviour strictly before the focal game.
 [^t-proxy]: A proxy variable is an observed measurement used as an imperfect stand-in for something that cannot be observed directly. Here, participant history could partly stand in for underlying differences between players.
 [^t-over]: Overadjustment occurs when controlling for a variable removes part of the relationship you are trying to study, because that variable already lies on, or carries part of, the relevant pathway.
 
@@ -456,78 +456,338 @@ The distinction that matters is therefore between how the engine evaluates a gam
 
 ## Appendix
 
-### A. Headline-claims audit table (§1–§7)
+The appendix is organised as an audit layer rather than a second version of the
+article. Appendix A defines what was analysed, B specifies the methods, C reports
+what happened when those methods were stress-tested, D gives the exact numbers and
+their provenance, and E covers data, code, and AI assistance.
 
-*Every headline number in the article, with its source.*
+### A. Data scope and analysis definitions
 
-| Claim | Value | Output table | Python script | Interval method |
-|---|---|---|---|---|
-| Share of games with evaluations | 7.54% (1,078,379 / 14,306,375) | `agg_headline.csv` | `code_w1/step1_aggregate.py` | Wilson |
-| Classical vs UltraBullet selection | 25.0% vs 4.3% (5.9×) | `t3_1_rates.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200; crossed check in appendix) |
-| Classical share overstated | 5.6% vs 1.7% (3.32×) | `t3_2_composition.csv` | `code_w1/step3_selection.py` | — |
-| Tournament share understated (§2) | 11.3% vs 16.5% | `t3_2_composition.csv` | `code_w1/step3_selection.py` | — |
-| Participants' monthly games (§2) | 368 in evaluated games vs 508 overall | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | see IPW row below |
-| Rating gap | eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated | `t4_5_elo_balance.csv` | `code_w1/step4_elo.py` | one-way player bootstrap: −40.9 [−42.8, −39.0] |
-| Kitagawa split | 24.2% composition / 75.8% within | `t4_4_kitagawa.csv` | `code_w1/step4_elo.py` | exact identity; means from lossless counts |
-| Rating-pool spread | 278 points: median 1733 UltraBullet vs 1455 Classical | `t4_1_elo_by_speed.csv` | `code_w1/step4_elo.py` | — |
-| Composition shift along rating | <1000: >25% Rapid+Classical; 2400+: 96% Bullet+Blitz | `t4_2_grid.csv` | `code_w1/step4_elo.py` | — |
-| Six within-control ratios | 0.26 → 3.68, reversal Blitz↔Rapid | `t4_3_crossover.csv` | `code_w1/step4_elo.py` | one-way player bootstrap on log ratio (B=200; crossed check in appendix) |
-| U-shape of marginal rating curve | 10.9% → 6.2% (1800–2000) → 11.3% | `t3_4_rate_by_elo.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200; crossed check in appendix) |
-| Length means / distance | −3.5 plies / Wasserstein 6.84 | `t5_2_ply_balance.csv` | `code_w1/step5_length.py` | exact from lossless counts |
-| 16-fold hump, peak 41–60 | 0.65% → 10.4% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | one-way player bootstrap (B=200; crossed check in appendix) |
-| Length tail shares (§4) | ≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); >120 plies: 3.86% vs 6.24% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | — |
-| Hump within every control | 6/6 peaks interior | `t5_4_ply_by_speed.csv` | `code_w1/step5_length.py` | — |
-| Zero-evaluation categories | Unterminated 0/7,592 | `t3_1_rates.csv` | `code_w1/step3_selection.py` | Wilson upper 0.05% |
-| Selection-model AUC (in-sample) | 0.664 | `t7_2_model_fit.csv` | `code_w4/step9_model.py` | one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665] |
-| Conditional odds ratios (Classical 4.69 at ref band; tournament 0.80 additive; UltraBullet 0.94 n.s. at ref band) | ref = Blitz/1400–1600/41–60/non-tour | `t7_1_model_coefs.csv` | `code_w4/step9_model.py` | same bootstrap, per-coefficient CIs |
-| In-model closure after IPW (machinery check) | Classical share 99.2%; mean rating 98.6%; length 72.4% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | gap CIs from same bootstrap |
-| Excluded-variable closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | same |
-| Games-per-player after IPW | 368 → 425 (benchmark 508) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | weighted point CI [418, 433] |
-| Cannot-fix categories (positivity failures) | Abandoned 0.0039% raw vs 0.412% benchmark; Unterminated absent | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | flagged absent-in-selected |
-| Harm case (M15) | Rules infraction: benchmark 0.0069% → weighted 0.0127% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | CI [0.0092%, 0.0162%] excludes truth |
-| Analysis-history gradient | 1.7% → 79.5% analyzed (47-fold) across history bins | `t8_4_habit_bins.csv` | `code_w5/step11_player.py` | descriptive counts |
-| AUC ladder (in-sample) | 0.664 → 0.827 adding one participant-history variable | `t8_3_auc_ladder.csv` | `code_w5/step11_player.py` | one-way player bootstrap: [0.826, 0.828] |
-| Classical OR collapse | 4.69 [4.51, 4.88] → 0.99 [0.96, 1.02] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same bootstrap, both models refit per replicate |
-| Hierarchy ends flip | UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same |
-| Leak demo (leave-one-out justification) | AUC 0.827 (LOO) vs 0.853 (current game included; invalid) | `t8_3_auc_ladder.csv` | `code_w5/step11_player.py` | teaching check, not a result |
+#### Population and unit of analysis
 
-: Source and verification record for the article's headline results. Each row links a reported result to its underlying output table, pipeline step, analysis scope, and interval or uncertainty calculation. {#tbl-audit}
+The target population is the November 2017 Lichess database of standard rated games,
+`lichess_db_standard_rated_2017-11.pgn`. The unit of analysis throughout the article
+is a single game. Chess variants are published by Lichess in separate files and
+casual games are not included in this database, so neither requires an additional
+exclusion.
 
-**Verification chain:** pipeline totals assert against registered constants (step1 exits on mismatch); speed rates cross-checked to two independent legacy implementations, 41/41 exact (`t7_crosscheck.csv`); parser validated against python-chess on a 1,000-game pilot; Wasserstein = eCDF-area identity asserted at runtime; Kitagawa components assert to the exact total.
+The parser was specified to drop records whose player-rating fields are not numeric.
+After that exclusion 14,306,375 games remain, and every quantity in the article is
+computed on that set.
 
-### B. Methods notes
+#### Evaluated-game indicator
 
-**Estimand and intervals (whole article).** November 2017 is treated as a complete finite population: the point values are exact descriptions of that month, carrying no sampling error. The intervals answer a stability question — how much a number would move under a different draw of the month's players — and can equally be read as superpopulation CIs under an independent-player sampling model; nothing in the article depends on the second reading. Wherever the article says "CI", read these stability intervals; Wilson bounds on thin bins are the one exception, kept to display small-count instability (the n = 4 bin, the k = 0 category). Games sharing a player are not independent (41.5% of games are repeat pairings; design effects on headline rates run 6 to 34, so no single correction factor exists). All CIs are one-way player-bootstrap intervals: resample the 276,345 players with replacement, weight each game by its owner's draw count, recompute the entire statistic, B = 200; run once with games assigned to their white player and once to their black, report the wider seat; ratio statistics combine on the log scale. The scheme reads a design effect of 1 on synthetic data with no clustering (a calibration that caught and retired a defective earlier scheme), and the white-seat design effect on the headline rate (12.9) independently matches a closed-form estimate (13.2). A crossed-clustering check (white + black − pairing, à la Cameron–Gelbach–Miller) widens intervals by roughly ×1.4 and changes no conclusion.
+A game is classified as evaluated if its movetext contains at least one `[%eval ...]`
+annotation; the indicator `has_eval` is 1 for such games and 0 otherwise.
 
-**Robustness (drop-Correspondence; §8 note).** Dropping Correspondence entirely (50,489 games, 0.35% of the month, but the control where 21.65% of games are degenerate) moves the headline evaluated share from 7.54% to 7.53%, the rating gap from −40.9 to −41.5 rating points, and the composition share of the Kitagawa split from 24.2% to 24.1%; the five remaining within-control ratios are unchanged by construction, and no conclusion moves. Robustness comparisons are point-value only.
+This definition measures whether an evaluation was present when the monthly dump was
+created. A game analysed only later would still appear as unevaluated in this static
+file.
 
-**Weight truncation (§5 note).** Extreme inverse-probability weights are a standard source of instability, so every quantity was recomputed with the weights winsorized — capped at a threshold, with all smaller weights left untouched. Because every target here is a weighted mean or share, capping renormalizes automatically. Four caps were tried: the 99.9th, 99th and 95th percentiles of the evaluated games' weights (100.7, 40.8 and 26.2, binding on 1,072, 10,776 and 51,334 of the 1,078,379 evaluated games) and a fixed cap of 200 (119 games). Kish effective sample size rises from 753,325 to 835,618 at the 99th percentile, confirming the caps do what they are meant to do.
+The database records the presence of an evaluation but not who requested it. The
+requester may be one of the two players or another person viewing the game
+afterwards, so `has_eval` is treated as a game-level selection indicator rather than
+as an observed decision by a particular player.
 
-The excluded-variable results reported in §5 are insensitive to this. Under the three milder caps, the closure figures for time forfeits, normal terminations, draws and participants' monthly game counts each move by less than one percentage point; even the 95th-percentile cap, which binds on 4.8% of the evaluated subset, moves them by at most 4.5 points. The 29% low end of the reported range is the black-win share, whose initial discrepancy is only 2.7% and whose closure is correspondingly the least stable of the set (28.9% untruncated, 18.7% under the 95th-percentile cap). Two quantities move further, and both movements clarify rather than undercut the reading in §5. Mean-length closure rises from 72.4% to 89.0% under the 99th-percentile cap, which shows that part of the residual length gap is carried by a few very large weights and not only by the width of the length bins. And the rules-infraction estimate — the harm case in §5 — becomes markedly less harmful as the cap tightens (closure −234% untruncated, −126% at the 95th percentile), confirming directly that its failure is driven by a handful of heavily weighted games. Truncation comparisons are point-value only, on the same convention as the drop-Correspondence check above.
+#### Recorded game characteristics
 
-**Data and pipeline.** One pass over the 14,306,375-game dump compresses losslessly into contingency tables (~4 MB; see Appendix D); every §2–§4 headline is recomputed from them and cross-checked 41/41 against two independent implementations; the parser is validated against python-chess on a pilot; distributional identities (Wasserstein = eCDF area; Kitagawa components sum to the exact total) assert at runtime.
+| Variable | Operational definition |
+|---|---|
+| **Game rating** | Mean of the two players' pre-game ratings, $(\text{WhiteElo}+\text{BlackElo})/2$ |
+| **Time control** | Lichess's category, derived from the estimated duration `base + 40 × increment`: under 30 s UltraBullet, under 180 s Bullet, under 480 s Blitz, under 1500 s Rapid, otherwise Classical; a `-` clock field denotes Correspondence |
+| **Game length** | Number of plies, where one ply is one move by one player |
+| **Tournament status** | Indicator that the PGN `Event` field contains `tournament` |
+| **Result** | White win, Black win, or draw, from the PGN result field |
+| **Termination** | Recorded termination category: Normal, Time forfeit, Abandoned, and the rarer categories retained in the data |
+| **Participants' monthly games** | For each game, the average number of games played that month by its two participants |
 
-**Kitagawa decomposition (§3).** With c indexing time controls, w_c the share of games in control c (evaluated set vs. all games) and m_c the mean rating in control c, the gap splits as
+: Operational definitions of the recorded game characteristics used throughout the article. Time control is taken from the clock settings rather than inferred from the event name. {#tbl-a1}
 
-$$\Delta=\sum_c w_c^{\mathrm{ev}}m_c^{\mathrm{ev}}-\sum_c w_c^{\mathrm{all}}m_c^{\mathrm{all}}$$
+#### What is observed for the full population
 
-$$\underbrace{\sum_c\bigl(w_c^{\mathrm{ev}}-w_c^{\mathrm{all}}\bigr)\tfrac{m_c^{\mathrm{ev}}+m_c^{\mathrm{all}}}{2}}_{\text{composition}}\;+\;\underbrace{\sum_c\tfrac{w_c^{\mathrm{ev}}+w_c^{\mathrm{all}}}{2}\bigl(m_c^{\mathrm{ev}}-m_c^{\mathrm{all}}\bigr)}_{\text{within}}\;=\;\Delta,$$
+Time control, ratings, game length, tournament status, result, termination, and
+participant activity are recorded for evaluated and unevaluated games alike. These
+variables therefore have known full-month benchmarks against which the evaluated
+subset can be compared, which is what makes the audit in §5 and §7 possible at all.
 
-an algebraic identity, asserted at runtime. This is the symmetric (midpoint-weighted) convention, invariant to which set is called the baseline. Sequential conventions — weighting composition by baseline means or by evaluated-set means — allocate the split differently; 24.2% is the symmetric convention's allocation, not a unique decomposition; the symmetric convention is the one reported.
+Engine-derived move quantities are different. Position evaluations, evaluation
+swings, blunder rates and the like exist only where engine annotations are present.
+Their full-population values cannot be recovered from this dump, which is the
+limitation §8 returns to.
 
-**Selection model and weighting (§5).** Model:
+### B. Statistical methods
 
-$$\log\frac{\pi}{1-\pi}=\alpha+\beta_{\text{control}}+\beta_{\text{rating band}}+\beta_{\text{length band}}+\beta_{\text{tournament}}+\gamma_{\text{control}\times\text{rating}};$$
+This section specifies what was done. What happened when each procedure was checked
+is reported separately in Appendix C.
 
-654 populated cells, 59 parameters, unpenalized MLE fit by iteratively reweighted least squares; coefficients referenced to a non-tournament Blitz game, rated 1400–1600, 41–60 plies (with the interaction, main effects are contrasts at these reference conditions); full coefficient table with bootstrap CIs in `t7_1_model_coefs.csv`; the fitting identity (predicted analyzed games equal observed analyzed games, column by column) is asserted at every run, worst residual 4 × 10⁻¹⁶. Margins are heavily populated but a few cross-cells are thin. The fallback rule was fixed in code before any output was inspected: a speed-by-rating interaction term is dropped (its games served by main effects) when that margin has zero games, zero evaluated games, or only evaluated games, since its coefficient would otherwise run to a boundary. Two margins trip it: Correspondence below 1000 (no games at all this month — nobody is affected) and Classical above 2400 (exactly two games, both analyzed — two games' predictions, and the weights of those two evaluated games, are served by main effects). At two games in 14.3 million, no headline quantity is sensitive to any reasonable alternative treatment of these cells; the model is best described as a 59-parameter MLE with a declared exception for two empty-or-degenerate interaction cells. AUC is computed in-sample; with 14.3M games against 59 parameters the optimism is negligible, but it is not out-of-sample. Weight diagnostics: largest weight 660 (a cell analyzed 0.15% of the time); Kish effective sample size 753,325 of 1,078,379 (70%) — this reflects weight inequality only, not the player-clustering information loss, which the bootstrap handles separately; the heaviest 1% of weights carry 4.5% of the total. Intervals: one-way player bootstrap, B = 200 per seat (games assigned once to their white and once to their black player, wider seat reported), with the entire pipeline, model refit included, inside every replicate; 400 refits in all, 0 unconverged; the identity-weight path reproduces every point estimate with zero drift. Games-per-player is treated as a fixed covariate of the game (measured in the real month), not re-derived inside replicates. The cell table `t7_3_cells.csv` allows any weight to be recomputed by hand as 1/p̂.
+#### B.1 Stability intervals and player clustering
 
-**Participants' analysis history (§6).** Definition: per game, the leave-one-out share of each seat's player's other games that carry evaluations this month, averaged over the two seats:
+November 2017 is treated as a complete finite population rather than as a random
+sample of games. The descriptive point values in the article are therefore exact
+quantities for that month, carrying no sampling error. The reported intervals answer
+a different question: how much would those quantities move under a different draw of
+the month's players, given that games involving the same players are not independent?
+Repeat pairings are common — 41.5% of games involve a player pair that appears more
+than once — so treating 14.3 million games as 14.3 million independent observations
+would badly overstate precision.
 
-$$h_g=\tfrac12\left(\frac{E_{w(g)}-e_g}{N_{w(g)}-1}+\frac{E_{b(g)}-e_g}{N_{b(g)}-1}\right),$$
+Unless otherwise noted, 95% intervals come from a one-way player bootstrap. The
+276,345 players are resampled with replacement, each game is weighted by how often
+its designated player appears in the resample, and the entire statistic is
+recomputed. The procedure is run twice, once with each game assigned to its White
+player and once to its Black player, with B = 200 replicates per seat; the wider of
+the two intervals is reported.
 
-where $N_p$ and $E_p$ are player $p$'s games and evaluated games this month and $e_g$ is the current game's own evaluation status. The variable does not identify who requested any analysis; the PGN records no requester, and requests may come from non-participants. Entered as fixed bins (0%, 0-5, 5-10, 10-20, 20-50, 50-100%, no-history), reference = exactly 0%. 435 games (0.003%) have no history on either seat. The exactly-0% bin (20,706 games, 3.1% analyzed, above the 0-5% bin's 1.7%) mixes genuine never-analyzers with players whose few other games make the rate uninformative; a measurement artifact, not behavior. History values and bin edges are fixed on the point data and treated as covariates inside the bootstrap (same convention as games-per-player). Both models are refit inside every replicate (B = 200 per seat, 400 refits, 0 unconverged; score equations assert at 4 x 10^-16). Leave-one-out justification: deliberately including the current game inflates in-sample AUC by +0.026 (real data) and +0.16 (synthetic). Collapse validation on known ground truth: on synthetic data where the control effect was pure player composition, the spurious Classical odds ratio read 1.66 with no history term, 1.25 with the LOO proxy, and 1.05 with the true (oracle) history binned identically — the implementation recovers composition fully when measurement is clean, and in that composition-only scenario the noisy proxy attenuates the collapse. This validates the pipeline under that scenario; it says nothing about the direction of any bias in the real data.
+For statistics involving a fitted model, the model is refit inside every replicate
+rather than holding the original coefficients fixed. Ratio statistics are combined on
+the log scale and transformed back afterwards. Quantities that describe a player's
+month as a whole — participants' monthly game counts, and the participant-history
+score of §6 — are measured once on the real data and carried into the replicates as
+fixed game-level covariates rather than being re-derived inside each resample.
 
-### C. Exact tables behind the figures
+These intervals are called **stability intervals** rather than confidence intervals
+because they do not express uncertainty about unobserved November games: the month is
+fully observed. They can equally be read as superpopulation confidence intervals under
+an independent-player sampling model, but nothing in the article depends on that
+second reading. Wilson intervals are used instead for a small number of sparse
+binomial cells, where the purpose is to display the instability caused by very small
+counts rather than to describe player-level stability.
+
+#### B.2 Kitagawa decomposition
+
+To separate the 41-point rating gap into a part associated with differences in
+time-control composition and a part remaining within time controls, I use a symmetric
+Kitagawa decomposition.
+
+Let $w_c^{\mathrm{ev}}$ and $w_c^{\mathrm{all}}$ denote the share of control $c$ in
+the evaluated subset and in the full month, and $m_c^{\mathrm{ev}}$ and
+$m_c^{\mathrm{all}}$ their mean game ratings. The total gap is
+
+$$\Delta=\sum_c w_c^{\mathrm{ev}}m_c^{\mathrm{ev}}-\sum_c w_c^{\mathrm{all}}m_c^{\mathrm{all}}.$$
+
+Using midpoint weights this can be written exactly as
+
+$$\underbrace{\sum_c\bigl(w_c^{\mathrm{ev}}-w_c^{\mathrm{all}}\bigr)\tfrac{m_c^{\mathrm{ev}}+m_c^{\mathrm{all}}}{2}}_{\text{composition}}\;+\;\underbrace{\sum_c\tfrac{w_c^{\mathrm{ev}}+w_c^{\mathrm{all}}}{2}\bigl(m_c^{\mathrm{ev}}-m_c^{\mathrm{all}}\bigr)}_{\text{within}}\;=\;\Delta.$$
+
+The first term measures how much of the rating gap is associated with the evaluated
+subset containing a different mix of time controls; the second measures the rating
+differences that remain within those controls. The identity is asserted at runtime,
+and the group means are computed from lossless counts rather than from rounded
+summaries.
+
+This symmetric convention does not privilege either group as the baseline. Sequential
+conventions — weighting composition by baseline means, or by evaluated-set means —
+allocate the total somewhat differently, so the reported 24.2% composition share
+should be read as the allocation under this stated convention rather than as a unique
+decomposition.
+
+#### B.3 Selection model and inverse-probability weighting
+
+For each game $g$, let $S_g = 1$ if the game carries an evaluation and $0$ otherwise.
+I estimate $\pi_g = P(S_g = 1 \mid X_g)$ with an unpenalised logistic regression:
+
+$$\operatorname{logit}(\pi_g)=\alpha+\beta_{\text{control}}+\beta_{\text{rating band}}+\beta_{\text{length band}}+\beta_{\text{tournament}}+\gamma_{\text{control}\times\text{rating}}.$$
+
+The predictors are time control, game-rating band, game-length band, tournament
+status, and a time-control × rating interaction. The interaction is included because
+the relationship between rating and evaluation reverses across time controls.
+
+Rating is grouped into 200-point bands through the central range, with open-ended
+groups below 1000 and above 2400. Game length uses the same seven categories as the
+main analysis: 0–10, 11–20, 21–40, 41–60, 61–80, 81–120, and more than 120 plies. The
+reference profile is a non-tournament Blitz game rated 1400–1600 and lasting 41–60
+plies; because the model contains an interaction, main effects are contrasts at those
+reference conditions. The fit is an unpenalised maximum-likelihood fit by iteratively
+reweighted least squares, with 59 parameters over 654 populated predictor cells.
+
+For each evaluated game the inverse-probability weight is $w_g = 1/\hat{\pi}_g$, so
+games the model judged unlikely to be evaluated stand in for more of the population.
+For a quantity $Y$ observed among evaluated games, the weighted estimate is
+
+$$\hat{\mu}_{w}=\frac{\sum_{g:S_g=1}w_gY_g}{\sum_{g:S_g=1}w_g},$$
+
+where $Y_g$ is an indicator of category membership for categorical quantities.
+
+Game result, termination, and participants' monthly game counts are deliberately
+excluded from the selection model. Because their full-month values are nevertheless
+observed, they serve as prespecified holdout variables for testing whether the
+adjustment generalises beyond the characteristics used to build the weights.
+
+The headline analysis uses the untruncated weights. Sensitivity to large weights and
+to alternative truncation thresholds is reported in Appendix C.3.
+
+#### B.4 Participant-history construction
+
+Section 6 introduces a participant-level variable intended to capture clustering in
+where evaluations appear.
+
+For player $p$, let $N_p$ be the number of games that player played during the month
+and $E_p$ the number of those games carrying evaluations. For a focal game $g$ with
+evaluation indicator $e_g$, that player's leave-one-out history rate is
+
+$$h_{pg}=\frac{E_p-e_g}{N_p-1},$$
+
+defined whenever the player has at least one other game in the month. Removing the
+focal game prevents its own evaluation status from entering its own predictor.
+
+The game-level participant-history score is the mean of the leave-one-out rates that
+are **available** for the two players. When only one player has other games that
+month, that player's rate is used alone; the 435 games (0.003%) in which neither
+player has another game are assigned to a separate no-history category.
+
+For modelling, the score is entered categorically: exactly 0%, 0–5%, 5–10%, 10–20%,
+20–50%, 50–100%, and no history, with exactly 0% as the reference. The
+participant-history model otherwise uses the same game-level predictors and
+time-control × rating interaction as the selection model above.
+
+The exactly-0% bin deserves a note of its own. It holds 20,706 games and is 3.1%
+analysed, which is *higher* than the 1.7% of the 0–5% bin above it. That
+non-monotonicity is a measurement artefact rather than behaviour: the bin mixes
+genuine never-analysers with players whose handful of other games makes the rate
+uninformative.
+
+"History" is shorthand and not a temporal claim. The score uses the participants'
+other games from the whole month, including games played after the focal game. It is
+a retrospective measure of within-player clustering, not a forecasting variable and
+not a direct measure of any player's underlying tendency to request analysis.
+
+### C. Diagnostics and robustness
+
+Appendix B states what the procedures are. This section reports what happened when
+they were checked against clustering, extreme weights, an unusual time control, and
+the construction of the participant-history score. Except where an interval is quoted,
+the robustness comparisons in C.3 and C.4 are point-value only.
+
+#### C.1 Interval and clustering checks
+
+Games are not independent observations because the same players recur, so the main
+intervals use the player-resampling procedure of Appendix B.1 rather than a
+game-level bootstrap. Design effects on the headline rates run from roughly 6 to 34,
+so no single variance-inflation factor would serve.
+
+Two checks support the scheme. As a calibration, the player bootstrap returns a
+design effect of 12.9 for the overall evaluation rate, close to an independently
+derived closed-form value of 13.2. A more conservative crossed-player check, which
+accounts for clustering through the White player, the Black player, and the pairing
+together, widens the intervals by roughly a factor of 1.4 and changes no substantive
+conclusion. All bootstrap model refits converged.
+
+These checks support reading the reported intervals as measures of player-level
+stability, not as sampling error around an unobserved population.
+
+#### C.2 Selection-model and weight diagnostics
+
+The game-feature selection model is deliberately low-dimensional relative to the data
+it is fit on: 59 parameters over 654 populated predictor cells and 14.3 million games.
+
+Most rating × time-control cells are well supported, but two degenerate margins
+require a fallback, which was fixed in code before any output was inspected: when a
+margin has no games, no evaluated games, or only evaluated games, its interaction term
+is dropped and predictions are supplied by the remaining main effects, since the
+coefficient would otherwise run to a boundary. Two margins trip the rule.
+Correspondence below rating 1000 contains no games at all this month, so nobody is
+affected. Classical above 2400 contains exactly two games, both evaluated; those two
+games' predictions and weights are served by main effects. At two games in 14.3
+million, no headline quantity is sensitive to any reasonable alternative treatment.
+
+The fitted weights are unequal but not dominated by a small tail. The largest weight
+is about 660, corresponding to a cell evaluated roughly 0.15% of the time. The
+heaviest 1% of evaluated games carry 4.5% of the total weight. The Kish effective
+sample size is 753,325, about 70% of the 1,078,379 evaluated games; this measures
+information loss from unequal weights only, not the additional dependence created by
+repeated players, which the bootstrap handles separately.
+
+All reported AUCs are computed in-sample. With 14.3 million games against 59
+parameters the optimism is negligible, but the figures are used to compare
+discrimination between specifications, not as estimates of out-of-sample forecasting
+performance.
+
+#### C.3 Sensitivity to weight truncation
+
+Extreme inverse-probability weights are a standard source of instability, so every
+weighted quantity was recomputed with the weights winsorised — capped at a threshold,
+with all smaller weights untouched. Because every target here is a weighted mean or
+share, capping renormalises automatically. The headline analysis uses the original,
+untruncated weights.
+
+| Truncation rule | Maximum allowed weight | Evaluated games affected |
+|---|---:|---:|
+| Fixed cap of 200 | 200 | 119 |
+| 99.9th percentile | 100.7 | 1,072 |
+| 99th percentile | 40.8 | 10,776 |
+| 95th percentile | 26.2 | 51,334 |
+
+: Weight-truncation rules tested, with the threshold each implies and the number of the 1,078,379 evaluated games whose weight it binds. {#tbl-c5}
+
+The holdout results of §5 are stable under these alternatives. Under the three milder
+caps, the closure figures for time forfeits, normal terminations, draws and
+participants' monthly game counts each move by less than one percentage point; even
+the 95th-percentile cap, which binds on 4.8% of the evaluated subset, moves them by at
+most 4.5 points. The 29% low end of the reported closure range is the black-win share,
+whose initial discrepancy is only 2.7%; its closure is correspondingly the least
+stable of the set, at 28.9% untruncated and 18.7% under the 95th-percentile cap.
+
+Two quantities move further, and both clarify rather than undercut the reading in §5.
+Mean-length closure rises from 72.4% with the original weights to 89.0% under the
+99th-percentile cap, which shows that part of the residual length gap is carried by a
+few very large weights rather than only by the width of the length bins. And the
+rare rules-infraction category — the case in §5 where weighting makes an already-small
+discrepancy worse — becomes markedly less distorted as the cap tightens, with closure
+moving from −234% untruncated to −126% at the 95th percentile. That is direct evidence
+that the failure is driven by a handful of heavily weighted games rather than by a
+broad instability in the weighting procedure.
+
+At the 99th-percentile cap the Kish effective sample size rises from 753,325 to
+835,618, confirming that the caps do what they are meant to do.
+
+#### C.4 Sensitivity to Correspondence games
+
+Correspondence is structurally unlike the live time controls and contains a far larger
+share of degenerate games — 21.65% of its games, against a few per cent elsewhere. I
+therefore repeated the main descriptive calculations after removing all 50,489
+Correspondence games, 0.35% of the month.
+
+The results barely move. The overall evaluated share goes from 7.54% to 7.53%, the
+evaluated-versus-population rating gap from −40.9 to −41.5 points, and the composition
+component of the Kitagawa decomposition from 24.2% to 24.1%. The within-control
+comparisons for the remaining five controls are unchanged by construction.
+
+This shows that the headline descriptive conclusions are not driven by the unusual
+structure of Correspondence games. It is not a general sensitivity analysis over all
+modelling choices.
+
+#### C.5 Participant-history validation
+
+Two checks address the construction of the participant-history score.
+
+First, I tested how much the leave-one-out construction matters. On the real data the
+correctly constructed leave-one-out model has an in-sample AUC of 0.827; if the focal
+game's own evaluation status is allowed into its own history score, the AUC rises to
+0.853. The increase is artificial, because part of the outcome has entered the
+predictor. In a synthetic version of the same check the leakage inflates AUC by about
+0.16.
+
+Second, I tested whether the pipeline behaves sensibly when the data-generating
+mechanism is known. In a synthetic scenario where the apparent time-control difference
+was created entirely by player composition, the Classical-versus-Blitz odds ratio
+reads 1.66 with no participant-history term, 1.25 with the observed leave-one-out
+proxy, and 1.05 when that noisy proxy is replaced by the underlying simulated player
+propensity, binned identically.
+
+The synthetic result has a deliberately limited interpretation. It shows that the
+implementation can recover a composition-driven pattern when player propensity is
+measured cleanly, and that measurement noise in the leave-one-out proxy leaves some
+residual difference. It does not establish that the real Classical–Blitz pattern is
+caused by player composition, and it does not determine the direction or magnitude of
+measurement error in the observed data.
+
+### D. Exact results and audit trail
+
+The main figures emphasise patterns rather than printing every value. This section
+gives the exact numbers behind those figures and records where the article's principal
+quantitative claims come from.
+
+#### D.1 Exact values behind the figures
 
 | Time control | Games | Share analyzed | vs overall |
 |---|---:|---:|---:|
@@ -573,14 +833,105 @@ where $N_p$ and $E_p$ are player $p$'s games and evaluated games this month and 
 | 20-50% | 741,585 | 43.1% |
 | 50-100% | 52,021 | 79.5% |
 
-: Exact analysis rates by participant-history bin, underlying @fig-history. Participant history is the mean of the two players' leave-one-out analysis rates among their other games that month. {#tbl-c4}
+: Exact analysis rates by participant-history bin, underlying @fig-history. Participant history is the average of the participants' leave-one-out analysis rates among their other games that month. {#tbl-c4}
 
-The five bins above hold 14,285,234 games. The remaining 21,141 are the two bins omitted from @fig-history: 20,706 games whose participants have a leave-one-out rate of exactly zero, and 435 whose participants have no other games at all.
+The five bins above hold 14,285,234 games. The remaining 21,141 are the two groups
+omitted from @fig-history: 20,706 games whose participants have a leave-one-out rate
+of exactly zero, and 435 whose participants have no other games at all. Their exact
+values are in the released output tables.
 
-### D. Data, code, and AI assistance {#appendix-d}
+#### D.2 Headline-results audit trail
 
-**Data.** The source file is `lichess_db_standard_rated_2017-11.pgn`, published by Lichess at [database.lichess.org](https://database.lichess.org/) under a Creative Commons CC0 licence. It is not redistributed here; the analysis pipeline reads it directly.
+Each row links a reported result to the pipeline output it is drawn from, the script
+that produces that output, and the interval or verification procedure attached to it.
+File names are the current pipeline's names; when the public repository is released
+they will be mapped to its stable, semantically named outputs.
 
-**Code.** The pipeline — parser, aggregation, bootstrap, selection model, weighting, and every figure here — is being prepared for public release and will be linked from this section; it is available on request in the meantime. Appendix B is written to stand on its own until then: it gives the model specification, the reference cell, the bin edges, the bootstrap scheme and seeds, and the diagnostic values needed to reimplement or check any number in the article.
+| Claim | Value | Output table | Python script | Interval method |
+|---|---|---|---|---|
+| Share of games with evaluations | 7.54% (1,078,379 / 14,306,375) | `agg_headline.csv` | `code_w1/step1_aggregate.py` | Wilson |
+| Classical vs UltraBullet selection | 25.0% vs 4.3% (5.9×) | `t3_1_rates.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200) |
+| Classical share overstated | 5.6% vs 1.7% (3.32×) | `t3_2_composition.csv` | `code_w1/step3_selection.py` | exact shares |
+| Rating gap | eval − all: −40.9 (equivalently eval − unevaluated: −44.2 = −40.9/0.9246); SMD −0.157 vs unevaluated | `t4_5_elo_balance.csv` | `code_w1/step4_elo.py` | one-way player bootstrap: −40.9 [−42.8, −39.0] |
+| Kitagawa split | 24.2% composition / 75.8% within | `t4_4_kitagawa.csv` | `code_w1/step4_elo.py` | exact identity; means from lossless counts |
+| Rating-pool spread | 278 points: median 1733 UltraBullet vs 1455 Classical | `t4_1_elo_by_speed.csv` | `code_w1/step4_elo.py` | descriptive |
+| Six within-control ratios | 0.26 → 3.68, reversal Blitz↔Rapid | `t4_3_crossover.csv` | `code_w1/step4_elo.py` | one-way player bootstrap on log ratio (B=200) |
+| U-shape of marginal rating curve | 10.9% → 6.2% (1800–2000) → 11.3% | `t3_4_rate_by_elo.csv` | `code_w1/step3_selection.py` | one-way player bootstrap (B=200) |
+| Length means / distance | −3.5 plies / Wasserstein 6.84 | `t5_2_ply_balance.csv` | `code_w1/step5_length.py` | exact from lossless counts |
+| 16-fold hump, peak 41–60 | 0.65% → 10.4% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | one-way player bootstrap (B=200) |
+| Length tail shares | ≤10 plies: 0.124% of evaluated vs 1.55% of unevaluated (12.5×); >120 plies: 3.86% vs 6.24% | `t5_1_ply_bins.csv` | `code_w1/step5_length.py` | exact shares |
+| Selection-model AUC (in-sample) | 0.664 | `t7_2_model_fit.csv` | `code_w4/step9_model.py` | one-way player bootstrap, full-pipeline refit (B=200): [0.662, 0.665] |
+| In-model closure after IPW | Classical share 99.2%; mean rating 98.6%; length 72.4% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | gap CIs from same bootstrap |
+| Holdout-variable closure after IPW | 29–47% per quantity (fixable median 43%) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | same |
+| Games-per-player after IPW | 368 → 425 (benchmark 508) | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | weighted point CI [418, 433] |
+| Zero and near-zero overlap | Unterminated 0/7,592 evaluated; Abandoned 0.0039% raw vs 0.412% benchmark | `t3_1_rates.csv`, `t7_4_threepoint.csv` | `code_w1/step3_selection.py`, `code_w4/step10_ipw.py` | Wilson upper 0.05%; flagged absent-in-selected |
+| Harm case | Rules infraction: benchmark 0.0069% → weighted 0.0127% | `t7_4_threepoint.csv` | `code_w4/step10_ipw.py` | CI [0.0092%, 0.0162%] excludes truth |
+| Analysis-history gradient | 1.7% → 79.5% analyzed (47-fold) across history bins | `t8_4_habit_bins.csv` | `code_w5/step11_player.py` | descriptive counts |
+| AUC ladder (in-sample) | 0.664 → 0.827 adding one participant-history variable | `t8_3_auc_ladder.csv` | `code_w5/step11_player.py` | one-way player bootstrap: [0.826, 0.828] |
+| Classical OR collapse | 4.69 [4.51, 4.88] → 0.99 [0.96, 1.02] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same bootstrap, both models refit per replicate |
+| Hierarchy ends flip | UltraBullet 0.94 → 1.50 [1.41, 1.60]; Correspondence 1.26 → 0.59 [0.55, 0.63] | `t8_2_or_collapse.csv` | `code_w5/step11_player.py` | same |
+| Weight truncation sensitivity | Length closure 72.4% → 89.0%; harm case −234% → −126% | `t9_3_truncation.csv` | `code_w6/step13_truncation.py` | point-value only |
 
-**AI assistance.** Code development and visualization were assisted by generative AI; the study design, estimand choices, pre-registered hypotheses, validation checks, interpretation, and final claims were decided and reviewed by the author.
+: Source and verification record for the article's headline results. {#tbl-audit}
+
+The cell table `t7_3_cells.csv` lists the fitted cell probabilities, so any individual
+weight can be recomputed by hand as $1/\hat{\pi}$.
+
+#### Verification notes
+
+The pipeline carries several implementation checks that are separate from the
+statistical robustness work above. Aggregate game counts are asserted against
+registered reference totals, and the run aborts on a mismatch. The PGN parser was
+validated against `python-chess` on a 1,000-game sample. The §2–§4 descriptive rates
+were cross-checked against two independent earlier implementations, agreeing on all 41
+compared quantities. The Kitagawa components are required to sum to the observed
+rating gap, and the one-dimensional Wasserstein distance is checked against its
+equivalent empirical-CDF area representation, both asserted at runtime.
+
+These checks verify that the code computes what it claims to compute. The checks that
+address modelling assumptions and sensitivity are in Appendix C.
+
+### E. Data, code, and AI assistance {#appendix-e}
+
+#### E.1 Data availability
+
+The analysis uses the November 2017 Lichess standard-rated-games database,
+`lichess_db_standard_rated_2017-11.pgn`, published by Lichess at
+[database.lichess.org](https://database.lichess.org/) under the Creative Commons CC0
+public-domain dedication.
+
+The raw PGN is not redistributed here; the pipeline reads the original Lichess file
+directly. One pass over the dump compresses losslessly into contingency tables of
+about 4 MB, and every descriptive result in §2–§4 is recomputed from those tables
+rather than from a re-parse.
+
+#### E.2 Code and reproducibility
+
+The complete analysis code and derived outputs are being prepared for public release
+and will be linked from this section; they are available on request in the meantime.
+The repository will contain the code that parses the PGN, builds the descriptive
+summaries, fits the selection models, performs the weighting and robustness checks,
+constructs the participant-history analysis, and generates every table and figure in
+this article.
+
+It will be organised as a reproducible pipeline rather than as the original research
+workspace: the README documents the required environment, where to obtain the data,
+the execution order, and the mapping from scripts to final outputs. Intermediate
+development files and superseded analyses are not part of the release. Because the
+Lichess database is large, the raw PGN is not included; the compact derived tables
+needed to check the reported results are included where practical.
+
+Until the repository is public, Appendices A–D are written to stand on their own. They
+give the population definition, the model specification, the reference cell, the bin
+edges, the bootstrap scheme, and the diagnostic values needed to reimplement or check
+any number in the article.
+
+#### E.3 AI assistance
+
+Generative AI tools assisted with code development, figure-generation code, and
+final-language editing. The research question, statistical design, choice of methods,
+validation strategy, interpretation of results, and final analytical decisions were
+made by the author.
+
+All reported numerical results were checked against the analysis pipeline rather than
+accepted from generated text.
