@@ -172,10 +172,22 @@ body {
 .sechead h2.anchored .anchorjs-link { display: none; }
 
 // ── Headings ─────────────────────────────────────────────────
+// The ladder has to survive four live levels: the appendix runs to h4.
+// Body text is 18px, so h4 sits level with it and separates by voice instead
+// of size — Sora 600 against Figtree 400 — while h3 moves up to 20px so the
+// two are not a 1px apart. Space does the rest: each level takes more air
+// above it than the one below.
 h1, .h1 { font-size: 35px; letter-spacing: -.028em; font-weight: 700; }
-h2, .h2 { font-size: 24px; letter-spacing: -.02em; font-weight: 600; margin-top: 2.2rem; }
-h3, .h3 { font-size: 19px; letter-spacing: -.015em; font-weight: 600; }
-h4, .h4 { font-size: 17px; font-weight: 600; }
+h2, .h2 { font-size: 24px; letter-spacing: -.02em;  font-weight: 600; margin-top: 2.2rem; }
+h3, .h3 { font-size: 20px; letter-spacing: -.015em; font-weight: 600; margin-top: 2rem; margin-bottom: .55rem; }
+h4, .h4 {
+  font-size: 18px;
+  letter-spacing: -.008em;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 1.7rem;
+  margin-bottom: .4rem;
+}
 
 #title-block-header .title { font-size: 35px; line-height: 1.2; letter-spacing: -.028em; }
 #title-block-header .subtitle {
@@ -362,9 +374,15 @@ body:not(.glightbox-mobile) .glightbox-container .gslide-desc {
 }
 
 // Table captions sit above their table, so the 11px gap goes the other way
-.quarto-float-caption-top {
+// Quarto centres table captions through
+// `figure.quarto-float-tbl figcaption.quarto-float-caption-top` (0,3,2), so a
+// bare class here loses. Figure captions below the image are already left;
+// a table caption above it should read the same way.
+.quarto-float-caption-top,
+figure.quarto-float-tbl figcaption.quarto-float-caption-top {
   margin-top: 0;
   margin-bottom: 11px;
+  text-align: left;
 }
 .quarto-float-tbl { margin: 32px 0; }
 
@@ -399,6 +417,14 @@ table caption, caption {
   margin-bottom: 11px;
   padding: 0;
 }
+// Quarto wraps a table float in .quarto-figure-center, and that text-align
+// cascades into every cell — invisible on numeric columns, but it centres
+// prose, which the appendix's definition table is made of. Cells read flush
+// left; pandoc writes its own inline text-align on aligned columns, and an
+// inline style still wins, so numeric columns keep their alignment.
+table th, table td,
+.table th, .table td { text-align: left; }
+
 table thead th, .table thead th {
   font-family: $font-family-monospace;
   font-size: 12px;
