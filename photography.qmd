@@ -10,7 +10,6 @@ format:
     include-after-body: assets/html/photo-grid.html
 ---
 
-Landscapes and street scenes from the past four years, in China, the United
-States, and Europe.
+Landscapes and street scenes from China, the United States, and Europe.
 
 {{< include _photo-grid.qmd >}}
