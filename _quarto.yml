@@ -4,6 +4,15 @@ project:
   render:
     - "*.qmd"
     - "projects/**/*.qmd"
+  # The full-size original of the hero photograph lives at the repo root for
+  # re-editing; only the stripped, web-sized copies under assets/img are meant
+  # to be published. Excluded here rather than trusted to stay unreferenced.
+  resources:
+    - "!main_page.jpeg"
+    - "!Archive.zip"
+    # Originals kept for re-editing, not for publishing: the chessboard capture
+    # and the reference eval chart the project card was built from.
+    - "!assets/img/source/**"
 
 website:
   title: "Miller Liao"
@@ -17,6 +26,9 @@ website:
 
       - href: projects.qmd
         text: Projects
+
+      - href: photography.qmd
+        text: Photography
 
       - href: about.qmd
         text: About

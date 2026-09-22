@@ -140,12 +140,21 @@ body {
   letter-spacing: -.02em;
   color: var(--ink);
 }
-// The signature: U-curve sparkline drawn from this site's own data (§4, nine rating bins)
-.navbar-brand .spark {
-  width: 62px; height: 16px;
-  color: var(--terra);
-  opacity: .75;
+// Four marks beside the wordmark — statistics, photography, chess, piano —
+// in place of the U-curve sparkline that used to sit here. Decoration only:
+// no link, no hover, aria-hidden. Injected by assets/html/design-system.html
+// because Quarto's navbar template takes no markup.
+.navbar-brand .brand-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--mut);
   flex: none;
+  svg { width: 17px; height: 17px; display: block; }
+}
+@media (max-width: 575.98px) {
+  // On a phone the wordmark and the toggle need the room more than the marks do.
+  .navbar-brand .brand-marks { display: none; }
 }
 .navbar .nav-link {
   color: var(--body) !important;
@@ -725,6 +734,218 @@ a.footnote-ref {
   color: var(--mut);
   font-size: 13.5px;
   margin-top: 48px;
+}
+
+// ── Home hero: the fog photograph ─────────────────────────────
+// Used on index.qmd only. The photograph is Miller's: fog on a forested
+// ridge, pale almost-white cloud in the upper left, the ridge running
+// diagonally from the lower left up to the top right corner, deepest green
+// on the right and lower right. Two rules follow from that:
+//   - the crop anchors top-left, so the fog the text sits on is never the
+//     part that gets cut, and the ridge still crosses the frame;
+//   - the wash is a radial centred on the text, not a flat overlay, so it
+//     fades out before it reaches the green.
+.home-hero {
+  position: relative;
+  margin: 8px 0 64px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-fig);
+  overflow: hidden;
+  background-color: var(--bg);      // holds the text legible before the photo loads
+  background-image:
+    // 1. the column the words sit in, held at full legibility for its whole
+    //    height — the radial alone protected the first line and let the last
+    //    one drift onto the trees. Tilted a few degrees off vertical so the
+    //    edge follows the ridge rather than cutting across it.
+    linear-gradient(96deg,
+      rgba(245, 242, 236, .97) 0%,
+      rgba(245, 242, 236, .95) 34%,
+      rgba(245, 242, 236, .80) 48%,
+      rgba(245, 242, 236, .42) 60%,
+      rgba(245, 242, 236, .12) 72%,
+      rgba(245, 242, 236, 0) 84%),
+    // 2. a lift in the top-left corner, where the fog already is
+    radial-gradient(90% 80% at 2% 4%,
+      rgba(245, 242, 236, .70) 0%,
+      rgba(245, 242, 236, .28) 45%,
+      rgba(245, 242, 236, 0) 78%),
+    // 3. the picture settling into the page at its lower edge
+    linear-gradient(to bottom,
+      rgba(245, 242, 236, 0) 70%,
+      rgba(245, 242, 236, .34) 87%,
+      var(--bg) 100%),
+    url("assets/img/hero-forest.jpg");
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: cover;
+}
+
+.home-hero__copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;   // lets the name outrank the kicker visually
+                            // while the kicker stays first in the source
+  // Both limits matter. The rem cap sets a comfortable measure on a wide
+  // screen; the percentage keeps the column inside the fog when the hero
+  // narrows, which a fixed width does not — at 900px a 30rem column put its
+  // line ends on the trees.
+  max-width: min(30rem, 56%);
+  padding: 46px 48px 44px;
+}
+
+.home-hero__name {
+  order: 1;
+  font-family: $headings-font-family;
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  color: var(--ink);
+  margin: 0;
+}
+// Measured against the real pixels behind it, --sage lands at 3.76:1 here —
+// fine for a rule, short of AA for 12.5px type. This is the design system's
+// text-layer sage (§6), which reads as the same colour and measures 5.4:1.
+.home-hero__kicker {
+  order: 2;
+  font-family: $font-family-monospace;
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #55684F;
+  margin: 12px 0 0;
+}
+.home-hero__lede {
+  order: 3;
+  margin: 18px 0 0;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--body);
+}
+.home-hero__actions {
+  order: 4;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 28px 0 0;
+  .cta { margin-top: 0; padding: 10px 20px; font-size: 14.5px; }
+}
+// Same reasoning: --terra measures 3.45:1 on the washed photo. The deep
+// terracotta from §6's luminance ladder is 7.0:1 and still reads terracotta.
+// The second action is the same button at a lower voice: the page has two
+// doors and the statistics one should still be read first.
+// .cta is defined further down the file, so this needs the extra class to
+// win on specificity rather than order.
+.cta.cta--quiet {
+  background: transparent;
+  color: var(--ink) !important;
+  border: 1px solid #C9C1B4;
+  box-shadow: none;
+  &:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper) !important;
+  }
+}
+
+// ── Photography page ─────────────────────────────────────────
+.photo-plate {
+  margin: 30px 0 8px;
+  figure { margin: 0; }
+  figcaption { margin-top: 11px; }
+}
+
+.home-hero__second {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #8A3A1B;
+  text-underline-offset: 3px;
+  &:hover { color: var(--ink); text-decoration: underline; }
+}
+
+// Credit for the photograph, bottom right of the picture.
+// It carries its own scrim rather than depending on what the crop puts behind
+// it: measured, that corner runs from rgb(102) tree to rgb(245) fog depending
+// on viewport, and no single text colour clears 4.5:1 across that range. At
+// 62% the chip composites to ~110 even over the brightest fog, which holds the
+// light type at about 4.6:1 in the worst case and better everywhere else.
+.home-hero__credit {
+  position: absolute;
+  right: 18px;
+  bottom: 13px;
+  z-index: 2;
+  margin: 0;
+  font-family: $font-family-monospace;
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  // Same voice as the kicker in the opposite corner, a shade darker so it
+  // holds on the fog: measured, that corner runs rgb(178) to rgb(222), where
+  // this reads 5.4:1 to 8.3:1. The faint light halo is insurance for the
+  // mid-tones, not a panel.
+  color: #3F3A34;
+  text-shadow: 0 1px 2px rgba(245, 242, 236, .55);
+}
+
+// The stacked photo is for narrow screens only; on desktop the same picture
+// is the section's background.
+.home-hero__photo { display: none; }
+
+@media (max-width: 999.98px) {
+  // Two things fail below this width, and the second sets the number.
+  // The copy column can no longer stay clear of the trees; and — measured —
+  // the hero grows taller than the photograph's 3:2, so `cover` starts
+  // scaling to height and pushes the forest out of frame sideways: 190px of
+  // it gone at 880px, 46px at 940px, clear by 1000px. So stack below 1000:
+  // words on the warm page colour, photograph underneath at its own crop.
+  .home-hero {
+    background-image: none;
+    border-color: var(--line);
+    margin-bottom: 48px;
+  }
+  .home-hero__copy {
+    max-width: none;
+    padding: 34px 26px 30px;
+  }
+  .home-hero__name { font-size: 34px; }
+  .home-hero__actions {
+    flex-wrap: wrap;
+    gap: 16px 20px;
+  }
+  // Stacked: the credit leaves the picture and sits under it, on the page
+  // colour. Over the photo it would depend on whatever the phone crop happens
+  // to put in that corner — fog in one viewport, trees in the next — and no
+  // single colour survives both without a panel behind it.
+  .home-hero__credit {
+    position: static;
+    padding: 9px 26px 2px;
+    text-align: right;
+    color: var(--mut);
+    text-shadow: none;
+  }
+  .home-hero__photo {
+    display: block;
+    aspect-ratio: 3 / 2;
+    min-height: 200px;
+    border-top: 1px solid var(--line);
+    background-color: var(--bg);
+    background-image: url("assets/img/hero-forest-mobile.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    // Slightly right of centre: keeps the ridge and the green, which is what
+    // the picture is of, rather than a rectangle of empty fog.
+    background-position: 58% 48%;
+  }
+}
+
+@media (max-width: 520px) {
+  // A 3:2 box on a 270px-wide phone is a 180px strip and the ridge falls out
+  // of it. Give the picture more height and let cover trim the sides instead.
+  .home-hero__photo {
+    aspect-ratio: 5 / 4;
+    background-position: 56% 50%;
+  }
 }
 
 // ── Hero: 7:5 asymmetric grid ─────────────────────────────────

@@ -1,5 +1,5 @@
 ---
-pagetitle: "Miller Liao — Statistics & Data Science"
+pagetitle: "Miller Liao — Statistics & Physics, University of Chicago"
 page-layout: full
 toc: false
 listing:
@@ -18,19 +18,26 @@ listing:
 ---
 
 ```{=html}
-<header class="hero">
-  <div class="herogrid">
-    <div>
-      <h1>Statistics &amp; Physics undergraduate at the University of Chicago</h1>
-      <p class="lede">I build statistical projects around real-world questions — data analysis, modeling, and the validation that decides whether the answer holds. My first long piece came out of a chess database; I also spend time behind a camera, at a piano, and somewhere unfamiliar with a map.</p>
-      <a class="cta" href="projects.html">View projects →</a>
-    </div>
-    <div class="heroside">
-      <p><b>Currently</b><br>Selection bias in open chess data<br><br>
-      <b>Working in</b><br>Python · R · Quarto<br><br>
-      <b>Elsewhere</b><br>Photography · piano · maps</p>
-    </div>
+<header class="home-hero">
+  <div class="home-hero__copy">
+    <!-- The kicker precedes the name in source order on purpose: when an h1 is
+         the first block of the document, Quarto lifts it out into its own
+         title block above the hero. CSS puts the name back on top visually. -->
+    <p class="home-hero__kicker">Statistics &amp; Physics · University of Chicago</p>
+    <h1 class="home-hero__name">Miller Liao</h1>
+
+    <p class="home-hero__lede">I study statistics and physics at the University of Chicago. My most recent project asks a question about online chess: which games get analyzed, and how does that shape what we learn from them?</p>
+    <p class="home-hero__lede">Outside my studies, I play piano and chess, and photograph the places I visit, from natural landscapes to everyday life on city streets. This site is currently a collection of my projects and photographs.</p>
+
+    <p class="home-hero__actions">
+      <a class="cta" href="projects.html">View statistics projects →</a>
+      <a class="cta cta--quiet" href="photography.html">View photos →</a>
+    </p>
   </div>
+
+  <div class="home-hero__photo" role="img"
+       aria-label="Fog drifting across a forested ridge in the Siguniang Mountains, China — photograph by Miller Liao"></div>
+  <p class="home-hero__credit">Siguniang Mountains, China · Photo by Miller Liao</p>
 </header>
 
 <div class="sechead">
