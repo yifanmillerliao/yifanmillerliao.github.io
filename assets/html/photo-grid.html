@@ -1,0 +1,98 @@
+<script src="assets/vendor/glightbox/glightbox.min.js"></script>
+<script>
+/*
+ * Masonry for the photography page.
+ *
+ * Places each figure in whichever column is currently shortest, walking the
+ * photographs in data order, so the first ones form the first row and reading
+ * order runs roughly left to right. CSS multi-column is the easy way to get
+ * this shape and the wrong one: it fills each column top to bottom, which
+ * reorders the collection.
+ *
+ * Column count follows the same breakpoints as the rest of the site. The
+ * figures are re-dealt on resize only when the count actually changes.
+ */
+(function () {
+  function columnCount() {
+    var w = window.innerWidth;
+    if (w >= 1000) return 3;
+    if (w >= 620) return 2;
+    return 1;
+  }
+
+  function layout(grid, items) {
+    var n = columnCount();
+    if (grid.dataset.built === String(n)) return;
+    grid.dataset.built = String(n);
+    grid.textContent = "";
+
+    var cols = [];
+    for (var i = 0; i < n; i++) {
+      var c = document.createElement("div");
+      c.className = "photo-col";
+      grid.appendChild(c);
+      cols.push({ el: c, h: 0 });
+    }
+    items.forEach(function (fig) {
+      var target = cols[0];
+      for (var i = 1; i < cols.length; i++) if (cols[i].h < target.h) target = cols[i];
+      target.el.appendChild(fig);
+      // Height is predicted from the photograph's own ratio, not measured, so
+      // the deal does not depend on whether the image has loaded yet.
+      var img = fig.querySelector("img");
+      var ratio = img && img.width && img.height ? img.height / img.width : 0.667;
+      target.h += ratio + 0.24;   // the caption's rough share of a column width
+    });
+  }
+
+  function init() {
+    var grid = document.querySelector(".photo-grid");
+    if (!grid) return;
+    var items = Array.prototype.slice.call(grid.querySelectorAll(".photo-item"));
+    if (!items.length) return;
+    layout(grid, items);
+    var t;
+    window.addEventListener("resize", function () {
+      clearTimeout(t);
+      t = setTimeout(function () { layout(grid, items); }, 120);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<script>
+/*
+ * The gallery's own lightbox.
+ *
+ * Quarto only wires glightbox into pages whose images its own filter created,
+ * and these figures are written by tools/build_photos.py, so the page carries
+ * its own copy of the library and starts it here. That also keeps the article
+ * untouched: it keeps Quarto's instance, one gallery per figure, while this
+ * page is a single gallery of every photograph, with arrows and swipe.
+ */
+(function () {
+  function start() {
+    if (typeof GLightbox !== "function") return;
+    if (!document.querySelector(".photo-grid a.lightbox")) return;
+    GLightbox({
+      selector: ".photo-grid a.lightbox",
+      loop: true,
+      openEffect: "fade",
+      closeEffect: "fade",
+      // Beside a portrait, under a landscape: set per slide below.
+      descPosition: "bottom"
+    });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+})();
+</script>

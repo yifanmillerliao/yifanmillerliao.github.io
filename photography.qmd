@@ -1,12 +1,16 @@
 ---
 title: "Photography"
 pagetitle: "Photography — Miller Liao"
+page-layout: full
 toc: false
+body-classes: page-photos
+format:
+  html:
+    include-in-header: assets/html/photo-head.html
+    include-after-body: assets/html/photo-grid.html
 ---
 
 Landscapes and street scenes from the past four years, in China, the United
-States, and Europe. This page is a placeholder — more of the work is on its way.
+States, and Europe.
 
-::: {.photo-plate}
-![Fog moving through a forested ridge.](assets/img/hero-forest.jpg){.photo-plate__img fig-alt="A forested mountain ridge with fog drifting diagonally across it, pale cloud in the upper left and dense green trees to the lower right"}
-:::
+{{< include _photo-grid.qmd >}}

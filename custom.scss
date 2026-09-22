@@ -850,10 +850,144 @@ a.footnote-ref {
 }
 
 // ── Photography page ─────────────────────────────────────────
-.photo-plate {
-  margin: 30px 0 8px;
-  figure { margin: 0; }
-  figcaption { margin-top: 11px; }
+// A masonry gallery: equal-width columns, every photograph at its own aspect
+// ratio, never cropped. The columns are filled by assets/html/photo-grid.html,
+// which puts each figure in the shortest column in data order — CSS columns
+// would reorder them down each column instead.
+//
+// --mut measures 3.3:1 on the greige page, short of AA for the small caption
+// type, so the captions use a darker step of the same warm grey.
+$mut-text: #736B63;   // 4.7:1 on #F5F2EC
+
+.photo-count {
+  font-family: $font-family-monospace;
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #55684F;
+  margin: -6px 0 30px;
+}
+
+.photo-grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;                       // between columns
+}
+.photo-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 58px;                       // between photographs, clearly larger, so a
+}                                  // caption reads with the picture above it
+
+// Photographs are figures, not cards: no border, no shadow, no hover lift.
+.photo-item {
+  margin: 0;
+  break-inside: avoid;
+}
+.photo-item__link {
+  display: block;
+  line-height: 0;
+  cursor: zoom-in;
+}
+// Quarto adds `figure` and `figure-img` to this markup, which brings the
+// article figure's hairline border with it. Photographs take the frame off
+// again, and need the matching specificity to do it.
+.photo-grid .photo-item img,
+.photo-grid figure img.figure-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 0;
+  border-radius: var(--r-fig);
+  background: var(--bg);           // holds the reserved box before the load
+  box-shadow: none;
+}
+
+.photo-grid figcaption.photo-cap {
+  display: block;
+  margin-top: 13px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
+  line-height: 1.55;
+  text-align: left;
+  font-size: 14.5px !important;    // the global figcaption rule carries !important
+}
+.photo-grid .photo-cap__title {
+  display: block;
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--ink);
+}
+.photo-grid .photo-cap__desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 14.5px;
+  color: var(--body);
+}
+.photo-grid .photo-cap__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  font-family: $font-family-monospace;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: $mut-text;
+}
+
+@media (max-width: 999.98px) { .photo-grid { gap: 22px; } .photo-col { gap: 48px; } }
+@media (max-width: 619.98px) { .photo-col { gap: 40px; } }
+
+// ── Lightbox, only on this page ──────────────────────────────
+// The global rules are tuned for the article's long figure captions: they hide
+// the description below 1280px and on phones. A photo caption is two lines, so
+// here it stays, under the picture on a phone and beside a portrait on a wide
+// screen. Every selector below is scoped to .page-photos so the article's
+// lightbox is untouched.
+body.page-photos {
+  .glightbox-container .gslide-description { display: block !important; }
+
+  .glightbox-container .gslide-desc,
+  .glightbox-container .gslide-title {
+    font-family: $font-family-sans-serif;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--body);
+  }
+  .glightbox-container .gslide-title {
+    font-family: $headings-font-family;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  &.glightbox-mobile .glightbox-container .gslide-description {
+    position: static;
+    max-height: none;
+    background: var(--bg);
+    padding: 14px 18px 20px;
+  }
+  &.glightbox-mobile .glightbox-container .gslide-desc,
+  &.glightbox-mobile .glightbox-container .gslide-title { color: var(--body); }
+  &.glightbox-mobile .glightbox-container .gslide-title { color: var(--ink); }
+  &.glightbox-mobile .glightbox-container .ginner-container {
+    background: var(--bg);
+    border-radius: var(--r-fig);
+    overflow: hidden;
+    height: auto;
+    max-height: 94vh;
+  }
+  &.glightbox-mobile .glightbox-container .gslide-image img {
+    max-height: calc(100vh - 230px);
+    max-height: calc(100dvh - 230px);
+  }
+
+  // One gallery for the page, so the arrows work; glightbox hides them only
+  // when a gallery holds a single slide.
+  .glightbox-container .gbtn.glightbox-button-hidden { display: none; }
 }
 
 .home-hero__second {

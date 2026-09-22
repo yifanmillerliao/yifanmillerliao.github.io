@@ -6,3 +6,5 @@
 .env
 **/*.quarto_ipynb
 
+# Camera originals (~100 MB). Web copies under assets/photos are committed.
+photos-source/

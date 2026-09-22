@@ -13,6 +13,9 @@ project:
     # Originals kept for re-editing, not for publishing: the chessboard capture
     # and the reference eval chart the project card was built from.
     - "!assets/img/source/**"
+    # Camera originals: renamed and read by tools/build_photos.py, never served.
+    # The web copies under assets/photos are what the page loads.
+    - "!photos-source/**"
 
 website:
   title: "Miller Liao"
