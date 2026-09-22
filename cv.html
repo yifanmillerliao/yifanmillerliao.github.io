@@ -42,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-11a0e1da962a2b0ba0ef0836a8805e9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-57de840770c18a9a63cb35689b10a72f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,6 +103,10 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Projects</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./photography.html"> 
+<span class="menu-text">Photography</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
@@ -152,25 +156,37 @@ ul.task-list li input[type="checkbox"] {
 <script>
 /*
  * C2 · Atelier — two DOM touches Quarto's templates do not expose:
- *   1. the signature sparkline beside the wordmark
+ *   1. the four marks beside the wordmark
  *   2. wrapping "FIG. N —" so only the label carries terracotta
  * Everything else is CSS in custom.scss.
  */
 (function () {
-  /* The U-curve is drawn from this site's own data: evaluation rate across the
-     nine rating bins of §4. Path copied verbatim from the approved specimen. */
-  var SPARK =
-    '<svg class="spark" viewBox="0 0 240 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<path d="M 3.0 5.2 L 32.2 10.1 L 61.5 16.2 L 90.8 21.1 L 120.0 27.7 L 149.2 31.0 L 178.5 30.2 L 207.8 29.4 L 237.0 3.0" ' +
-    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
-    '<circle cx="3.0" cy="5.2" r="2.2" fill="currentColor"/>' +
-    '<circle cx="149.2" cy="31.0" r="2.2" fill="currentColor"/>' +
-    '<circle cx="237.0" cy="3.0" r="2.2" fill="currentColor"/></svg>';
+  /* Four marks for what the site collects: statistics, photography, chess,
+     piano. They sit beside the wordmark in the navbar, where the U-curve
+     sparkline used to be. Same stroke weight, same size, one colour. */
+  var MARKS =
+    '<span class="brand-marks" aria-hidden="true">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M3.8 4v16h16.4"/><path d="M6.4 16.9 19.6 7.4"/>' +
+      '<circle cx="7.9" cy="14.3" r="1.15"/><circle cx="11.3" cy="14.9" r="1.15"/>' +
+      '<circle cx="13.9" cy="10.3" r="1.15"/><circle cx="18.2" cy="9.9" r="1.15"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 8.6h2.9l1.5-2.2h7.2l1.5 2.2H20a1.6 1.6 0 0 1 1.6 1.6v6.6A1.6 1.6 0 0 1 20 18.6H4a1.6 1.6 0 0 1-1.6-1.6v-6.6A1.6 1.6 0 0 1 4 8.6Z"/>' +
+      '<circle cx="12" cy="13.4" r="3.1"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M12 2.6v4M10 4.3h4"/>' +
+      '<path d="M12 6.6c-2.9 1.5-4.4 3.4-4.4 5.6 0 2.2 1.5 4 4.4 5.6 2.9-1.6 4.4-3.4 4.4-5.6 0-2.2-1.5-4.1-4.4-5.6Z"/>' +
+      '<path d="M8.4 17.8h7.2l1.1 2.6H7.3Z"/></svg>' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<rect x="2.8" y="6.4" width="18.4" height="11.2" rx="1.4"/>' +
+      '<path d="M8.9 12.6v5"/><path d="M15.1 12.6v5"/>' +
+      '<path d="M7.7 6.4h2.4v6h-2.4zM13.9 6.4h2.4v6h-2.4z" fill="currentColor" stroke="none"/></svg>' +
+    '</span>';
 
-  function addSparkline() {
+  function addBrandMarks() {
     var brand = document.querySelector(".navbar-brand");
-    if (!brand || brand.querySelector(".spark")) return;
-    brand.insertAdjacentHTML("beforeend", SPARK);
+    if (!brand || brand.querySelector(".brand-marks")) return;
+    brand.insertAdjacentHTML("beforeend", MARKS);
   }
 
   /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
@@ -233,7 +249,7 @@ ul.task-list li input[type="checkbox"] {
     });
   }
 
-  function init() { addSparkline(); markFigureNumbers(); }
+  function init() { addBrandMarks(); markFigureNumbers(); }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
