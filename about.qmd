@@ -3,6 +3,12 @@ title: "About"
 toc: false
 ---
 
+```{=html}
+<figure class="about-portrait">
+  <img src="assets/img/about-portrait.jpg" width="640" height="960" alt="">
+</figure>
+```
+
 I am an undergraduate student at the University of Chicago, double majoring in Statistics and Physics.
 
 I am interested in using statistical reasoning, computation, and visualization to understand real-world problems.

@@ -849,6 +849,34 @@ a.footnote-ref {
   }
 }
 
+// ── About page ───────────────────────────────────────────────
+// The portrait sits beside the prose rather than above it, so a page that is
+// still short does not open with a half-screen of photograph. Floated, not
+// gridded, so the text that eventually fills this page wraps around it
+// without the markup changing. No hairline: that frame belongs to figures.
+.about-portrait {
+  float: right;
+  width: 320px;
+  margin: 4px 0 28px 44px;
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 0;
+    border-radius: var(--r-fig);   // the same corner the gallery gives a photograph
+  }
+}
+
+// Below this the text column is too narrow to wrap around 320px of
+// photograph, so the portrait stops floating and leads the page instead.
+@media (max-width: 767.98px) {
+  .about-portrait {
+    float: none;
+    width: min(320px, 68%);
+    margin: 0 0 30px;
+  }
+}
+
 // ── Photography page ─────────────────────────────────────────
 // A masonry gallery: equal-width columns, every photograph at its own aspect
 // ratio, never cropped. The columns are filled by assets/html/photo-grid.html,

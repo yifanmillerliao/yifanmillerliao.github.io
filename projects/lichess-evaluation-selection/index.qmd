@@ -3,7 +3,7 @@ title: "Which Chess Games Get Engine Analysis?"
 subtitle: "A selection-bias audit of 14.3 million Lichess games"
 author: "Miller Liao"
 date: 2026-08-26
-description: "Lichess publishes millions of rated games each month, but engine evaluations appear only when a user requests analysis — in November 2017, just 7.5% of games had them. This project asks whether that convenient subset represents the full population, and how much adjustment can reduce the difference."
+description: "Lichess publishes millions of rated games each month, but engine evaluations appear only when a user requests analysis. In November 2017, just 7.5% of games had them. This project asks whether that convenient subset represents the full population, and how much adjustment can reduce the difference."
 image: images/card_thumbnail.png
 image-alt: "A chessboard dissolving into an engine-evaluation chart: the line rises and falls across a game, with coloured dots marking blunders, mistakes, and strong moves"
 categories:

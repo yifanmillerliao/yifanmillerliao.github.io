@@ -8,3 +8,8 @@
 
 # Camera originals (~100 MB). Web copies under assets/photos are committed.
 photos-source/
+
+# Camera original behind assets/img/about-portrait.jpg (4.4 MB). Same rule as
+# photos-source: the full-resolution file stays local, the stripped web copy
+# is what ships.
+assets/img/source/about-portrait.jpeg
