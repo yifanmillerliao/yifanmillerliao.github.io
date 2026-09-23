@@ -1167,13 +1167,6 @@ body.page-photos {
   }
 }
 
-// A single muted line under a section rule, above the grid
-.sechead-lede {
-  margin: -12px 0 26px;
-  color: var(--mut);
-  font-size: 15.5px;
-}
-
 // ── Project listing ──────────────────────────────────────────
 // The only cards on the site. Card = grouping semantics, not decoration.
 .quarto-listing .list.grid {

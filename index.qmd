@@ -43,7 +43,6 @@ listing:
 <div class="sechead">
   <h2>Selected projects</h2><span class="mono">2026</span>
 </div>
-<p class="sechead-lede">One long-form data story, with more in progress.</p>
 ```
 
 ::: {#project-listing}
