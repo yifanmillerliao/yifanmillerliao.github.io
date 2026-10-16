@@ -13,3 +13,8 @@ photos-source/
 # photos-source: the full-resolution file stays local, the stripped web copy
 # is what ships.
 assets/img/source/about-portrait.jpeg
+
+# Camera original behind assets/img/hero-forest.jpg and hero-forest-mobile.jpg
+# (1.8 MB). Same rule as photos-source: the full-resolution file stays local,
+# the stripped web copies are what ships.
+/main_page.jpeg
