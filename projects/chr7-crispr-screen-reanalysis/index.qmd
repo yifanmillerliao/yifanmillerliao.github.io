@@ -5,7 +5,7 @@ author: "Miller Liao"
 date: 2026-10-14
 description: "Neighboring genes on chromosome 7 turn out to be mildly correlated, but a 2022 CRISPR screen's central comparison — more tumor-suppressor activity inside the chromosome's commonly deleted regions — survives a test that keeps neighbors together."
 image: images/thumbnail.png
-image-alt: "Dots for 108 chromosome 7 genes in chromosome order. Four shaded bands mark the commonly deleted regions; the dark dots inside them tend to sit higher than the grey dots outside."
+image-alt: "Chromosome 7 drawn with its bands and its four commonly deleted regions marked, beside a correlogram of the residual gene scores in chromosome order, in which the neighbor correlation at lag 1 just clears the dashed significance bounds."
 categories:
   - Replication
   - Permutation Tests
