@@ -3,14 +3,14 @@ title: "Rechecking a Chromosome 7 CRISPR Screen"
 subtitle: "Does the deleted-region enrichment hold when neighboring genes are not treated as independent?"
 author: "Miller Liao"
 date: 2026-10-14
-description: "Neighboring genes on chromosome 7 turn out to be mildly correlated, but a 2022 CRISPR screen's central comparison — more tumor-suppressor activity inside the chromosome's commonly deleted regions — survives a test that keeps neighbors together."
+description: "I found that neighboring genes on chromosome 7 are mildly correlated, but the central finding of a 2022 CRISPR screen, that genes inside commonly deleted regions show stronger tumor-suppressor activity, still holds when this local correlation is taken into account."
 image: images/thumbnail.png
 image-alt: "Chromosome 7 drawn with its bands and its four commonly deleted regions marked, beside a correlogram of the residual gene scores in chromosome order, in which the neighbor correlation at lag 1 just clears the dashed significance bounds."
 categories:
-  - Replication
-  - Permutation Tests
-  - Spatial Dependence
   - Genomics
+  - Spatial Dependence
+  - Permutation Tests
+  - R
 order: 2
 format:
   html:
@@ -21,19 +21,21 @@ format:
 bibliography: references.bib
 ---
 
-**Neighboring genes on chromosome 7 score somewhat alike, which the paper's test does not allow for, but the finding that the chromosome's commonly deleted regions are enriched for tumor-suppressor activity still holds under a test that keeps neighboring genes together.**
+Standard statistical tests often assume independent observations. But when genes sit along the same chromosome, that assumption may not hold. This reanalysis examines whether accounting for such dependence changes the evidence for tumor-suppressor enrichment in chromosome 7's commonly deleted regions. It does not: the enrichment still holds under a test that keeps neighboring genes together.
 
-*Data: the supplementary workbook of @baeten2022. Code: a single R script, [available on request](#code).*
+*Data: the supplementary material of the @baeten2022 paper. Code: R script, [available on request](#code).*
 
-## 1. A finding worth a second look
+## 1. A finding worth another look
 
-Acute myeloid leukemia (AML) and **myelodysplastic syndromes**[^t-mds] (MDS) are blood cancers that disrupt the body's ability to produce healthy blood cells. In the U.S. alone, [about 22,700 people are expected to be diagnosed with AML in 2026](https://www.cancer.org/cancer/types/acute-myeloid-leukemia/about/key-statistics.html). One recurring genetic abnormality in both diseases is the loss of chromosome 7, or of part of its long arm (7q). Because such a deletion removes hundreds of genes at once, biologists have long asked which of the missing genes actually contribute to the disease.
+Acute myeloid leukemia and **myelodysplastic syndromes**[^t-mds] are blood cancers that disrupt the body's ability to produce healthy blood cells. In the U.S. alone, about 22,700 people are expected to be diagnosed with acute myeloid leukemia in 2026.[^acs] One recurring genetic abnormality in both diseases is the loss of chromosome 7, or of part of its long arm (7q). Because such a deletion removes hundreds of genes at once, biologists have long asked which of the missing genes actually contribute to the disease.
 
-Earlier studies had mapped several **commonly deleted regions**[^t-cdr] (CDRs) on chromosome 7: stretches lost again and again across patients. Building on this work, @baeten2022 took candidate genes from earlier screens and from within the CDRs, and tested them one at a time with CRISPR. They disrupted each gene in **human blood stem and progenitor cells**[^t-hspc] and measured whether the cells grew faster or became less able to mature into red blood cells — both signs that the gene normally acts as a **tumor suppressor**[^t-tsg].
+![Chromosome 7, drawn to scale from its cytogenetic bands. The centromere separates the short arm, 7p, from the long arm, 7q. The four commonly deleted regions used in the paper all lie on 7q. They span between about 0.3 and 5 million base pairs, and their markers are widened so that the smallest stays visible.](images/fig_chr7_ideogram.png){#fig-chr7}
+
+Earlier studies had mapped several **commonly deleted regions**[^t-cdr] (CDRs) on chromosome 7: stretches lost again and again across patients (@fig-chr7). Building on this work, @baeten2022 took candidate genes from earlier screens and from within the CDRs, and tested them one at a time with CRISPR. They disrupted each gene in **human blood stem and progenitor cells**[^t-hspc] and measured whether the cells grew faster or became less able to mature into red blood cells. Either change suggests that the gene normally acts as a **tumor suppressor**[^t-tsg], whose loss can contribute to cancer.
 
 The researchers combined these measurements into a single score and found that genes inside the CDRs showed significantly stronger tumor-suppressor-like effects than genes outside them (p < 0.0001). That supports an important possibility: the loss of several protective genes together, rather than of one critical gene, may help drive the disease.
 
-Reading this, I wondered about the statistical assumption behind the result. The comparison uses a t-test, which treats each gene's score as an independent observation. But genes sit next to one another on a chromosome, and neighboring genes can share biological functions or regulatory mechanisms. What if their scores are correlated too? Then the CDR genes, packed into four stretches, would carry less independent information than the same number of unrelated genes, much as surveying 52 people from a handful of households tells you less than surveying 52 strangers. The original test might then overstate the strength of the evidence.
+Reading this, I wondered about the statistical assumption behind the result. The comparison uses a t-test, which treats each gene's score as an independent observation. But genes sit next to one another on a chromosome, and neighboring genes can share biological functions or regulatory mechanisms. What if their scores are correlated too? Then the CDR genes, packed into four stretches, would carry less independent information than the same number of unrelated genes. It is like measuring the height of 10 trees growing in two spots rather than 10 trees scattered across a forest: trees that grow side by side share the same conditions, so they tell you less about the forest as a whole. The original test might then overstate the strength of the evidence.
 
 That led to the question behind this project: **does the finding still hold once similarities between neighboring genes are taken into account?**
 
@@ -46,11 +48,11 @@ After removing four experimental controls, the dataset contains 108 genes: 52 in
 ::: {.callout-note collapse="true"}
 ## Data cleaning and discrepancies
 
-**Controls.** I exclude four experimental controls (AAVS1, PTEN, GATA1, and a mock well), which are not chromosome 7 candidate genes.
+**Controls:** I exclude four experimental controls (AAVS1, PTEN, GATA1, and a mock well), which are not chromosome 7 candidate genes.
 
-**A mislabeled gene.** The summary sheet lists RAC1 twice. Cross-checking against another sheet shows that the second entry is TMEM248, a screened gene otherwise missing from the summary. After correcting the label, all 112 scores, controls included, agree across the two sheets.
+**A mislabeled gene:** The summary sheet lists RAC1 twice. Cross-checking against another sheet shows that the second entry is TMEM248, a screened gene otherwise missing from the summary. After correcting the label, all 112 scores, controls included, agree across the two sheets.
 
-**Sample sizes.** The paper reports 53 CDR and 59 non-CDR genes; my cleaned dataset has 52 and 56. The paper's two counts add to 112, the 108 genes plus the four controls, and I could not fully reconcile its split with the supplementary data. Keeping the controls would weaken the result to p ≈ 0.002, while excluding them reproduces the paper's reported p < 0.0001.
+**Sample sizes:** The paper reports 53 CDR and 59 non-CDR genes; my cleaned dataset has 52 and 56. The paper's two counts add to 112, the 108 genes plus the four controls, and I could not fully reconcile its split with the supplementary data. Keeping the controls would weaken the result to p ≈ 0.002, while excluding them reproduces the paper's reported p < 0.0001.
 :::
 
 ## 3. Method
@@ -59,13 +61,17 @@ The analysis asks three questions, in order.
 
 **First, does the original result reproduce?** I rerun the comparison reported in the paper, a Student t-test of CDR against non-CDR scores, on the cleaned data.
 
-**Second, do neighboring genes have similar scores?** The obvious check, correlating each gene's score with the next gene's, is contaminated by the very finding under test: CDR genes sit next to each other *and* score higher, so neighbors would look alike even if the CDR effect were the only thing going on. I therefore first subtract each group's average from its genes' scores, and then ask whether a gene above its own group's average tends to sit next to another that is too. This is a **lag-1 correlation**[^t-lag] of what remains once the CDR effect is removed.
+**Second, do neighboring genes have similar scores?** Simply correlating neighboring genes could be misleading. CDR genes tend to score higher and sit next to each other, so neighbors might look correlated just because they belong to the same group. To check for dependence beyond this group difference, I subtract each group's average score (CDR or non-CDR) from its genes' scores. I then calculate the **lag-1 correlation**[^t-lag] between neighboring genes' remaining scores.
 
-**Third, does the enrichment survive a test that keeps neighbors together?** The question here is: if the CDRs were not specially aligned with higher-scoring genes, how unusual would the observed difference be, compared with other placements of the same CDR pattern?
+**Third, does the enrichment survive a test that keeps neighbors together?** If neighboring genes are positively correlated, high scores may naturally come in clusters. The CDRs could then look enriched simply because they happen to overlap some of those clusters. To see whether the actual CDR locations are unusually enriched, I compare them with alternative placements of the same CDR pattern.
 
-Picture the 108 genes in a row, with the CDR labels marking four stretches of it. Slide the whole pattern of labels one gene to the right, wrapping the last gene round to the front. The gene scores stay fixed; only the labels move, and each stretch keeps its length and its distance from the others. Repeat for every possible shift — there are 108, counting the original placement — and calculate the CDR-minus-rest difference in average score each time. This is a **circular-shift test**[^t-shift]. Shuffling the labels at random instead would break the four stretches into scattered single genes, and with them the neighbor structure the test is meant to keep.
+Picture the 108 genes in a row, with the CDR labels marking four stretches. Slide the entire pattern of labels one gene to the right, wrapping around at the end. The genes and their scores stay fixed; only the labels move. Each stretch keeps its length and its distance from the others. Repeat for every possible shift (108 in total), and calculate the difference in average scores between labeled CDR and non-CDR genes each time.
 
-The circular-shift p-value is the fraction of placements that produce a difference at least as large as the observed one, the original placement included:
+![A circular-shift test, illustrated with 16 hypothetical genes and two CDR stretches; the analysis itself uses 108 genes and four. The gene scores never move. Only the CDR labels slide along the row, keeping their lengths and spacing, and wrap round to the start when they pass the last gene. Each placement gives its own CDR-minus-rest difference: +0.38 for the original placement here, −0.10 after a four-gene shift.](images/fig_shift_diagram.png){#fig-shift-diagram}
+
+If high-scoring genes naturally cluster together, some of these other placements may also produce large differences. Because the test keeps both the neighboring gene scores and the CDR stretches intact, it asks whether the actual CDR locations stand out even against these alternatives. This is a **circular-shift test**[^t-shift]. Shuffling the labels at random instead would break the four stretches into scattered single genes, and with them the neighbor structure the test is meant to keep.
+
+The circular-shift p-value is the fraction of placements that produce a difference at least as large as the observed one, including the original placement:
 
 $$
 p_{\text{shift}} = \frac{\text{number of shifts with a difference} \geq \text{the observed difference}}{\text{total number of shifts}}.
@@ -81,13 +87,13 @@ Genes inside the CDRs average 0.88 on the combined score, against 0.68 for genes
 
 ### Neighboring genes show modest correlation
 
-Before any adjustment, the correlation between neighboring genes' scores is 0.28. After removing the CDR and non-CDR group averages, it falls to 0.21 (nominal p = 0.03).[^1]
+Before any adjustment, the correlation between neighboring genes' scores is 0.28. After removing the CDR and non-CDR group averages, it falls to 0.21 (nominal p = 0.03).[^nominal]
 
 Some similarity between neighboring genes therefore remains even after the overall difference between CDR and non-CDR genes is accounted for. The correlation is modest, but it raises a fair concern: could treating these genes as independent make the original test overly confident?
 
 ### The real CDR placement ranks first
 
-![The real CDR placement (shift 0) produces a larger difference than any of the 107 shifted placements. Each point is one shift of the CDR labels along the ordered genes; the vertical axis is the CDR-minus-rest difference in average score.](images/fig2_circular_shift.png){#fig-shift}
+![The real CDR placement (shift = 0) produces a larger difference than any of the 107 shifted placements. Each point is one shift of the CDR labels along the ordered genes; the vertical axis is the CDR-minus-rest difference in average score. Higher values mean the labeled stretches hold higher-scoring genes than the rest; values below zero mean they hold lower-scoring ones.](images/fig2_circular_shift.png){#fig-shift}
 
 Among all 108 placements, the real one produces the largest difference in average scores (0.20); the next largest is 0.17. Only the real placement reaches a difference this large, so the circular-shift p-value is 1/108 ≈ 0.009, the smallest this test can return. Even with the neighbor structure preserved, the real CDR positions stand out from every alternative.
 
@@ -97,29 +103,27 @@ The main finding is reassuring: the enrichment of tumor-suppressor-like activity
 
 The two p-values, however, should not be compared directly. The t-test's $7.5 \times 10^{-5}$ comes from a model that assumes independent observations, while the circular-shift test's 0.009 compares the real CDR placement with a limited set of alternatives. The second is not a corrected version of the first, and its resolution is capped by the 108 possible shifts.
 
-What the analysis supports is therefore a narrower conclusion: **the CDR enrichment is robust to this particular way of accounting for neighboring genes.** It does not show whether individual genes contribute to cancer, nor does it rule out other forms of dependence or experimental bias. Those questions need further analysis and biological evidence.
+What the analysis supports is therefore a narrower conclusion: **the CDR enrichment is robust to this particular way of accounting for neighboring genes.**
 
 ::: {.callout-note collapse="true"}
 ## Additional statistical checks
 
-**Distributional assumptions.** A rank-based Wilcoxon test also finds a difference between CDR and non-CDR genes ($p = 1.5 \times 10^{-4}$). The original result is therefore not driven by the t-test's normality assumption, although the Wilcoxon test does not address dependence between genes either.
+**Distributional assumptions:** A rank-based Wilcoxon test also finds a difference between CDR and non-CDR genes ($p = 1.5 \times 10^{-4}$). The original result is therefore not driven by the t-test's normality assumption, although the Wilcoxon test does not address dependence between genes either.
 
-**Direction of the comparison.** A two-sided version of the circular-shift test, counting differences at least as extreme in either direction, still finds the original placement to be the only qualifying shift.
+**Direction of the comparison:** A two-sided version of the circular-shift test, counting differences at least as extreme in either direction, still finds the original placement to be the only qualifying shift.
 
-**Uncertainty in the neighbor correlation.** The residual correlation of 0.21 is estimated from 107 adjacent pairs and should not be read as a precise measure of dependence. The circular-shift test does not need this estimate: it keeps the observed sequence of scores intact, whatever its correlation.
+**Uncertainty in the neighbor correlation:** The residual correlation of 0.21 is estimated from 107 adjacent pairs and should not be read as a precise measure of dependence. The circular-shift test does not need this estimate: it keeps the observed sequence of scores intact, whatever its correlation.
 :::
 
 ## 6. Limitations
 
-**Experimental design.** The screen's plate layout was not balanced between CDR and non-CDR genes. In the supplement's plate-by-plate growth data, one plate held 51 CDR genes and no non-CDR genes, another held 56 non-CDR genes and a single CDR gene, and the remaining five held both. Each plate's measurements are normalized to its own AAVS1 control, but any plate-to-plate difference left over would line up with the CDR comparison. This is a different problem from neighbor correlation: a plate effect would already be built into the scores, so no rearrangement of the labels can remove it. Assessing it would need a separate look at the plate-level data and the experimental design, which this reanalysis does not attempt.
+**Experimental design:** The screen's plate layout was not balanced between CDR and non-CDR genes. In the supplement's plate-by-plate growth data, one plate held 51 CDR genes and no non-CDR genes, another held 56 non-CDR genes and a single CDR gene, and the remaining five held both. Each plate's measurements are normalized to its own AAVS1 control, but any plate-to-plate difference left over would line up with the CDR comparison. This is a different problem from neighbor correlation: a plate effect would already be built into the scores, so no rearrangement of the labels can remove it. Assessing it would need a separate look at the plate-level data and the experimental design, which this reanalysis does not attempt.
 
-**Methodological assumptions.** The circular-shift test keeps the observed sequence of scores intact, but preserving that structure is not the same as guaranteeing a fair comparison. The test assumes that, without a real CDR effect, any shifted placement would be as good a reference as the original. If scores ran systematically higher in one part of the chromosome, moving the CDR pattern there would not be a like-for-like comparison. Genes are also spaced by their order along the chromosome, not by physical distance: inside the 7q22.1 region, 28 screened genes sit within about 2 million base pairs, while outside the CDRs consecutive screened genes can be more than 10 million base pairs apart. Dependence between genes that are not neighbors, through a shared pathway or regulator, is not addressed at all.
-
-**Scope.** The two groups were selected differently: genes outside the CDRs entered the screen because earlier studies suggested tumor-suppressor activity, while the CDR group included every eligible expressed gene. If anything, that asymmetry makes the CDR group's advantage harder to achieve, but it means the results describe this screen's genes rather than chromosome 7 as a whole. Finally, this project reexamines one statistical comparison from @baeten2022, not the whole study. The paper also presents a separate machine-learning analysis and further biological experiments, which I have not reassessed.
+**Methodological assumptions:** The circular-shift test keeps the observed sequence of scores intact, but preserving that structure is not the same as guaranteeing that every comparison is fair. The test assumes that, without a real CDR effect, any shifted placement would be as good a reference as the original. If scores ran systematically higher in one part of the chromosome, moving the CDR pattern there would not be a fair comparison. Genes are also spaced by their order along the chromosome, not by physical distance: inside the 7q22.1 region, 28 screened genes sit within about 2 million base pairs, while outside the CDRs consecutive screened genes can be more than 10 million base pairs apart. Dependence between genes that are not neighbors, through a shared pathway or regulator, is not addressed at all.
 
 ## 7. Code and data {#code}
 
-This reanalysis uses the supplementary data from @baeten2022. The complete analysis is a single R script that reproduces the statistical tests and generates both figures.
+This reanalysis uses the supplementary data from @baeten2022. The complete analysis is a single R script that reproduces the statistical tests and generates both results figures.
 
 **Code:** The R script is being prepared for public release and will be linked here. It is available on request in the meantime.
 
@@ -132,7 +136,8 @@ This reanalysis uses the supplementary data from @baeten2022. The complete analy
 [^t-lag]: The correlation between consecutive values in an ordered sequence. Here, the sequence is the genes arranged by chromosome position.
 [^t-shift]: A statistical test that keeps the sequence of gene scores fixed while shifting the CDR labels as one pattern, preserving their arrangement.
 
-[^1]: Each gene appears in two neighboring pairs, so the 107 pairs are not independent observations, and the standard p-value for this correlation is only approximate.
+[^acs]: American Cancer Society, [Key Statistics for Acute Myeloid Leukemia](https://www.cancer.org/cancer/types/acute-myeloid-leukemia/about/key-statistics.html), estimate for 2026.
+[^nominal]: Each gene appears in two neighboring pairs, so the 107 pairs are not independent observations, and the standard p-value for this correlation is only approximate.
 
 ## References
 
