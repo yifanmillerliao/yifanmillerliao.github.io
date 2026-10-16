@@ -9,7 +9,7 @@ listing:
   id: project-listing
   contents: projects
   type: grid
-  grid-columns: 2
+  grid-columns: 1
   fields: [image, title, subtitle, description, categories]
   image-height: 240px
   grid-item-border: true

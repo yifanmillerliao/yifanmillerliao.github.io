@@ -1197,9 +1197,11 @@ body.page-photos {
 
 // ── Project listing ──────────────────────────────────────────
 // The only cards on the site. Card = grouping semantics, not decoration.
+// Every project is a feature card: one column of full-width cards, image
+// left, copy right, so every cover gets the box it is authored for (1.32).
 .quarto-listing .list.grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 34px;
   counter-reset: projnum;
 }
@@ -1226,9 +1228,6 @@ body.page-photos {
   border-radius: var(--r-btn);
   pointer-events: none;
 }
-// Deliberate asymmetry: the first project spans both columns
-.quarto-listing .list.grid > [data-index="0"] { grid-column: span 2; }
-
 .quarto-listing .quarto-grid-link { text-decoration: none; display: block; height: 100%; }
 .quarto-listing .quarto-grid-item {
   background: var(--paper);
@@ -1238,32 +1237,23 @@ body.page-photos {
   overflow: hidden;
   transition: .2s;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: stretch;
 }
 .quarto-listing .quarto-grid-link:hover .quarto-grid-item {
   box-shadow: var(--lift-1);
   transform: translateY(-2px);
   border-color: #D8D0C4;
 }
-// Feature card: image left, copy right
-.quarto-listing .list.grid > [data-index="0"] .quarto-grid-item {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  align-items: stretch;
-}
-.quarto-listing .list.grid > [data-index="0"] .card-img-top {
-  border-right: 1px solid var(--line);
-  border-bottom: 0;
-  height: 100%;
-}
-.quarto-listing .list.grid > [data-index="0"] .card-title { font-size: 25px; }
-
 .quarto-listing .card-img-top {
   margin: 0;
   padding: 0;
   background: var(--paper);
   overflow: hidden;
+  border-right: 1px solid var(--line);
+  border-bottom: 0;
+  height: 100%;
 }
 .quarto-listing .thumbnail-image {
   width: 100%;
@@ -1287,7 +1277,7 @@ body.page-photos {
 .quarto-listing .card-title {
   font-family: $headings-font-family;
   font-weight: 600;
-  font-size: 21px;
+  font-size: 25px;
   line-height: 1.28;
   letter-spacing: -.018em;
   color: var(--ink);
@@ -1366,6 +1356,21 @@ body.page-photos {
 .quarto-grid-item .listing-category { cursor: default; user-select: none; }
 
 // ── Responsive ───────────────────────────────────────────────
+// Cards stack, image on top, below 1140px rather than at the hero's 1000.
+// Side by side, a card is as tall as its copy, and below 1140 the copy
+// outgrows the 1.32 covers. Measured: `cover` cut 12% off each side at
+// 1000px, 6% at 1024 and 2% at 1100. The lichess board sits flush to the
+// left edge, so any side crop shows. From 1140 up the cut is under 0.2%.
+// At the old 860, the boxes went portrait between 861 and 999.
+@media (max-width: 1139.98px) {
+  .quarto-listing .quarto-grid-item { grid-template-columns: 1fr; }
+  .quarto-listing .card-img-top {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .quarto-listing .card-title { font-size: 21px; }
+}
+
 @media (max-width: 860px) {
   .herogrid { grid-template-columns: 1fr; }
   .heroside {
@@ -1375,15 +1380,6 @@ body.page-photos {
   }
   .hero { padding: 56px 0 48px; }
   .hero h1 { font-size: 34px; }
-
-  .quarto-listing .list.grid { grid-template-columns: 1fr; }
-  .quarto-listing .list.grid > [data-index="0"] { grid-column: span 1; }
-  .quarto-listing .list.grid > [data-index="0"] .quarto-grid-item { grid-template-columns: 1fr; }
-  .quarto-listing .list.grid > [data-index="0"] .card-img-top {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .quarto-listing .list.grid > [data-index="0"] .card-title { font-size: 21px; }
 
   .navbar .navbar-container { padding: 16px 20px; }
   .page-layout-full main.content { padding-left: 20px; padding-right: 20px; }
