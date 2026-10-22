@@ -100,6 +100,18 @@ $code-bg:    rgba(196, 98, 60, .07);
   --r-fig: 4px;
 }
 
+// ── Light only ───────────────────────────────────────────────
+// The site has one theme and says so. Left undeclared, browsers that darken
+// pages themselves (Chrome's auto-dark, "Darken websites" on Android) put the
+// figures' dark ink on a dark page — the lichess figures' labels measured
+// 1.0–1.3:1 — and turn the chr7 figures into white boxes. `only light` is
+// honoured per element, so it is declared here, in the color-scheme meta in
+// assets/html/fonts.html, and on the navbar below, whose own plain `light`
+// would let the darkening back in. Two limits, measured in Chrome 155: nothing
+// stops forced dark when the browser itself is set to light, and Dark Reader
+// ignores color-scheme (its darkreader-lock meta is deliberately not used).
+:root { color-scheme: only light; }
+
 // ── Paper: 2.2% fractal-noise overlay. This is the line between "paper" and "a CSS color".
 body {
   background-color: var(--bg);
@@ -113,7 +125,9 @@ body {
 // Quarto hardcodes data-bs-theme="dark" on <nav> (nav-before-body.ejs), so
 // Bootstrap's dark-theme variables apply inside the navbar subtree no matter
 // what $navbar-bg says. Re-assert the light palette for descendants that read
-// the generic variables (the search box, chiefly).
+// the generic variables (the search box, chiefly). The scheme has to be
+// `only light`, like the root's: a plain `light` here lets forced darkening
+// back in for the navbar alone (see Light only, above).
 .navbar[data-bs-theme="dark"] {
   --bs-body-color: #{$bodyink};
   --bs-body-bg: #{$greige};
@@ -122,7 +136,7 @@ body {
   --bs-border-color: #{$line};
   --bs-link-color: #{$terra};
   --bs-link-hover-color: #{$espresso};
-  color-scheme: light;
+  color-scheme: only light;
 }
 
 .navbar {
