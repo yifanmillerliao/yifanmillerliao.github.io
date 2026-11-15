@@ -14,3 +14,27 @@ I am an undergraduate student at the University of Chicago, double majoring in S
 I am interested in using statistical reasoning, computation, and visualization to understand real-world problems.
 
 This page is currently under construction.
+
+:::: {.content-hidden}
+<!--
+Education: not on the page until it has an entry. Write one line per school
+in this form, then delete this block's opening and closing :::: lines.
+
+- [School · degree]{.what} [years]{.when}
+-->
+::: {.about-list}
+## Education
+:::
+::::
+
+:::: {.content-hidden}
+<!--
+Experience: as Education, one line per role, and it stays off the page until
+it has one.
+
+- [Role · organisation]{.what} [years]{.when}
+-->
+::: {.about-list}
+## Experience
+:::
+::::
