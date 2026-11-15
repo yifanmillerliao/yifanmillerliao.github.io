@@ -205,7 +205,7 @@ def write_strip(items):
     fills its width exactly. custom.scss lays the rows out per width.
     """
     shown = [it for it in items if it.get("image") and it.get("width") and it.get("height")]
-    count, span = count_span(items)
+    _, span = count_span(items)
     first = shown[:STRIP_N]
     gap = 12
     ar = [int(it["width"]) / int(it["height"]) for it in first]
@@ -232,12 +232,12 @@ def write_strip(items):
                 f' width="{w}" height="{h}" loading="lazy" decoding="async" alt=""></a>')
     body = "\n".join('  <div class="photo-strip__row">\n' + "\n".join(item(i) for i in r) + "\n  </div>"
                      for r in rows if r)
-    label = f"{count} · {span}" if span else f"{count}"
-    more = f"View all {count} photograph{'s' if count != 1 else ''} →"
+    label = f'<span class="mono">{esc(span)}</span>' if span else ""   # the years, or nothing
+    more = "View all photos →"
     write_if_changed(STRIP,
         "```{=html}\n"
         '<section class="photo-strip">\n'
-        f'<div class="sechead">\n  <h2>Photographs</h2><span class="mono">{esc(label)}</span>\n</div>\n'
+        f'<div class="sechead">\n  <h2>Photographs</h2>{label}\n</div>\n'
         f'<div class="photo-strip__rows">\n{body}\n</div>\n'
         f'<p class="photo-strip__more"><a href="photography.html">{esc(more)}</a></p>\n'
         "</section>\n"
