@@ -873,7 +873,12 @@ footer.footer .nav-footer {
   // screen; the percentage keeps the column inside the fog when the hero
   // narrows, which a fixed width does not — at 900px a 30rem column put its
   // line ends on the trees.
-  max-width: min(30rem, 56%);
+  // 31.5rem (535.5px) is chosen for the hero's height. With the current text,
+  // any column from 511 to 561px sets the two paragraphs in 8 + 4 lines, and
+  // the hero stays inside the photograph's 3:2 at 667px. 30rem sat 3px from a
+  // ninth line, which puts the hero 8% past 3:2. Re-measure when the words
+  // change.
+  max-width: min(31.5rem, 56%);
   padding: 46px 48px 44px;
 }
 
@@ -899,15 +904,30 @@ footer.footer .nav-footer {
   color: #55684F;
   margin: 12px 0 0;
 }
-.home-hero__lede {
+// The opening line. A plain paragraph in the text's own face, one step up and
+// in the deep terracotta: not a heading, not a link, so it has no hover.
+.home-hero__greeting {
   order: 3;
+  margin: 16px 0 0;
+  font-family: $font-family-sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--terra-text);
+  // Below about 400px it needs two lines; split them evenly rather than
+  // leaving "here!" on its own.
+  text-wrap: balance;
+}
+.home-hero__lede {
+  order: 4;
   margin: 18px 0 0;
   font-size: 17px;
   line-height: 1.65;
   color: var(--body);
 }
 .home-hero__actions {
-  order: 4;
+  order: 5;
   display: flex;
   align-items: center;
   gap: 22px;
@@ -1190,13 +1210,14 @@ body.page-photos {
 // is the section's background.
 .home-hero__photo { display: none; }
 
-@media (max-width: 999.98px) {
-  // Two things fail below this width, and the second sets the number.
-  // The copy column can no longer stay clear of the trees; and — measured —
-  // the hero grows taller than the photograph's 3:2, so `cover` starts
-  // scaling to height and pushes the forest out of frame sideways: 190px of
-  // it gone at 880px, 46px at 940px, clear by 1000px. So stack below 1000:
-  // words on the warm page colour, photograph underneath at its own crop.
+@media (max-width: 1159.98px) {
+  // Stack below 1160: words on the warm page colour, photograph underneath at
+  // its own crop. The hero's height sets the number. Side by side, the hero is
+  // as tall as its words (667px with the current text), and once it is taller
+  // than the photograph's 3:2, `cover` scales to height and cuts the forest
+  // off the right. 667px is inside 3:2 from 1001px wide. The hero reaches its
+  // full 1005 in a 1140px window, and at 1160 behind a 15px classic scrollbar.
+  // The number moves with the text: re-measure when the words change.
   .home-hero {
     background-image: none;
     border-color: var(--line);
@@ -1235,6 +1256,13 @@ body.page-photos {
     // the picture is of, rather than a rectangle of empty fog.
     background-position: 58% 48%;
   }
+}
+
+// From 1000 to 1160 the stacked photograph is drawn up to 1005px wide, often
+// on a tablet held sideways at 2x. The 1000px phone copy goes soft there; the
+// full copy is what these windows loaded for the side-by-side hero before.
+@media (min-width: 1000px) and (max-width: 1159.98px) {
+  .home-hero__photo { background-image: url("assets/img/hero-forest.jpg"); }
 }
 
 @media (max-width: 520px) {
@@ -1543,7 +1571,7 @@ body.page-photos {
 .quarto-grid-item .listing-category { cursor: default; user-select: none; }
 
 // ── Responsive ───────────────────────────────────────────────
-// Cards stack, image on top, below 1140px rather than at the hero's 1000.
+// Cards stack, image on top, below 1140px, which is their own number, not the hero's.
 // Side by side, a card is as tall as its copy, and below 1140 the copy
 // outgrows the 1.32 covers. Measured: `cover` cut 12% off each side at
 // 1000px, 6% at 1024 and 2% at 1100. The lichess board sits flush to the
