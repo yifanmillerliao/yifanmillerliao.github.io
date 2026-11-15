@@ -1,9 +1,8 @@
 /*-- scss:defaults --*/
 
 // ─────────────────────────────────────────────────────────────
-// C2 · Atelier, de-templated
+// Atelier, de-templated
 // Three semantic colors (espresso / terracotta / sage) + two neutrals.
-// Spec: design/specimens/C2-atelier-detemplated.html  (specimen wins for pixels)
 // ─────────────────────────────────────────────────────────────
 
 $greige:   #F5F2EC;
@@ -301,7 +300,7 @@ p strong, li strong { color: var(--ink); font-weight: 600; }
 // Figures = hairline border + rule-anchored caption. No shadow, no panel.
 figure, .quarto-float-fig { margin: 36px 0; }
 // Figures are drawn on transparent grounds so the greige page shows through
-// the plot area — printed on the paper, not pasted on it (design-system §6).
+// the plot area — printed on the paper, not pasted on it.
 // A white background here would undo that.
 .quarto-float-fig img,
 figure img.figure-img {
@@ -505,7 +504,7 @@ table tbody tr:hover td { background: transparent; }
 
 // Wide tables scroll inside their own frame rather than breaking the page.
 // A stacked layout was the alternative, but turning each row into a panel
-// fights the card quota (§4) and doubles the text by repeating column names.
+// fights the card quota and doubles the text by repeating column names.
 // The two `local` layers are page-coloured covers that ride with the content,
 // so the shadow only shows while there is actually more table to reach.
 figure.quarto-float-tbl > div[aria-describedby] {
@@ -719,7 +718,7 @@ a.footnote-ref {
 }
 
 // ── TOC ──────────────────────────────────────────────────────
-// Quarto ships the TOC heading at weight 500, which §2 rules out
+// Quarto ships the TOC heading at weight 500, which the type scale rules out
 // (only 400 / 600 / 700 are loaded, and 500 is the fence-sitting weight).
 .sidebar nav[role="doc-toc"] > h2,
 .sidebar nav[role="doc-toc"] > .h2,
@@ -890,7 +889,7 @@ footer.footer .nav-footer {
 }
 // Measured against the real pixels behind it, --sage lands at 3.76:1 here —
 // fine for a rule, short of AA for 12.5px type. This is the design system's
-// text-layer sage (§6), which reads as the same colour and measures 5.4:1.
+// text-layer sage, which reads as the same colour and measures 5.4:1.
 .home-hero__kicker {
   order: 2;
   font-family: $font-family-monospace;
@@ -916,7 +915,7 @@ footer.footer .nav-footer {
   .cta { margin-top: 0; padding: 10px 20px; font-size: 14.5px; }
 }
 // Same reasoning: --terra measures 3.45:1 on the washed photo. The deep
-// terracotta from §6's luminance ladder is 7.0:1 and still reads terracotta.
+// terracotta from the luminance ladder is 7.0:1 and still reads terracotta.
 // The second action is the same button at a lower voice: the page has two
 // doors and the statistics one should still be read first.
 // .cta is defined further down the file, so this needs the extra class to

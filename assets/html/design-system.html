@@ -1,6 +1,6 @@
 <script>
 /*
- * C2 · Atelier — two DOM touches Quarto's templates do not expose:
+ * Two DOM touches Quarto's templates do not expose:
  *   1. the four marks beside the wordmark
  *   2. wrapping "FIG. N —" so only the label carries terracotta
  * Everything else is CSS in custom.scss.
@@ -24,7 +24,7 @@
 
   /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
      so the number can carry terracotta without touching the article source.
-     Tables get the same treatment (§5: the numbering habit is a signature). */
+     Tables get the same treatment, since the numbering is part of the look. */
   function markFigureNumbers() {
     var caps = document.querySelectorAll(
       "figcaption.quarto-float-caption, figure > figcaption, table > caption");
