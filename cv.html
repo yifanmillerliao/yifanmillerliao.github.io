@@ -42,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5d9c4867fd5a12e8e64ec26ffba4d2b6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-2fdbbc1f3af1c19875ec3cd3a9a2a5b1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -129,6 +129,40 @@ ul.task-list li input[type="checkbox"] {
     
 <!-- main -->
 <main class="content" id="quarto-document-content">
+<!-- The four marks for what the site collects: statistics, photography, chess,
+     piano. One copy, used through <use href="#mark-…"> by the navbar
+     (assets/html/design-system.html) and by the About page. Same stroke
+     weight, same size, drawn in currentColor. Hidden with zero size rather
+     than display: none, which would stop <use> from drawing them. -->
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="mark-stats" viewbox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.8 4v16h16.4"></path><path d="M6.4 16.9 19.6 7.4"></path>
+      <circle cx="7.9" cy="14.3" r="1.15"></circle><circle cx="11.3" cy="14.9" r="1.15"></circle>
+      <circle cx="13.9" cy="10.3" r="1.15"></circle><circle cx="18.2" cy="9.9" r="1.15"></circle>
+    </g>
+  </symbol>
+  <symbol id="mark-camera" viewbox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8.6h2.9l1.5-2.2h7.2l1.5 2.2H20a1.6 1.6 0 0 1 1.6 1.6v6.6A1.6 1.6 0 0 1 20 18.6H4a1.6 1.6 0 0 1-1.6-1.6v-6.6A1.6 1.6 0 0 1 4 8.6Z"></path>
+      <circle cx="12" cy="13.4" r="3.1"></circle>
+    </g>
+  </symbol>
+  <symbol id="mark-king" viewbox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2.6v4M10 4.3h4"></path>
+      <path d="M12 6.6c-2.9 1.5-4.4 3.4-4.4 5.6 0 2.2 1.5 4 4.4 5.6 2.9-1.6 4.4-3.4 4.4-5.6 0-2.2-1.5-4.1-4.4-5.6Z"></path>
+      <path d="M8.4 17.8h7.2l1.1 2.6H7.3Z"></path>
+    </g>
+  </symbol>
+  <symbol id="mark-piano" viewbox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.8" y="6.4" width="18.4" height="11.2" rx="1.4"></rect>
+      <path d="M8.9 12.6v5"></path><path d="M15.1 12.6v5"></path>
+      <path d="M7.7 6.4h2.4v6h-2.4zM13.9 6.4h2.4v6h-2.4z" fill="currentColor" stroke="none"></path>
+    </g>
+  </symbol>
+</svg>
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -156,7 +190,7 @@ ul.task-list li input[type="checkbox"] {
 </main> <!-- /main -->
 <script>
 /*
- * C2 · Atelier — two DOM touches Quarto's templates do not expose:
+ * Two DOM touches Quarto's templates do not expose:
  *   1. the four marks beside the wordmark
  *   2. wrapping "FIG. N —" so only the label carries terracotta
  * Everything else is CSS in custom.scss.
@@ -164,25 +198,13 @@ ul.task-list li input[type="checkbox"] {
 (function () {
   /* Four marks for what the site collects: statistics, photography, chess,
      piano. They sit beside the wordmark in the navbar, where the U-curve
-     sparkline used to be. Same stroke weight, same size, one colour. */
-  var MARKS =
-    '<span class="brand-marks" aria-hidden="true">' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M3.8 4v16h16.4"/><path d="M6.4 16.9 19.6 7.4"/>' +
-      '<circle cx="7.9" cy="14.3" r="1.15"/><circle cx="11.3" cy="14.9" r="1.15"/>' +
-      '<circle cx="13.9" cy="10.3" r="1.15"/><circle cx="18.2" cy="9.9" r="1.15"/></svg>' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M4 8.6h2.9l1.5-2.2h7.2l1.5 2.2H20a1.6 1.6 0 0 1 1.6 1.6v6.6A1.6 1.6 0 0 1 20 18.6H4a1.6 1.6 0 0 1-1.6-1.6v-6.6A1.6 1.6 0 0 1 4 8.6Z"/>' +
-      '<circle cx="12" cy="13.4" r="3.1"/></svg>' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M12 2.6v4M10 4.3h4"/>' +
-      '<path d="M12 6.6c-2.9 1.5-4.4 3.4-4.4 5.6 0 2.2 1.5 4 4.4 5.6 2.9-1.6 4.4-3.4 4.4-5.6 0-2.2-1.5-4.1-4.4-5.6Z"/>' +
-      '<path d="M8.4 17.8h7.2l1.1 2.6H7.3Z"/></svg>' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<rect x="2.8" y="6.4" width="18.4" height="11.2" rx="1.4"/>' +
-      '<path d="M8.9 12.6v5"/><path d="M15.1 12.6v5"/>' +
-      '<path d="M7.7 6.4h2.4v6h-2.4zM13.9 6.4h2.4v6h-2.4z" fill="currentColor" stroke="none"/></svg>' +
-    '</span>';
+     sparkline used to be. The drawings live once, in assets/html/marks.html,
+     and are drawn here by reference: same stroke weight, same size, one colour. */
+  function mark(id) {
+    return '<svg viewBox="0 0 24 24"><use href="#mark-' + id + '"></use></svg>';
+  }
+  var MARKS = '<span class="brand-marks" aria-hidden="true">' +
+    mark("stats") + mark("camera") + mark("king") + mark("piano") + '</span>';
 
   function addBrandMarks() {
     var brand = document.querySelector(".navbar-brand");
@@ -192,7 +214,7 @@ ul.task-list li input[type="checkbox"] {
 
   /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
      so the number can carry terracotta without touching the article source.
-     Tables get the same treatment (§5: the numbering habit is a signature). */
+     Tables get the same treatment, since the numbering is part of the look. */
   function markFigureNumbers() {
     var caps = document.querySelectorAll(
       "figcaption.quarto-float-caption, figure > figcaption, table > caption");
@@ -337,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/yifanmillerliao\.github\.io\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -665,6 +687,19 @@ ul.task-list li input[type="checkbox"] {
   });
   </script>
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Miller Liao</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Updated 2026-11-15</p>
+</div>
+  </div>
+</footer>
 
 
 
