@@ -70,6 +70,8 @@ format:
     toc: true
     code-fold: true
     include-in-header: assets/html/fonts.html
+    # The four marks, once, for the navbar and the About page to use by reference.
+    include-before-body: assets/html/marks.html
     include-after-body: assets/html/design-system.html
     # Scoped to html deliberately: the caption LaTeX package rejects an em-dash
     # title-delim, so a top-level crossref block makes every PDF build emit a

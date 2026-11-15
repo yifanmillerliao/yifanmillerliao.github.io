@@ -38,3 +38,33 @@ it has one.
 ## Experience
 :::
 ::::
+
+:::: {.content-hidden}
+<!--
+Beyond statistics: not on the page until it has text. Write one or two
+sentences in place of each comment, delete any entry left without them, then
+delete this block's opening and closing :::: lines. The marks are the navbar's
+own, drawn by reference from assets/html/marks.html.
+-->
+::: {.about-pursuits}
+## Beyond statistics
+
+::: {.about-pursuit}
+<svg class="about-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#mark-camera"></use></svg>
+
+**Photography** <!-- one or two sentences --> [Gallery →](photography.html)
+:::
+
+::: {.about-pursuit}
+<svg class="about-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#mark-king"></use></svg>
+
+**Chess** <!-- one or two sentences -->
+:::
+
+::: {.about-pursuit}
+<svg class="about-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#mark-piano"></use></svg>
+
+**Piano** <!-- one or two sentences -->
+:::
+:::
+::::

@@ -994,6 +994,24 @@ footer.footer .nav-footer {
   .about-list li { flex-direction: column; align-items: flex-start; }
 }
 
+// Beyond statistics: each entry is the navbar's mark for it, in ink at the
+// same 1.6 stroke, with the name on its own line and a sentence or two under
+// it. Pandoc wraps the mark in a paragraph of its own, which takes the first
+// column; the words take the second.
+.about-pursuits { clear: right; }
+.about-pursuit {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  column-gap: 16px;
+  align-items: start;
+  margin-top: 18px;
+  > p { grid-column: 2; margin: 0; }
+  > p:first-child { grid-column: 1; grid-row: 1; line-height: 0; padding-top: 4px; }
+  p + p { margin-top: 8px; }
+  strong:first-child { display: block; color: var(--ink); font-weight: 600; }
+}
+.about-mark { display: block; width: 22px; height: 22px; color: var(--ink); }
+
 // ── Photography page ─────────────────────────────────────────
 // A masonry gallery: equal-width columns, every photograph at its own aspect
 // ratio, never cropped. The columns are filled by assets/html/photo-grid.html,
