@@ -45,12 +45,28 @@
     });
   }
 
+  /* The home page's strip links to single photographs (photography.html#id).
+     The browser scrolls to the figure before the columns are dealt, which moves
+     it, so the jump is made again once they are in place, and once more after
+     the page has loaded unless the reader has scrolled in the meantime. */
+  function revealHash() {
+    var id = decodeURIComponent(location.hash.slice(1));
+    var el = id && document.getElementById(id);
+    if (!el || !el.classList.contains("photo-item")) return;
+    el.scrollIntoView({ block: "start" });
+    var y = window.scrollY;
+    window.addEventListener("load", function () {
+      if (Math.abs(window.scrollY - y) < 2) el.scrollIntoView({ block: "start" });
+    }, { once: true });
+  }
+
   function init() {
     var grid = document.querySelector(".photo-grid");
     if (!grid) return;
     var items = Array.prototype.slice.call(grid.querySelectorAll(".photo-item"));
     if (!items.length) return;
     layout(grid, items);
+    revealHash();
     var t;
     window.addEventListener("resize", function () {
       clearTimeout(t);

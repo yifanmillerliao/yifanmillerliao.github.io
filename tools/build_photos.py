@@ -2,7 +2,8 @@
 """
 Rebuild the photography page's images and data.
 
-  python3 tools/build_photos.py
+  python3 tools/build_photos.py                  # after adding photographs
+  python3 tools/build_photos.py --partials-only  # run before every render
 
 Reads the originals in photos-source/, and for each one:
   - renames it to YYYY-MM-DD-NN.jpg from its EXIF capture date (an id, not a
@@ -12,7 +13,12 @@ Reads the originals in photos-source/, and for each one:
     segment, including the GPS coordinates several of these carry,
   - adds an entry to photos.yml if the photo is new, keeping any words that
     are already there. Nothing written by hand is ever overwritten.
-  - regenerates _photo-grid.qmd, the markup the page includes.
+  - regenerates _photo-grid.qmd, the markup the photography page includes,
+    and _photo-strip.qmd, the first few photographs on the home page.
+
+--partials-only rewrites just those two files from photos.yml. It never
+touches an image, an original or photos.yml, so a reorder in photos.yml shows
+on the next render without a full run.
 
 Originals are never copied into _site; see the resources block in _quarto.yml.
 """
@@ -24,6 +30,8 @@ GRID   = ROOT / "assets/photos/grid"
 FULL   = ROOT / "assets/photos/full"
 DATA   = ROOT / "photos.yml"
 PARTIAL= ROOT / "_photo-grid.qmd"
+STRIP  = ROOT / "_photo-strip.qmd"
+STRIP_N = 6                # the home strip shows the first N entries of photos.yml
 GRID_W, FULL_W = 800, 2000
 SRGB = "/System/Library/ColorSync/Profiles/sRGB Profile.icc"
 
@@ -167,7 +175,7 @@ def write_partial(items):
         # Caption beside a portrait, under a landscape.
         pos = "right" if (w and h and int(h) > int(w)) else "bottom"
         rows.append(
-f'''<figure class="photo-item">
+f'''<figure class="photo-item" id="{esc(it["id"])}">
   <a class="lightbox photo-item__link" href="{esc(it["full"])}" data-gallery="photos"
      data-desc-position="{pos}"{gl}>
     <img src="{esc(it["image"])}" srcset="{esc(it["image"])} {GRID_W}w, {esc(it["full"])} {FULL_W}w"
@@ -177,18 +185,79 @@ f'''<figure class="photo-item">
   </a>
   {'<figcaption class="photo-cap">' + "".join(cap) + "</figcaption>" if cap else ""}
 </figure>''')
-    years = sorted({str(it.get("date", ""))[:4] for it in items if it.get("date")})
-    span = years[0] if len(years) == 1 else (f"{years[0]}–{years[-1]}" if years else "")
-    count = len([i for i in items if i.get("image")])
+    count, span = count_span(items)
     meta = f"{count} photograph{'s' if count != 1 else ''}" + (f", {span}" if span else "")
-    PARTIAL.write_text(
+    write_if_changed(PARTIAL, 
         "```{=html}\n"
         f'<p class="photo-count mono">{esc(meta)}</p>\n'
         '<div class="photo-grid" data-columns="3">\n' + "\n".join(rows) + "\n</div>\n"
         "```\n")
 
+def count_span(items):
+    years = sorted({str(it.get("date", ""))[:4] for it in items if it.get("date")})
+    span = years[0] if len(years) == 1 else (f"{years[0]}–{years[-1]}" if years else "")
+    return len([i for i in items if i.get("image")]), span
+
+def write_if_changed(path, text):
+    # A running preview watches these files; an unchanged write would set it off.
+    if not path.exists() or path.read_text() != text:
+        path.write_text(text)
+
+def write_strip(items):
+    """The home page's strip: the first STRIP_N photographs, uncropped.
+
+    Each one is a flex item that grows in proportion to its own aspect ratio
+    and carries that ratio as aspect-ratio, so a row shares one height and
+    fills its width exactly. custom.scss lays the rows out per width.
+    """
+    shown = [it for it in items if it.get("image") and it.get("width") and it.get("height")]
+    count, span = count_span(items)
+    first = shown[:STRIP_N]
+    gap = 12
+    ar = [int(it["width"]) / int(it["height"]) for it in first]
+    half = (len(first) + 1) // 2
+    rows = [list(range(half)), list(range(half, len(first)))]
+    def item(i):
+        it = first[i]; w, h = int(it["width"]), int(it["height"])
+        full_w = round(w * FULL_W / max(w, h))          # the full copy's own width
+        # The width this photograph is drawn at, per layout, so srcset can pick
+        # the smaller copy wherever that is sharp enough.
+        # The row widths are the home page's content column, measured in the
+        # built page: 1005px at its widest, 868px at 999px.
+        row = rows[0] if i < half else rows[1]
+        w_one = (1005 - gap * (len(first) - 1)) * ar[i] / sum(ar)
+        w_two = (868 - gap * (len(row) - 1)) * ar[i] / sum(ar[j] for j in row)
+        w_strip = 180 * ar[i]
+        name = str(it.get("place") or it.get("date") or "").strip()
+        label = f"Photograph, {name} — open in gallery" if name else "Photograph — open in gallery"
+        return (f'    <a class="photo-strip__item" href="photography.html#{esc(it["id"])}"'
+                f' style="--ar: {ar[i]:.5f}; aspect-ratio: {w} / {h}" aria-label="{esc(label)}">'
+                f'<img src="{esc(it["image"])}"'
+                f' srcset="{esc(it["image"])} {w}w, {esc(it["full"])} {full_w}w"'
+                f' sizes="(min-width: 1000px) {w_one:.0f}px, (min-width: 620px) {w_two:.0f}px, {w_strip:.0f}px"'
+                f' width="{w}" height="{h}" loading="lazy" decoding="async" alt=""></a>')
+    body = "\n".join('  <div class="photo-strip__row">\n' + "\n".join(item(i) for i in r) + "\n  </div>"
+                     for r in rows if r)
+    label = f"{count} · {span}" if span else f"{count}"
+    more = f"View all {count} photograph{'s' if count != 1 else ''} →"
+    write_if_changed(STRIP,
+        "```{=html}\n"
+        '<section class="photo-strip">\n'
+        f'<div class="sechead">\n  <h2>Photographs</h2><span class="mono">{esc(label)}</span>\n</div>\n'
+        f'<div class="photo-strip__rows">\n{body}\n</div>\n'
+        f'<p class="photo-strip__more"><a href="photography.html">{esc(more)}</a></p>\n'
+        "</section>\n"
+        "```\n")
+
+def partials_only():
+    """Rewrite the two partials from photos.yml alone. Nothing else is touched."""
+    items = [it for it in read_yaml(DATA) if it.get("id") and (GRID / f"{it['id']}.jpg").exists()]
+    write_partial(items); write_strip(items)
+
 # ---------- main -----------------------------------------------------------
 def main():
+    if "--partials-only" in sys.argv[1:]:
+        partials_only(); return
     if not SRC.is_dir():
         sys.exit(f"no {SRC}")
     existing = {it["id"]: it for it in read_yaml(DATA) if it.get("id")}
@@ -224,8 +293,8 @@ def main():
 
     items = [existing[i] for i in order if i in existing] + [existing[i] for i in fresh]
     items = [it for it in items if (SRC / f"{it['id']}.jpg").exists()]
-    write_yaml(items); write_partial(items)
-    print(f"  {len(items)} photographs · photos.yml and _photo-grid.qmd rewritten")
+    write_yaml(items); write_partial(items); write_strip(items)
+    print(f"  {len(items)} photographs · photos.yml, _photo-grid.qmd and _photo-strip.qmd rewritten")
 
 if __name__ == "__main__":
     main()

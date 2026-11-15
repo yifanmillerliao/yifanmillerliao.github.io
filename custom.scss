@@ -995,9 +995,12 @@ footer.footer .nav-footer {
 }                                  // caption reads with the picture above it
 
 // Photographs are figures, not cards: no border, no shadow, no hover lift.
+// Each carries its id, so the home strip can link to one; the margin keeps it
+// clear of the fixed navbar when the page opens on it.
 .photo-item {
   margin: 0;
   break-inside: avoid;
+  scroll-margin-top: 104px;
 }
 .photo-item__link {
   display: block;
@@ -1287,6 +1290,57 @@ body.page-photos {
     color: var(--mut-text);
     margin-left: auto;
   }
+}
+
+// ── Home: photo strip ────────────────────────────────────────
+// The first six photographs in photos.yml, written into _photo-strip.qmd by
+// tools/build_photos.py. Nothing is cropped at any width: each item grows in
+// proportion to its own aspect ratio (--ar) and keeps that ratio, so a row
+// shares one height and fills its width exactly.
+// min-width: 0 because Quarto lays main.content out as a grid: as a grid item
+// the section would otherwise grow to the scrolling row's full width on phones
+// and push the whole page sideways.
+.photo-strip { margin-top: 72px; min-width: 0; }
+.photo-strip__rows { display: flex; align-items: flex-start; gap: 12px; }
+.photo-strip__row { display: contents; }           // 1000px and up: one row of six
+.photo-strip__item {
+  flex: var(--ar) 1 0%;
+  min-width: 0;
+  display: block;
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--r-fig);   // the corner the gallery gives a photograph
+  }
+}
+.photo-strip__more {
+  margin: 18px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+// 620–999px: two rows of three, each justified on its own.
+@media (max-width: 999.98px) {
+  .photo-strip__rows { flex-direction: column; align-items: stretch; }
+  .photo-strip__row { display: flex; align-items: flex-start; gap: 12px; }
+}
+// Below 620px: one row that scrolls sideways, every photograph 180px tall at
+// its own width.
+@media (max-width: 619.98px) {
+  .photo-strip__rows {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    overflow-x: auto;
+    contain: inline-size;          // its own width never counts toward the page's
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .photo-strip__row { display: contents; }
+  .photo-strip__item { flex: none; height: 180px; scroll-snap-align: start; }
 }
 
 // ── Project listing ──────────────────────────────────────────

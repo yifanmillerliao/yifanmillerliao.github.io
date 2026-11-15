@@ -1,9 +1,13 @@
 project:
   type: website
   output-dir: _site
-  # Writes _variables.yml with the last commit's date, for the footer's
-  # "Updated" line. See tools/write_updated.py.
-  pre-render: tools/write_updated.py
+  # Before every render: the last commit's date for the footer's "Updated"
+  # line (tools/write_updated.py), and the photo partials from photos.yml, so
+  # a reorder there reaches the gallery and the home strip without a full run
+  # of the photo tool (it touches no image and no original in this mode).
+  pre-render:
+    - tools/write_updated.py
+    - tools/build_photos.py --partials-only
   render:
     - "*.qmd"
     - "projects/**/*.qmd"

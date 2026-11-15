@@ -47,3 +47,5 @@ listing:
 
 ::: {#project-listing}
 :::
+
+{{< include _photo-strip.qmd >}}
