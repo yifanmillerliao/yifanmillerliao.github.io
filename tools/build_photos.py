@@ -140,30 +140,36 @@ def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             .replace('"', "&quot;"))
 
+def meta_line(it):
+    """One line, place · date · camera. An empty field goes, separator and all."""
+    return " · ".join(v for v in (str(it.get(k, "")).strip() for k in ("place", "date", "camera")) if v)
+
 def write_partial(items):
     rows = []
     for it in items:
         if not it.get("image"): continue
         w, h = it.get("width", ""), it.get("height", "")
         ratio = f"{w} / {h}" if w and h else "3 / 2"
-        gl = []
-        if it.get("title"): gl.append("title: " + str(it["title"]).replace(";", ","))
-        desc_bits = [b for b in (it.get("description"), " · ".join(
-            [x for x in (it.get("place"), it.get("date"), it.get("camera")) if x])) if b]
-        if desc_bits: gl.append("description: " + " — ".join(desc_bits).replace(";", ","))
-        meta_left, meta_right = it.get("place", ""), it.get("date", "")
+        meta = meta_line(it)
         cap = []
         if it.get("title"): cap.append(f'<span class="photo-cap__title">{esc(it["title"])}</span>')
         if it.get("description"): cap.append(f'<span class="photo-cap__desc">{esc(it["description"])}</span>')
-        if meta_left or meta_right:
-            cap.append('<span class="photo-cap__meta">'
-                       f'<span>{esc(meta_left)}</span><span>{esc(meta_right)}</span></span>')
+        if meta: cap.append(f'<span class="photo-cap__meta">{esc(meta)}</span>')
+        # The lightbox shows the same words in the same order. glightbox inserts
+        # its title and description as HTML, so the text is escaped for that
+        # once more on top of the attribute escaping.
+        lb = []
+        if it.get("description"): lb.append(f'<span class="photo-lb__desc">{esc(it["description"])}</span>')
+        if meta: lb.append(f'<span class="photo-lb__meta">{esc(meta)}</span>')
+        gl = ""
+        if it.get("title"): gl += f' data-title="{esc(esc(it["title"]))}"'
+        if lb: gl += f' data-description="{esc("".join(lb))}"'
         # Caption beside a portrait, under a landscape.
         pos = "right" if (w and h and int(h) > int(w)) else "bottom"
         rows.append(
 f'''<figure class="photo-item">
   <a class="lightbox photo-item__link" href="{esc(it["full"])}" data-gallery="photos"
-     data-desc-position="{pos}" data-glightbox="{esc("; ".join(gl))}">
+     data-desc-position="{pos}"{gl}>
     <img src="{esc(it["image"])}" srcset="{esc(it["image"])} {GRID_W}w, {esc(it["full"])} {FULL_W}w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="{w}" height="{h}" style="aspect-ratio: {ratio}" loading="lazy" decoding="async"

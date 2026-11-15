@@ -3,263 +3,263 @@
 <div class="photo-grid" data-columns="3">
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-08-31-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2025-08-31">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-08-31&lt;/span&gt;">
     <img src="assets/photos/grid/2025-08-31-01.jpg" srcset="assets/photos/grid/2025-08-31-01.jpg 800w, assets/photos/full/2025-08-31-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-08-31</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-08-31</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-08-25-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2025-08-25">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-08-25&lt;/span&gt;">
     <img src="assets/photos/grid/2025-08-25-01.jpg" srcset="assets/photos/grid/2025-08-25-01.jpg 800w, assets/photos/full/2025-08-25-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="621" height="800" style="aspect-ratio: 621 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-08-25</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-08-25</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-11-17-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2024-11-17">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-11-17&lt;/span&gt;">
     <img src="assets/photos/grid/2024-11-17-01.jpg" srcset="assets/photos/grid/2024-11-17-01.jpg 800w, assets/photos/full/2024-11-17-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="560" height="800" style="aspect-ratio: 560 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-11-17</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-11-17</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-04-21-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-04-21">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-04-21&lt;/span&gt;">
     <img src="assets/photos/grid/2026-04-21-01.jpg" srcset="assets/photos/grid/2026-04-21-01.jpg 800w, assets/photos/full/2026-04-21-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="500" style="aspect-ratio: 800 / 500" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-04-21</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-04-21</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-11-22-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2024-11-22">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-11-22&lt;/span&gt;">
     <img src="assets/photos/grid/2024-11-22-01.jpg" srcset="assets/photos/grid/2024-11-22-01.jpg 800w, assets/photos/full/2024-11-22-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-11-22</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-11-22</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-12-17-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2025-12-17">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-12-17&lt;/span&gt;">
     <img src="assets/photos/grid/2025-12-17-01.jpg" srcset="assets/photos/grid/2025-12-17-01.jpg 800w, assets/photos/full/2025-12-17-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-12-17</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-12-17</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-10-22-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2024-10-22">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-10-22&lt;/span&gt;">
     <img src="assets/photos/grid/2024-10-22-01.jpg" srcset="assets/photos/grid/2024-10-22-01.jpg 800w, assets/photos/full/2024-10-22-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-10-22</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-10-22</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-12-16-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2024-12-16">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-12-16&lt;/span&gt;">
     <img src="assets/photos/grid/2024-12-16-01.jpg" srcset="assets/photos/grid/2024-12-16-01.jpg 800w, assets/photos/full/2024-12-16-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-12-16</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-12-16</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-12-18-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2025-12-18">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-12-18&lt;/span&gt;">
     <img src="assets/photos/grid/2025-12-18-01.jpg" srcset="assets/photos/grid/2025-12-18-01.jpg 800w, assets/photos/full/2025-12-18-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-12-18</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-12-18</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-04-14-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2025-04-14">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-04-14&lt;/span&gt;">
     <img src="assets/photos/grid/2025-04-14-01.jpg" srcset="assets/photos/grid/2025-04-14-01.jpg 800w, assets/photos/full/2025-04-14-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-04-14</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-04-14</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2023-09-04-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2023-09-04">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2023-09-04&lt;/span&gt;">
     <img src="assets/photos/grid/2023-09-04-01.jpg" srcset="assets/photos/grid/2023-09-04-01.jpg 800w, assets/photos/full/2023-09-04-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2023-09-04</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2023-09-04</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-07-12-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2026-07-12">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-07-12&lt;/span&gt;">
     <img src="assets/photos/grid/2026-07-12-01.jpg" srcset="assets/photos/grid/2026-07-12-01.jpg 800w, assets/photos/full/2026-07-12-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-07-12</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-07-12</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-08-27-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-08-27">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-08-27&lt;/span&gt;">
     <img src="assets/photos/grid/2026-08-27-01.jpg" srcset="assets/photos/grid/2026-08-27-01.jpg 800w, assets/photos/full/2026-08-27-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-08-27</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-08-27</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-08-28-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-08-28">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-08-28&lt;/span&gt;">
     <img src="assets/photos/grid/2026-08-28-01.jpg" srcset="assets/photos/grid/2026-08-28-01.jpg 800w, assets/photos/full/2026-08-28-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-08-28</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-08-28</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-08-29-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-08-29">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-08-29&lt;/span&gt;">
     <img src="assets/photos/grid/2026-08-29-01.jpg" srcset="assets/photos/grid/2026-08-29-01.jpg 800w, assets/photos/full/2026-08-29-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-08-29</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-08-29</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-06-10-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2024-06-10">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-06-10&lt;/span&gt;">
     <img src="assets/photos/grid/2024-06-10-01.jpg" srcset="assets/photos/grid/2024-06-10-01.jpg 800w, assets/photos/full/2024-06-10-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-06-10</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-06-10</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-03-17-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2025-03-17">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-03-17&lt;/span&gt;">
     <img src="assets/photos/grid/2025-03-17-01.jpg" srcset="assets/photos/grid/2025-03-17-01.jpg 800w, assets/photos/full/2025-03-17-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-03-17</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-03-17</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-03-15-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-03-15">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-03-15&lt;/span&gt;">
     <img src="assets/photos/grid/2026-03-15-01.jpg" srcset="assets/photos/grid/2026-03-15-01.jpg 800w, assets/photos/full/2026-03-15-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-03-15</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-03-15</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2025-09-01-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2025-09-01">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2025-09-01&lt;/span&gt;">
     <img src="assets/photos/grid/2025-09-01-01.jpg" srcset="assets/photos/grid/2025-09-01-01.jpg 800w, assets/photos/full/2025-09-01-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="531" height="800" style="aspect-ratio: 531 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2025-09-01</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2025-09-01</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-04-09-01.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2024-04-09">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-04-09&lt;/span&gt;">
     <img src="assets/photos/grid/2024-04-09-01.jpg" srcset="assets/photos/grid/2024-04-09-01.jpg 800w, assets/photos/full/2024-04-09-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="516" height="800" style="aspect-ratio: 516 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-04-09</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-04-09</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2024-12-29-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2024-12-29">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2024-12-29&lt;/span&gt;">
     <img src="assets/photos/grid/2024-12-29-01.jpg" srcset="assets/photos/grid/2024-12-29-01.jpg 800w, assets/photos/full/2024-12-29-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="506" style="aspect-ratio: 800 / 506" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2024-12-29</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2024-12-29</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2022-10-29-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2022-10-29">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2022-10-29&lt;/span&gt;">
     <img src="assets/photos/grid/2022-10-29-01.jpg" srcset="assets/photos/grid/2022-10-29-01.jpg 800w, assets/photos/full/2022-10-29-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="600" style="aspect-ratio: 800 / 600" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2022-10-29</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2022-10-29</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-10-24-01.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-10-24">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-10-24&lt;/span&gt;">
     <img src="assets/photos/grid/2026-10-24-01.jpg" srcset="assets/photos/grid/2026-10-24-01.jpg 800w, assets/photos/full/2026-10-24-01.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-10-24</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-10-24</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-10-24-02.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2026-10-24">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-10-24&lt;/span&gt;">
     <img src="assets/photos/grid/2026-10-24-02.jpg" srcset="assets/photos/grid/2026-10-24-02.jpg 800w, assets/photos/full/2026-10-24-02.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-10-24</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-10-24</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-10-24-03.jpg" data-gallery="photos"
-     data-desc-position="bottom" data-glightbox="description: 2026-10-24">
+     data-desc-position="bottom" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-10-24&lt;/span&gt;">
     <img src="assets/photos/grid/2026-10-24-03.jpg" srcset="assets/photos/grid/2026-10-24-03.jpg 800w, assets/photos/full/2026-10-24-03.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="800" height="533" style="aspect-ratio: 800 / 533" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-10-24</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-10-24</span></figcaption>
 </figure>
 <figure class="photo-item">
   <a class="lightbox photo-item__link" href="assets/photos/full/2026-10-24-04.jpg" data-gallery="photos"
-     data-desc-position="right" data-glightbox="description: 2026-10-24">
+     data-desc-position="right" data-description="&lt;span class=&quot;photo-lb__meta&quot;&gt;2026-10-24&lt;/span&gt;">
     <img src="assets/photos/grid/2026-10-24-04.jpg" srcset="assets/photos/grid/2026-10-24-04.jpg 800w, assets/photos/full/2026-10-24-04.jpg 2000w"
          sizes="(min-width: 1000px) 32vw, (min-width: 620px) 48vw, 92vw"
          width="533" height="800" style="aspect-ratio: 533 / 800" loading="lazy" decoding="async"
          alt="">
   </a>
-  <figcaption class="photo-cap"><span class="photo-cap__meta"><span></span><span>2026-10-24</span></span></figcaption>
+  <figcaption class="photo-cap"><span class="photo-cap__meta">2026-10-24</span></figcaption>
 </figure>
 </div>
 ```
