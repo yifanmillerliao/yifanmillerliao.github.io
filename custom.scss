@@ -1091,9 +1091,10 @@ footer.footer .nav-footer {
   font-size: 14.5px;
   color: var(--body);
 }
-// One mono line, place · date · camera; an empty field is left out entirely.
 .photo-grid .photo-cap__meta {
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 8px;
   font-family: $font-family-monospace;
   font-size: 11.5px;
@@ -1127,16 +1128,6 @@ body.page-photos {
     color: var(--ink);
     margin-bottom: 6px;
   }
-  // The same caption as under the photo: the description, then the mono line.
-  .glightbox-container .photo-lb__desc,
-  .glightbox-container .photo-lb__meta { display: block; }
-  .glightbox-container .photo-lb__meta {
-    font-family: $font-family-monospace;
-    font-size: 11.5px;
-    letter-spacing: .04em;
-    color: $mut-text;
-  }
-  .glightbox-container .photo-lb__desc + .photo-lb__meta { margin-top: 6px; }
 
   &.glightbox-mobile .glightbox-container .gslide-description {
     position: static;
