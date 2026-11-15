@@ -786,12 +786,38 @@ a.footnote-ref {
 }
 
 // ── Footer ───────────────────────────────────────────────────
-.nav-footer {
+// One row at every width, laid out like the navbar (1em outer padding, then a
+// 1120px container), so the copyright lines up with the wordmark. The rule runs the full width, like
+// the navbar's. Quarto pads the footer with (0,2,1), sizes each slot at .825em
+// with (0,2,0) and stacks the slots below 576px, so these rules match it.
+footer.footer {
   border-top: 1px solid var(--line);
+  margin-top: 48px;
+  padding: 0 1em;              // the same outer padding Quarto gives the navbar
+}
+footer.footer .nav-footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 18px 40px 22px;
+  min-height: 0;
+  flex-wrap: nowrap;
   background: transparent;
   color: var(--mut-text);
-  font-size: 13.5px;
-  margin-top: 48px;
+  p { margin: 0; }
+}
+.nav-footer .nav-footer-left,
+.nav-footer .nav-footer-right { flex: 1 1 auto; margin-bottom: 0; }
+.nav-footer .nav-footer-left { font-size: 13.5px; text-align: left; }
+.nav-footer .nav-footer-center { display: none; }   // no centre slot is used
+// The date is set like the gallery's dates: mono, small, the warm grey step.
+.nav-footer .nav-footer-right {
+  font-family: $font-family-monospace;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  text-align: right;
+}
+@media (max-width: 860px) {
+  footer.footer .nav-footer { padding-left: 20px; padding-right: 20px; }
 }
 
 // ── Home hero: the fog photograph ─────────────────────────────

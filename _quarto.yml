@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: _site
+  # Writes _variables.yml with the last commit's date, for the footer's
+  # "Updated" line. See tools/write_updated.py.
+  pre-render: tools/write_updated.py
   render:
     - "*.qmd"
     - "projects/**/*.qmd"
@@ -38,6 +41,11 @@ website:
 
       - href: cv.qmd
         text: CV
+
+  # One date for the whole site: the last commit's, not the render's.
+  page-footer:
+    left: "© 2026 Miller Liao"
+    right: "Updated {{< var updated >}}"
 
 execute:
   freeze: auto
