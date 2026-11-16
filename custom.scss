@@ -186,7 +186,8 @@ body {
 // toggle, and the whole box is the tap target: a 1px dashed --mut rule at the
 // buttons' 6px radius, 5px clear around the 17px drawing.
 //   - unlit: the dashed box, the drawing in --mut;
-//   - hover, on devices that can hover: the dashes take the mark's colour;
+//   - hover, on devices that can hover, and only while unlit: the dashes and
+//     the drawing take the mark's colour, still with no fill;
 //   - lit: the box fills with the mark's colour, the border goes solid in the
 //     same colour, and the drawing turns white;
 //   - keyboard focus: a solid 2px ring outside the box.
@@ -222,11 +223,15 @@ body {
   }
   &:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
 }
+// A lit mark is left alone on hover: its drawing is white on the fill, and the
+// mark's colour there would make it vanish. Touch screens report no hover, so
+// a tap never leaves the hint behind.
 @media (hover: hover) {
-  .navbar .brand-mark:hover { border-color: var(--lit); }
+  .navbar .brand-mark:not([aria-pressed="true"]):hover { border-color: var(--lit); color: var(--lit); }
 }
 // Lit colours, left to right. Each fill is at least 3:1 on the navbar's greige
-// and the white drawing at least 3:1 on its fill, measured.
+// and the white drawing at least 3:1 on its fill, measured; on hover the same
+// colours sit on the same greige.
 .brand-mark[data-mark="stats"]  { --lit: #EA580C; }   // orange
 .brand-mark[data-mark="camera"] { --lit: #059669; }   // green
 .brand-mark[data-mark="king"]   { --lit: #0284C7; }   // blue
