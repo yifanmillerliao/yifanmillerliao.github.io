@@ -160,8 +160,21 @@ body {
   padding: 0;
 }
 .navbar .navbar-container { max-width: 1120px; padding: 20px 40px; }
-.navbar-brand-container { margin-left: 0 !important; margin-right: auto !important; }
-.navbar-brand { display: flex; align-items: center; gap: 12px; }
+// The brand row: the wordmark, then the four marks, on one line at every width
+// and never inside the collapsed menu. The marks are injected by
+// assets/html/design-system.html, because Quarto's navbar template takes no
+// markup. 12px from the wordmark to the first box, a little more than the 6px
+// between boxes.
+.navbar-brand-container {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+// Quarto clips the wordmark's link (overflow: hidden, for its ellipsis), and
+// the link now ends where the text does: 2px inside, given back outside, keep
+// the last letter's anti-aliased edge from being cut off.
+.navbar-brand { display: flex; align-items: center; margin-right: -2px; padding-right: 2px; }
 .navbar-title {
   font-family: $headings-font-family;
   font-weight: 700;
@@ -169,21 +182,63 @@ body {
   letter-spacing: -.02em;
   color: var(--ink);
 }
-// Four marks beside the wordmark — statistics, photography, chess, piano —
-// in place of the U-curve sparkline that used to sit here. Decoration only:
-// no link, no hover, aria-hidden. Injected by assets/html/design-system.html
-// because Quarto's navbar template takes no markup.
-.navbar-brand .brand-marks {
+// The four marks: statistics, photography, chess, piano. Each is a boxed
+// toggle, and the whole box is the tap target: a 1px dashed --mut rule at the
+// buttons' 6px radius, 5px clear around the 17px drawing.
+//   - unlit: the dashed box, the drawing in --mut;
+//   - hover, on devices that can hover: the dashes take the mark's colour;
+//   - lit: the box fills with the mark's colour, the border goes solid in the
+//     same colour, and the drawing turns white;
+//   - keyboard focus: a solid 2px ring outside the box.
+// All four lit opens the egg (below).
+.brand-marks {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
-  color: var(--mut);
+  gap: 6px;
   flex: none;
-  svg { width: 17px; height: 17px; display: block; }
+  margin-right: 1rem;      // the wordmark's old margin before the menu
 }
-@media (max-width: 575.98px) {
-  // On a phone the wordmark and the toggle need the room more than the marks do.
-  .navbar-brand .brand-marks { display: none; }
+.navbar .brand-mark {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  margin: 0;
+  padding: 0;
+  border: 1px dashed var(--mut);
+  border-radius: var(--r-btn);
+  background-color: transparent;
+  color: var(--mut);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+  svg { width: 17px; height: 17px; display: block; }
+  &[aria-pressed="true"] {
+    background-color: var(--lit);
+    border-style: solid;
+    border-color: var(--lit);
+    color: #FFFFFF;
+  }
+  &:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+}
+@media (hover: hover) {
+  .navbar .brand-mark:hover { border-color: var(--lit); }
+}
+// Lit colours, left to right. Each fill is at least 3:1 on the navbar's greige
+// and the white drawing at least 3:1 on its fill, measured.
+.brand-mark[data-mark="stats"]  { --lit: #EA580C; }   // orange
+.brand-mark[data-mark="camera"] { --lit: #059669; }   // green
+.brand-mark[data-mark="king"]   { --lit: #0284C7; }   // blue
+.brand-mark[data-mark="piano"]  { --lit: #7C3AED; }   // purple
+@media (prefers-reduced-motion: reduce) {
+  .navbar .brand-mark { transition: none; }
+}
+@media (max-width: 991.98px) {
+  // Collapsed, the row shares the bar with the toggle (34px and its .5em
+  // margin) and the search button (40px), not the 115px Quarto allows for.
+  .navbar .navbar-container > .navbar-brand-container { max-width: calc(100% - 85px); }
+  .brand-marks { margin-right: 0; }
 }
 .navbar .nav-link {
   color: var(--body) !important;
@@ -198,6 +253,91 @@ body {
     box-shadow: inset 0 -2px 0 var(--terra);
   }
 }
+
+// ── The egg: what the four marks open ────────────────────────
+// A native <dialog>, built by assets/html/design-system.html on the first
+// opening, which is also when its picture is fetched. A paper card on a greige
+// scrim. It fits the window at every size: the picture's row is the one that
+// gives, and the picture keeps its proportions inside it.
+dialog.egg {
+  width: min(640px, calc(100vw - 32px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--paper);
+  color: var(--body);
+  box-shadow: var(--lift-2);
+  overflow: hidden;
+  &::backdrop { background: rgba(245, 242, 236, .9); }
+}
+.egg__card {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  max-height: calc(100vh - 34px);    // 16px clear of each edge, and the border
+  max-height: calc(100dvh - 34px);
+  padding: 26px 28px 28px;
+}
+.egg__title {
+  margin: 0;
+  padding: 0 40px 0 0;               // clear of the close button
+  border-bottom: 0;                  // the article h2's section rule has no place here
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.egg__media {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border-radius: var(--r-fig);
+  }
+}
+.egg__text {
+  margin: 0;
+  font-family: $font-family-sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--body);
+}
+.egg__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-btn);
+  background: none;
+  color: var(--body);
+  svg { width: 20px; height: 20px; display: block; }
+  &:hover { color: var(--ink); background: var(--bg); }
+  &:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+}
+// While it is open the page behind stays put. Where a scrollbar takes room (a
+// classic one), its gutter is kept, so its going does not shift the page
+// sideways; overlay scrollbars take none, and get no gutter.
+html.egg-open { overflow: hidden; }
+html.egg-open.egg-gutter { scrollbar-gutter: stable; }
 
 // ── Wide pages (home, listing): the specimen's 1120px .wrap ──
 .page-layout-full main.content {
@@ -1598,7 +1738,27 @@ body.page-photos {
 
   .navbar .navbar-container { padding: 16px 20px; }
   .page-layout-full main.content { padding-left: 20px; padding-right: 20px; }
-
+}
+// Phones: the menu button, the wordmark and all four boxes keep one line; the
+// row's own spacing never changes. Beside the search button the row needs a
+// window of about 400px, so below 410 the search button goes (it stays from
+// 410 up). Below 365 the bar also gives up its own 20px sides, half of
+// Quarto's 1em, and some of the toggle's margin. Measured, the row then fits
+// a 320px window even where a classic scrollbar takes 17px of it (WebKit on
+// a Mac).
+@media (max-width: 409.98px) {
+  .navbar #quarto-search { display: none; }
+  // The search button's auto margin was what kept the row against the toggle;
+  // without it the bar's space-between would centre the row.
+  .navbar .navbar-container > .navbar-brand-container { max-width: calc(100% - 45px); margin-right: auto !important; }
+}
+@media (max-width: 364.98px) {
+  #quarto-header > nav.navbar { padding-left: 8px; padding-right: 8px; }
+  .navbar .navbar-container { padding-left: 0; padding-right: 0; }
+  .navbar .navbar-toggler { margin-right: 6px; }
+  .navbar .navbar-container > .navbar-brand-container { max-width: calc(100% - 40px); }
+}
+@media (max-width: 860px) {
   // Wide tables scroll rather than break the page
   .table-responsive-wrap, .cell-output-display > table { overflow-x: auto; }
 }

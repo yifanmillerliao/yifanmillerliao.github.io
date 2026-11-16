@@ -23,6 +23,9 @@ project:
     # Camera originals: renamed and read by tools/build_photos.py, never served.
     # The web copies under assets/photos are what the page loads.
     - "!photos-source/**"
+    # Loaded by a script when the marks' dialog opens, so no page names it
+    # and Quarto would not copy it on its own.
+    - "assets/img/egg/chicken.webp"
 
 website:
   title: "Miller Liao"
