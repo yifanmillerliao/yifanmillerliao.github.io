@@ -42,7 +42,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-6607ce36c73501f07aebcb720b4297e8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-183c6a99d86d0d6c220ad17f541b3df6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -350,26 +350,104 @@ ul.task-list li input[type="checkbox"] {
 </main> <!-- /main -->
 <script>
 /*
- * Two DOM touches Quarto's templates do not expose:
- *   1. the four marks beside the wordmark
+ * DOM touches Quarto's templates do not expose:
+ *   1. the four marks beside the wordmark, and the small dialog they open
  *   2. wrapping "FIG. N —" so only the label carries terracotta
  * Everything else is CSS in custom.scss.
  */
 (function () {
   /* Four marks for what the site collects: statistics, photography, chess,
-     piano. They sit beside the wordmark in the navbar, where the U-curve
-     sparkline used to be. The drawings live once, in assets/html/marks.html,
-     and are drawn here by reference: same stroke weight, same size, one colour. */
-  function mark(id) {
-    return '<svg viewBox="0 0 24 24"><use href="#mark-' + id + '"></use></svg>';
+     piano. Quarto's navbar takes a wordmark and nothing else, so they go in
+     here, after the wordmark's link rather than inside it: the wordmark goes
+     home, the marks go nowhere. The drawings live once, in
+     assets/html/marks.html, and are drawn here by reference. Each is a boxed
+     toggle: pressed, the box fills with that mark's colour. */
+  var MARKS = [["stats", "Statistics"], ["camera", "Photography"], ["king", "Chess"], ["piano", "Piano"]];
+  function markButton(m) {
+    return '<button type="button" class="brand-mark" data-mark="' + m[0] + '" aria-pressed="false" aria-label="' + m[1] + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#mark-' + m[0] + '"></use></svg></button>';
   }
-  var MARKS = '<span class="brand-marks" aria-hidden="true">' +
-    mark("stats") + mark("camera") + mark("king") + mark("piano") + '</span>';
+  function marks() { return Array.prototype.slice.call(document.querySelectorAll(".brand-mark")); }
+  function isLit(b) { return b.getAttribute("aria-pressed") === "true"; }
 
   function addBrandMarks() {
     var brand = document.querySelector(".navbar-brand");
-    if (!brand || brand.querySelector(".brand-marks")) return;
-    brand.insertAdjacentHTML("beforeend", MARKS);
+    if (!brand || document.querySelector(".brand-marks")) return;
+    brand.insertAdjacentHTML("afterend",
+      '<span class="brand-marks">' + MARKS.map(markButton).join("") + "</span>");
+    marks().forEach(function (b) { b.addEventListener("click", toggleMark); });
+  }
+
+  /* Light all four and the egg opens; closing it puts all four out again. */
+  var lastMark = null, eggTimer = 0;
+  function toggleMark(e) {
+    var b = e.currentTarget;
+    lastMark = b;
+    b.setAttribute("aria-pressed", isLit(b) ? "false" : "true");
+    clearTimeout(eggTimer);
+    // A beat before opening, so the fourth colour is seen to arrive.
+    if (marks().every(isLit)) {
+      eggTimer = setTimeout(function () { if (marks().every(isLit)) openEgg(); }, 350);
+    }
+  }
+
+  var CLOSE =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+  function eggDialog() {
+    var d = document.getElementById("egg");
+    if (d) return d;
+    d = document.createElement("dialog");
+    d.id = "egg";
+    d.className = "egg";
+    d.setAttribute("aria-labelledby", "egg-title");
+    d.innerHTML =
+      '<div class="egg__card">' +
+        '<button type="button" class="egg__close" aria-label="Close">' + CLOSE + "</button>" +
+        '<h2 class="egg__title" id="egg-title">Nice! You found something:</h2>' +
+        '<div class="egg__media"></div>' +
+        '<p class="egg__text">While you are here, feel free to enjoy this piece of ... , uh, art.</p>' +
+      "</div>";
+    document.body.appendChild(d);
+    d.querySelector(".egg__close").addEventListener("click", function () { d.close(); });
+    // A click on the scrim lands on the dialog element itself; one inside the
+    // card never does. Both ends of the click must be on the scrim, so a drag
+    // that starts in the card and ends outside it does not close it.
+    var downOnScrim = false;
+    d.addEventListener("pointerdown", function (e) { downOnScrim = e.target === d; });
+    d.addEventListener("click", function (e) {
+      if (e.target === d && downOnScrim) d.close();
+      downOnScrim = false;
+    });
+    // Esc, the scrim and the close button all end here.
+    d.addEventListener("close", function () {
+      document.documentElement.classList.remove("egg-open", "egg-gutter");
+      marks().forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+      if (lastMark) lastMark.focus();
+    });
+    return d;
+  }
+
+  function openEgg() {
+    var d = eggDialog(), media = d.querySelector(".egg__media");
+    if (!media.firstChild) {
+      // Fetched now, on the first opening, never with the page.
+      var offset = document.querySelector('meta[name="quarto:offset"]');
+      var img = document.createElement("img");
+      img.alt = "A chicken dancing";
+      img.width = 1400;
+      img.height = 781;
+      img.decoding = "async";
+      img.src = (offset ? offset.getAttribute("content") : "./") + "assets/img/egg/chicken.webp";
+      media.appendChild(img);
+    }
+    // Lock the page behind it. Where a scrollbar takes room (a classic one),
+    // keep its gutter, so the page does not shift sideways as it goes.
+    var root = document.documentElement;
+    root.classList.toggle("egg-gutter", window.innerWidth - root.clientWidth > 0);
+    root.classList.add("egg-open");
+    d.showModal();   // moves focus to the first control inside, the close button
   }
 
   /* Quarto emits "FIG.<nbsp>3 — caption" as one text node. Split off the label
