@@ -64,7 +64,7 @@ div.csl-indent {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5f0e52f7877e3a078c44e13fc828ca0d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-99aaa39ddb27d3a79f26a6610dda07df.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-b3bf7fb553f2d8278654818607b4d2f8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -1623,7 +1623,11 @@ TAB.&nbsp;9&nbsp;— Source and verification record for the article’s headline
         '<button type="button" class="egg__close" aria-label="Close">' + CLOSE + "</button>" +
         '<h2 class="egg__title" id="egg-title">Nice! You found something:</h2>' +
         '<div class="egg__media"></div>' +
-        '<p class="egg__text">While you are here, feel free to enjoy this piece of ... , uh, art.</p>' +
+        '<div class="egg__text">' +
+          '<p>Is finding <em>this</em> the reward? Or is <em>finding</em> this the reward?</p>' +
+          '<p>Funny, that\'s the same question I keep asking about what to do with my life.</p>' +
+          '<p>Anyways, while you are here, feel free to enjoy this piece of ... , uh, art.</p>' +
+        '</div>' +
       "</div>";
     document.body.appendChild(d);
     d.querySelector(".egg__close").addEventListener("click", function () { d.close(); });
