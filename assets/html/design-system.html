@@ -57,7 +57,11 @@
         '<button type="button" class="egg__close" aria-label="Close">' + CLOSE + "</button>" +
         '<h2 class="egg__title" id="egg-title">Nice! You found something:</h2>' +
         '<div class="egg__media"></div>' +
-        '<p class="egg__text">While you are here, feel free to enjoy this piece of ... , uh, art.</p>' +
+        '<div class="egg__text">' +
+          '<p>Is finding <em>this</em> the reward? Or is <em>finding</em> this the reward?</p>' +
+          '<p>Funny, that\'s the same question I keep asking about what to do with my life.</p>' +
+          '<p>Anyways, while you are here, feel free to enjoy this piece of ... , uh, art.</p>' +
+        '</div>' +
       "</div>";
     document.body.appendChild(d);
     d.querySelector(".egg__close").addEventListener("click", function () { d.close(); });

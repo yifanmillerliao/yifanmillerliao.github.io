@@ -319,6 +319,10 @@ dialog.egg {
   font-size: 16px;
   line-height: 1.6;
   color: var(--body);
+  p { margin: 0; }
+  p + p { margin-top: .5em; }
+  // The two stressed words: upright, a step heavier, in the deep terracotta.
+  em { font-style: normal; font-weight: 600; color: var(--terra-text); }
 }
 .egg__close {
   position: absolute;
