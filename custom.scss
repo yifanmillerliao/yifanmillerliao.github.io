@@ -1358,6 +1358,8 @@ body.page-photos {
 // The stacked photo is for narrow screens only; on desktop the same picture
 // is the section's background.
 .home-hero__photo { display: none; }
+// The credit's two-line copy is for narrow stacked cards only (below).
+.home-hero__credit .split__two { display: none; }
 
 @media (max-width: 1159.98px) {
   // Stack below 1160: words on the warm page colour, photograph underneath at
@@ -1367,14 +1369,27 @@ body.page-photos {
   // off the right. 667px is inside 3:2 from 1001px wide. The hero reaches its
   // full 1005 in a 1140px window, and at 1160 behind a 15px classic scrollbar.
   // The number moves with the text: re-measure when the words change.
+  //
+  // Stacked, the hero is one card, the desktop hero's frame (1px --line,
+  // --r-fig corners) on the page colour: the photograph first, flush with the
+  // card's top and sides, the credit under it, then the words. The order is
+  // visual only; the source keeps the words first.
   .home-hero {
+    --hero-pad: 24px;
+    display: flex;
+    flex-direction: column;
     background-image: none;
     border-color: var(--line);
     margin-bottom: 48px;
+    container: hero / inline-size;
   }
+  .home-hero__photo { order: 1; }
+  .home-hero__credit { order: 2; }
   .home-hero__copy {
-    max-width: none;
-    padding: 34px 26px 30px;
+    order: 3;
+    max-width: calc(40rem + 2 * var(--hero-pad));   // a 40rem text column on tablets
+    padding: var(--hero-pad);
+    container: hero-copy / inline-size;
   }
   .home-hero__name { font-size: 34px; }
   .home-hero__actions {
@@ -1387,23 +1402,76 @@ body.page-photos {
   // single colour survives both without a panel behind it.
   .home-hero__credit {
     position: static;
-    padding: 9px 26px 2px;
+    padding: 8px var(--hero-pad) 0;
     text-align: right;
     color: var(--mut-text);
     text-shadow: none;
   }
+  // Never narrower than the photograph's own 3:2, never taller than 40% of
+  // the screen on a tablet (30% on a phone, below). Where the cap bites, the
+  // crop is a wider band; 45% down keeps the fog in the upper left and the
+  // ridge rising across it.
+  // The height is set outright, the smaller of the card's width ÷ 1.5 and the
+  // screen cap: aspect-ratio with a max-height is not read the same way
+  // everywhere (WebKit narrows the box to keep 3:2 instead of widening the
+  // crop). 100cqi is the card's inner width, the photograph's own.
   .home-hero__photo {
     display: block;
-    aspect-ratio: 3 / 2;
-    min-height: 200px;
-    border-top: 1px solid var(--line);
+    width: 100%;
+    height: min(100cqi / 1.5, 40vh);
+    height: min(100cqi / 1.5, 40svh);
     background-color: var(--bg);
     background-image: url("assets/img/hero-forest-mobile.jpg");
     background-repeat: no-repeat;
     background-size: cover;
-    // Slightly right of centre: keeps the ridge and the green, which is what
-    // the picture is of, rather than a rectangle of empty fog.
-    background-position: 58% 48%;
+    background-position: 50% 45%;
+  }
+
+  // The kicker and the credit: one line where it fits, at 11px or more with
+  // the tracking a little tighter if need be; otherwise two lines, broken at
+  // the "·", which goes. Neither half ever wraps. IBM Plex Mono advances 0.6em
+  // a character, so a line is chars × size × (0.6 + tracking) wide; the
+  // container queries below compare that with the room each one really has
+  // (the kicker: the text column; the credit: the card, less its padding).
+  .split__half { white-space: nowrap; }
+  .home-hero__kicker, .home-hero__credit { white-space: nowrap; }
+  // Kicker: 44 characters, 385px at 12.5px/.1em.
+  @container hero-copy (width < 386px) {
+    .home-hero__kicker {
+      letter-spacing: .06em;
+      font-size: clamp(11px, calc(100cqi / 29.3), 12.5px);   // 44 × 0.66 = 29.04, a hair spare
+    }
+  }
+  @container hero-copy (width < 322px) {
+    .home-hero__kicker { letter-spacing: .1em; font-size: 12.5px; white-space: normal; }
+    .home-hero__kicker .split__dot { display: none; }
+    .home-hero__kicker .split__half { display: block; }
+  }
+  // Credit: 49 characters, 383px at 11.5px/.08em, inside the card's padding
+  // (24px a side wherever these two queries can match: a tablet's card is
+  // never narrower than 558px). Query conditions cannot read --hero-pad.
+  @container hero (width < 432px) {
+    .home-hero__credit {
+      letter-spacing: .05em;
+      font-size: clamp(11px, calc((100cqi - 2 * var(--hero-pad)) / 32.1), 11.5px);   // 49 × 0.65 = 31.85
+    }
+  }
+  @container hero (width < 402px) {
+    .home-hero__credit { letter-spacing: .08em; font-size: 11.5px; white-space: normal; }
+    .home-hero__credit .split__one { display: none; }
+    .home-hero__credit .split__two, .home-hero__credit .split__half { display: block; }
+  }
+}
+@media (min-width: 600px) and (max-width: 1159.98px) {
+  .home-hero { --hero-pad: 32px; }
+}
+@media (max-width: 599.98px) {
+  // Phones: the photograph takes at most 30% of the screen, so the name, the
+  // greeting and the first lines of the words are in view without scrolling.
+  // svh: the screen less the browser's own bars, Instagram's included.
+  .home-hero__photo {
+    height: min(100cqi / 1.5, 30vh);
+    height: min(100cqi / 1.5, 30svh);
   }
 }
 
@@ -1414,14 +1482,6 @@ body.page-photos {
   .home-hero__photo { background-image: url("assets/img/hero-forest.jpg"); }
 }
 
-@media (max-width: 520px) {
-  // A 3:2 box on a 270px-wide phone is a 180px strip and the ridge falls out
-  // of it. Give the picture more height and let cover trim the sides instead.
-  .home-hero__photo {
-    aspect-ratio: 5 / 4;
-    background-position: 56% 50%;
-  }
-}
 
 // ── Hero: 7:5 asymmetric grid ─────────────────────────────────
 .hero { padding: 96px 0 84px; }

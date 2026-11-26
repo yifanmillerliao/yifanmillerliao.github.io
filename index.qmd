@@ -23,7 +23,7 @@ listing:
     <!-- The kicker precedes the name in source order on purpose: when an h1 is
          the first block of the document, Quarto lifts it out into its own
          title block above the hero. CSS puts the name back on top visually. -->
-    <p class="home-hero__kicker">Statistics &amp; Physics · University of Chicago</p>
+    <p class="home-hero__kicker"><span class="split__half">Statistics &amp; Physics</span><span class="split__dot"> · </span><span class="split__half">University of Chicago</span></p>
     <h1 class="home-hero__name">Miller Liao</h1>
 
     <p class="home-hero__greeting">Hi there, glad you’re here!</p>
@@ -38,7 +38,11 @@ listing:
 
   <div class="home-hero__photo" role="img"
        aria-label="Fog drifting across a forested ridge in the Siguniang Mountains, China — photograph by Miller Liao"></div>
-  <p class="home-hero__credit">Siguniang Mountains, China · Photo by Miller Liao</p>
+  <!-- The credit is right-aligned on desktop, so its one-line form stays one
+       unbroken run of text (split into pieces it measures a 64th of a pixel
+       wider and shifts). The two-line form, used only on narrow cards, is a
+       second copy; only one of the two is ever displayed. -->
+  <p class="home-hero__credit"><span class="split__one">Siguniang Mountains, China · Photo by Miller Liao</span><span class="split__two"><span class="split__half">Siguniang Mountains, China</span><span class="split__half">Photo by Miller Liao</span></span></p>
 </header>
 
 <div class="sechead">
