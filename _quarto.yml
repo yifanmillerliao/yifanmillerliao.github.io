@@ -11,6 +11,9 @@ project:
   render:
     - "*.qmd"
     - "projects/**/*.qmd"
+    # The CV is a draft until it has content. Quarto's draft-mode `gone` still
+    # writes an empty cv.html, so the page is also left out of the render.
+    - "!cv.qmd"
   # The full-size original of the hero photograph lives at the repo root for
   # re-editing; only the stripped, web-sized copies under assets/img are meant
   # to be published. Excluded here rather than trusted to stay unreferenced.
@@ -29,6 +32,9 @@ project:
 
 website:
   title: "Miller Liao"
+  # Pages marked `draft: true` are not published: no page, no link, no search
+  # entry. cv.qmd is one until it has content.
+  draft-mode: gone
 
   navbar:
     background: light
@@ -46,8 +52,9 @@ website:
       - href: about.qmd
         text: About
 
-      - href: cv.qmd
-        text: CV
+      # CV: hidden until the CV page has content (cv.qmd is a draft).
+      # - href: cv.qmd
+      #   text: CV
 
   # One date for the whole site: the last commit's, not the render's.
   page-footer:

@@ -1,6 +1,7 @@
 ---
 title: "CV"
 toc: false
+draft: true
 ---
 
 Résumé available on request.
